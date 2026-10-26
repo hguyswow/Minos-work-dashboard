@@ -33,6 +33,39 @@ Node.js를 별도로 설치하지 않고 바로 사용할 수 있는 원클릭 W
 
 ---
 
+## 0-1. 설치 프로그램 직접 빌드하기 (개발자용)
+
+소스에서 `WorkDashboard-Setup-<버전>.exe`를 직접 만들 수 있습니다. 완성된 설치 파일(약 24MB)은 저장소에 포함되어 있지 않으며, 배포용은 GitHub **Releases**에 첨부합니다.
+
+### 준비물 (Windows)
+- **Node.js 24 (LTS)**: 기본 경로(`C:\Program Files\nodejs\node.exe`)에 설치. 이 `node.exe`가 설치 파일 안에 함께 포장되어, 설치하는 PC에는 Node.js가 없어도 됩니다. 서버는 내장 SQLite(`node:sqlite`)를 쓰므로 이를 지원하는 최신 Node.js가 필요합니다(24.12에서 확인).
+- **Inno Setup 6**: `winget install JRSoftware.InnoSetup` 으로 설치하거나 [공식 사이트](https://jrsoftware.org/isinfo.php)에서 받습니다. 설치 위치는 `%LOCALAPPDATA%\Programs\Inno Setup 6`, `C:\Program Files (x86)\Inno Setup 6`, `C:\Program Files\Inno Setup 6` 중 어디든 `build.bat`이 자동으로 찾습니다.
+
+### 빌드 방법
+1. 프로젝트를 내려받은 폴더에서 **`installer\build.bat`** 을 더블 클릭하거나, 명령 프롬프트에서 `installer\build.bat` 을 실행합니다.
+2. 아래 4단계가 자동으로 진행됩니다.
+   - [1/4] 앱 아이콘 생성 (`installer\make-icon.js` → `installer\icon.ico`)
+   - [2/4] Node.js 실행 파일을 `installer\runtime\node.exe`로 복사 (이미 있으면 건너뜀. Node.js를 다른 경로에 설치했다면 이 위치에 `node.exe`를 직접 복사해 두세요.)
+   - [3/4] Inno Setup 컴파일러(`iscc.exe`) 검색
+   - [4/4] `installer\WorkDashboard.iss` 컴파일
+3. 성공하면 **`installer\Output\WorkDashboard-Setup-<버전>.exe`** 가 만들어지고 `[SUCCESS]`가 표시됩니다.
+
+### 버전 올리기
+- `installer\WorkDashboard.iss`의 `#define MyAppVersion "…"` 값을 바꾸면 설치 파일 이름과 설치 프로그램의 버전 표기가 함께 바뀝니다. (`installer\build.bat` 안의 안내 문구, 이 문서와 `public\guide.html`의 파일 이름 표기도 맞춰 주세요.)
+- 기존 설치본 위에 새 버전을 그대로 덮어 설치해도 되며, 작업 데이터는 `%LOCALAPPDATA%\WorkDashboard`에 따로 보관되어 유지됩니다.
+
+### 자주 생기는 문제
+| 증상 | 해결 |
+|---|---|
+| `[NOTICE] Inno Setup compiler (iscc.exe) is not installed` (종료 코드 2) | Inno Setup 6을 설치한 뒤 다시 실행 |
+| `[ERROR] Node.js binary not found` | Node.js를 설치하거나 `installer\runtime\node.exe`에 직접 복사 |
+| 글자가 깨지거나 명령이 이상하게 실행됨 | `build.bat`은 **CRLF(윈도우 줄바꿈)** 이어야 합니다. 편집기에서 LF로 저장했다면 CRLF로 바꿔 저장 |
+| 설치 중 앱이 이미 실행 중이라는 안내 | 설치 프로그램이 실행 중인 앱을 자동으로 닫습니다. 설치 후에는 앱을 직접 한 번 실행해 주세요 |
+
+### 배포 (GitHub Releases)
+완성된 `WorkDashboard-Setup-<버전>.exe`는 저장소 파일이 아니라 **Releases**에 올립니다: GitHub 저장소 → **Releases → Create a new release** → 태그(예: `v1.1.1`) 입력 → 설치 파일 첨부 → **Publish release**. 설치 파일에는 개인 데이터나 비밀번호가 들어 있지 않으며, 설치 후 비밀번호는 안내서의 초기값을 따릅니다.
+
+---
 ## 1. 실행 및 접속 방법
 
 ### 1) 서버 실행
