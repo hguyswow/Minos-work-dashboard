@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사용자 가이드 - Minos Work Dashboard</title>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #1e293b;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-color: #3b82f6;
+      --accent-hover: #2563eb;
+      --border-color: #334155;
+      --code-bg: #090d16;
+      --greeting-bg: rgba(59, 130, 246, 0.08);
+      --greeting-border: rgba(59, 130, 246, 0.3);
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+      --font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", "Noto Sans KR", sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --accent-color: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border-color: #e2e8f0;
+      --code-bg: #f1f5f9;
+      --greeting-bg: #eff6ff;
+      --greeting-border: #bfdbfe;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.65;
+      padding: 1.5rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* Header & Nav */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.85rem;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .back-btn:hover {
+      background: var(--border-color);
+    }
+
+    .header-titles h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .header-titles .sub-title {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .theme-toggle-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--border-color);
+    }
+
+    /* Greeting Box */
+    .greeting-box {
+      background-color: var(--greeting-bg);
+      border: 1px solid var(--greeting-border);
+      border-left: 4px solid var(--accent-color);
+      padding: 1.25rem 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .greeting-box h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent-color);
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .greeting-text {
+      color: var(--text-primary);
+      font-size: 0.96rem;
+      line-height: 1.7;
+    }
+
+    .greeting-text strong {
+      color: var(--accent-color);
+      font-weight: 700;
+    }
+
+    .greeting-text a {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .greeting-text a:hover {
+      text-decoration: underline;
+    }
+
+    /* Navigation Quick Links */
+    .toc-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .toc-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 0.6rem;
+      list-style: none;
+    }
+
+    .toc-item a {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: block;
+      padding: 0.4rem 0.6rem;
+      border-radius: 4px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      transition: all 0.15s ease;
+    }
+
+    .toc-item a:hover {
+      background: var(--border-color);
+      color: var(--text-primary);
+    }
+
+    /* Sections */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-num {
+      background: var(--accent-color);
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      width: 1.8rem;
+      height: 1.8rem;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .section-header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .section-content {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .section-content p {
+      margin-bottom: 0.85rem;
+    }
+
+    .section-content ul, .section-content ol {
+      margin-left: 1.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-content li {
+      margin-bottom: 0.5rem;
+    }
+
+    .section-content strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-family: monospace;
+    }
+
+    .callout {
+      padding: 0.85rem 1.1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    .callout-info {
+      background: rgba(59, 130, 246, 0.08);
+      border-left: 4px solid var(--accent-color);
+      color: var(--text-primary);
+    }
+
+    .callout-warning {
+      background: rgba(245, 158, 11, 0.08);
+      border-left: 4px solid #f59e0b;
+      color: var(--text-primary);
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 0.65rem 0.85rem;
+      border: 1px solid var(--border-color);
+      text-align: left;
+    }
+
+    th {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 2rem 0 1rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: 2rem;
+      line-height: 1.7;
+    }
+
+    footer a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0;
+      }
+      .back-btn, .theme-toggle-btn, .toc-card, footer {
+        display: none !important;
+      }
+      .greeting-box, .section-card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        color: #000 !important;
+        page-break-inside: avoid;
+        margin-bottom: 1.5rem;
+      }
+      .section-num {
+        background: #333 !important;
+        color: #fff !important;
+      }
+      th {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+      }
+      th, td {
+        border-color: #ccc !important;
+        color: #000 !important;
+      }
+      .section-content, .greeting-text, strong {
+        color: #000 !important;
+      }
+    }
+
+    /* Mobile Responsive (<= 480px, 390px iPhone) */
+    @media (max-width: 480px) {
+      body {
+        padding: 1rem 0.75rem;
+      }
+      .header-titles h1 {
+        font-size: 1.3rem;
+      }
+      .section-card {
+        padding: 1.25rem 1rem;
+      }
+      .toc-grid {
+        grid-template-columns: 1fr;
+      }
+      .header-left {
+        gap: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-left">
+        <a href="javascript:history.back()" class="back-btn" title="이전 화면으로 돌아가기">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          돌아가기
+        </a>
+        <div class="header-titles">
+          <h1>Minos work dashboard</h1>
+          <div class="sub-title">작업현황 대시보드 사용 설명서 · 문서 갱신: 2026-10-26</div>
+        </div>
+      </div>
+      <div>
+        <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="테마 전환">
+          <span id="themeIcon">🌓</span>
+          <span id="themeLabel">테마 전환</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 상단 무료 배포 안내 말씀 박스 -->
+    <div class="greeting-box">
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        안내 말씀
+      </h2>
+      <p class="greeting-text">
+        안녕하세요. Minos work dashboard를 찾아주셔서 감사합니다.<br>
+        이 프로그램은 <strong>현장 업무에 조금이라도 도움이 되고자 직접 제작하여 무료로 배포</strong>하고 있습니다.<br>
+        부담 없이 <strong>많이 사용해 주시고</strong>, 불편한 점이나 바라는 기능이 있으면 언제든 문의해 주세요. (문의: <a href="mailto:hguyswow@gmail.com">hguyswow@gmail.com</a>)
+      </p>
+    </div>
+
+    <!-- 목차 빠른 이동 -->
+    <nav class="toc-card" aria-label="목차">
+      <div class="toc-title">목차 바로가기</div>
+      <ul class="toc-grid">
+        <li class="toc-item"><a href="#section-1">1. 화면 구성 및 접속 방법</a></li>
+        <li class="toc-item"><a href="#section-2">2. 조회 화면, 식수 산정 & 일일 보고서 출력</a></li>
+        <li class="toc-item"><a href="#section-3">3. 관리자 입력, 복사 & 편의 기능</a></li>
+        <li class="toc-item"><a href="#section-4">4. 월별 계획 & TV 공고 알림</a></li>
+        <li class="toc-item"><a href="#section-5">5. 환경설정 & 날씨</a></li>
+        <li class="toc-item"><a href="#section-6">6. 비밀번호 관리 & 보안</a></li>
+        <li class="toc-item"><a href="#section-7">7. 데이터 관리, 백업 & 설치 운영</a></li>
+        <li class="toc-item"><a href="#section-8">8. TV 현장 운영 팁 & FAQ</a></li>
+      </ul>
+    </nav>
+
+    <!-- 1. 화면 구성 및 접속 방법 -->
+    <section id="section-1" class="section-card">
+      <div class="section-header">
+        <span class="section-num">1</span>
+        <h2>화면 구성 및 접속 방법</h2>
+      </div>
+      <div class="section-content">
+        <p>Minos Work Dashboard는 현장 운영 환경에 맞춰 3가지 핵심 화면을 제공합니다.</p>
+        <ul>
+          <li><strong>사용자용 화면 (사무실 PC / 스마트폰 조회 및 관리, <span class="badge">/</span>)</strong>: 일반 웹 문서 흐름으로 세로 스크롤되며 작업현황, 장비, 인원, 자재, 특이사항을 한눈에 조회합니다. 헤더에서 <span class="badge">[어제 | 어제+오늘 | 오늘]</span> 보기 선택, 날짜 이동, 캘린더, <span class="badge">출력</span>, 관리자 로그인, <span class="badge">파일박스</span> 및 <span class="badge">모니터 화면</span> 링크가 제공됩니다. 헤더 타이틀은 중앙에 정돈되며 긴 현장명(최대 40자 이상)도 화면 폭에 맞게 자동 최적화됩니다. 또한 조회 화면의 셀을 <strong>더블클릭</strong>하면 제자리에서 즉시 인라인 편집할 수 있습니다.</li>
+          <li><strong>현장 TV 전용 화면 (모니터링 전용 상황판, <span class="badge">/tv</span>)</strong>: 현장 사무실 대형 디스플레이 표출에 최적화된 고정 레이아웃 화면입니다. 세로 스크롤바가 전혀 생기지 않으며, 내용이 긴 구역은 10초마다 자동으로 페이지가 순환 표출됩니다.
+            <ul style="margin-top: 0.3rem;">
+              <li>우상단 호버 컨트롤 바: <strong>⛶ 전체 화면</strong>, <strong>☀/🌙 테마 전환</strong>, <strong>✎ 편집</strong> 버튼(누르면 관리자 로그인 창 오픈), <strong>상태 라벨</strong>(서버 시작 시각 및 오늘 백업 상태 표출).</li>
+              <li><strong>5분 무조작 자동 복귀</strong>: TV의 ✎ 편집 버튼으로 관리자 로그인한 경우, 작업 후 자리를 비워도 5분간 조작이 없으면 자동으로 로그아웃되고 원래의 TV 모니터링 화면으로 안전하게 복귀합니다.</li>
+            </ul>
+          </li>
+          <li><strong>파일박스 (사무실 파일 전달 창구, <span class="badge">/files</span>)</strong>: 도면, 사진, 작업일보 등 사무실 파일을 안전하게 올리고 내려받을 수 있는 현장 파일 공유 창구입니다 (사무실 비밀번호 또는 관리자 인증 필요).</li>
+          <li><strong>접속 주소 및 네트워크 연결</strong>:
+            <ul style="margin-top: 0.3rem;">
+              <li>서버 PC 본체: <span class="badge">http://localhost:3000</span> (또는 TV 모드: <span class="badge">http://localhost:3000/tv</span>)</li>
+              <li>다른 PC나 스마트폰 접속: 서버 실행 콘솔 창 또는 화면 좌측 하단에 안내되는 IP 주소(<span class="badge">http://서버IP:3000</span>)로 접속합니다.</li>
+              <li><strong>방화벽 확인 안내</strong>: 다른 PC나 스마트폰에서 접속이 되지 않는 경우, 서버 PC의 Windows Defender 방화벽에서 포트 3000(TCP 인바운드 허용) 규칙이 등록되어 있는지 확인하십시오.</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 2. 조회 화면, 식수 산정 & 일일 보고서 출력 -->
+    <section id="section-2" class="section-card">
+      <div class="section-header">
+        <span class="section-num">2</span>
+        <h2>조회 화면, 식수 산정 & 일일 보고서 출력</h2>
+      </div>
+      <div class="section-content">
+        <p>현장의 작업 현황을 명확하고 체계적으로 표출하며, 종이 인쇄 및 PDF 저장을 지원합니다.</p>
+        <ul>
+          <li><strong>어제 / 오늘 보기 모드</strong>: 헤더의 <span class="badge">[어제 | 어제+오늘 | 오늘]</span> 버튼으로 원하는 칸을 100% 전체 폭으로 확대하여 집중 조회하거나 전일 대비 당일 작업을 비교 조회할 수 있습니다.</li>
+          <li><strong>5대 구역 표출 및 테마 컬러</strong>: 작업현황(트리 구조 번호 <span class="badge">1</span>, <span class="badge">①</span>, <span class="badge">㉮</span> 계층 유지), 장비 투입(이름, 수량, 규격, 위치), 인원 투입(직종, 인원수, 위치), 자재 반입/사용(종류, 규격, 수량, 단위, 사용처), 특이사항 구역으로 구성되며, 각 섹션 머리글에 고유 테마 컬러 바가 적용되어 시각적으로 직관적입니다.</li>
+          <li><strong>밑줄 표시 = 직영</strong>: 장비, 인원, 자재 중 '직영'으로 지정된 항목은 텍스트 밑줄(<span style="text-decoration: underline; font-weight: 600;">직영 항목</span>)로 표출되어 도급(외주) 업체 작업과 즉시 구분됩니다.</li>
+          <li><strong>장비 수량 표출</strong>: 장비 투입 구역의 열이 "수량"으로 표출되며, 수량이 미입력된 항목은 흐린 텍스트로 안내됩니다.</li>
+          <li><strong>식수 인원 산정 규칙 & 세부 내역 조회 (중요)</strong>:
+            <div class="callout callout-info">
+              <strong>식수 인원 = 직원(관리자/기사) + 직영 인원 + 직영 장비 수량(대수)</strong><br>
+              <span style="font-size: 0.85rem; color: var(--text-secondary);">※ 도급(외주) 업체는 자체 식사를 원칙으로 하므로, 직종이 '직원'이거나 토글이 '직영'으로 켜진 인원, 그리고 '직영'으로 지정된 건설장비의 운전기사(대수만큼, 수량 미기재 시 1명)만 식수 인원에 자동 합산됩니다.</span>
+            </div>
+            인원투입 머리글에 표출된 식수 배지(<span class="badge">식수 N명</span>)를 클릭하면 <strong>"식수 인원 상세"</strong> 모달 창이 열려 산출 근거를 투명하게 확인할 수 있습니다. 모달에는 <strong>직종별 인원수(직원 및 직영)</strong>와 <strong>직영 건설장비 기사 수량(대수, 미기재 시 1명)</strong>이 행별로 상세히 나열되며, 마지막 행에 <strong>식수 합계 N명</strong>이 표출됩니다.
+          </li>
+          <li><strong>화면에서 바로 편집 (더블클릭 제자리 편집)</strong>:
+            조회 화면(<span class="badge">/</span>)에서 각 구역의 셀을 <strong>더블클릭</strong>하면 관리자 비밀번호를 확인한 후 해당 칸만 즉시 인라인으로 편집하여 저장할 수 있습니다. 편집 가능한 칸은 <strong>작업현황</strong>(내용), <strong>장비</strong>(장비명, 수량, 규격, 위치), <strong>인원</strong>(직종, 인원수, 위치), <strong>자재</strong>(종류, 규격, 수량, 단위, 사용처), <strong>특이사항</strong>(내용)입니다.
+          </li>
+          <li><strong>일일 보고서 출력 및 PDF 저장 (인쇄 최적화)</strong>:
+            상단 헤더의 <span class="badge">출력</span> 버튼(또는 키보드 <span class="badge">Ctrl + P</span>)을 누르면 불필요한 컨트롤이 모두 숨겨진 A4 인쇄 서식으로 전환됩니다.
+            <ul style="margin-top: 0.3rem;">
+              <li><strong>외곽선 및 구분선</strong>: 전체 외곽 실선(1px) 및 어제/오늘 사이 가운데 세로 구분선(1px)이 선명하게 복원되며, 내부 2열/3열 사이에도 세로선이 표시됩니다.</li>
+              <li><strong>좌우 높이 일치</strong>: 어제와 오늘의 내용량 차이가 커도 양쪽 칸 높이가 자동으로 맞춰집니다.</li>
+              <li><strong>글자 잘림 방지 (자동 줄바꿈)</strong>: 긴 작업명이나 위치명도 칸 오른쪽에서 잘리지 않고 다음 줄로 자동 줄바꿈되어 모든 내용이 온전히 출력됩니다.</li>
+              <li><strong>관리자 화면에서도 보고서 양식 인쇄</strong>: 관리자 모드에서 인쇄하더라도 입력창 테두리와 편집 버튼이 모두 사라지고 조회 모드와 동일한 최종 보고서 텍스트 양식으로 인쇄됩니다.</li>
+              <li>※ <strong>인쇄 팁</strong>: 모니터 화면(<span class="badge">/tv</span>)에서 브라우저 인쇄를 누르면 화면에 표출 중인 현재 페이지만 나오므로, 전체 일일 보고서 인쇄는 반드시 일반 화면(<span class="badge">/</span>)의 <strong>[출력]</strong> 버튼을 이용하십시오.</li>
+            </ul>
+          </li>
+          <li><strong>지난 날짜 열람 (달력 이력 조회)</strong>: 상단 헤더의 <span class="badge">지난 날짜</span> 버튼을 누르면 7열 달력이 열리며, 과거 기록이 존재하는 날짜에는 파란색 점(<span style="color: #3b82f6;">●</span>)이 표시되어 클릭 시 과거 5대 구역의 기록을 읽기 전용으로 안전하게 열람할 수 있습니다.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3. 관리자 입력, 복사 & 편의 기능 -->
+    <section id="section-3" class="section-card">
+      <div class="section-header">
+        <span class="section-num">3</span>
+        <h2>관리자 입력, 복사 & 편의 기능</h2>
+      </div>
+      <div class="section-content">
+        <p>작업 데이터를 입력하거나 수정할 때 필요한 관리자 기능입니다.</p>
+        <ul>
+          <li><strong>관리자 로그인</strong>: 화면 우측 상단의 옅은 <span class="badge">관리자</span> 글씨(또는 TV 화면의 ✎ 편집 버튼)를 누르고 관리자 비밀번호(기본값: <span class="badge">0000</span>)를 입력합니다. 초기 비밀번호인 0000 상태로 로그인하면 세션당 1회 설정 창이 자동으로 열려 비밀번호 변경을 안내합니다.</li>
+          <li><strong>어제 내용 → 오늘 복사 (항목별 선택 복사)</strong>: 상단의 <span class="badge">어제 내용 → 오늘 복사</span> 버튼을 누르면 모달 창이 열려 작업현황, 장비, 인원, 자재, 특이사항 중 원하는 항목만 체크박스로 골라 복사할 수 있습니다. 오늘 칸에 이미 작성된 내용이 있을 경우 덮어쓰기 전 확인 창이 제공됩니다.</li>
+          <li><strong>장비 수량 입력</strong>: 장비 등록 시 대수를 "수량" 칸에 숫자로 입력합니다. 수량이 비어있으면 붉은 테두리로 안내되며, 직영 장비의 수량만큼 식수 인원에 실시간으로 자동 합산됩니다.</li>
+          <li><strong>직영 ON/OFF 토글</strong>: 장비, 인원, 자재의 행마다 위치한 [직영] 버튼을 원클릭으로 켜고 끌 수 있으며, 켜진 항목은 밑줄 처리 및 식수 인원 집계에 실시간 반영됩니다.</li>
+          <li><strong>항목 추가/삭제 및 빠른 입력</strong>: 표의 마지막 입력칸에서 <span class="badge">Enter</span> 키를 누르면 다음 행이 자동 생성됩니다. 자재 입력 시 12종 표준 단위 자동완성이 지원되며, 최근 180일간의 입력 이력이 드롭다운 추천으로 표시됩니다.</li>
+          <li><strong>순서 변경 (▲/▼ 버튼 및 드래그)</strong>: 표 내부 항목 행을 위/아래 이동 버튼이나 마우스 드래그를 통해 원하는 순서로 손쉽게 재배치할 수 있습니다.</li>
+          <li><strong>구역 높이 조절 및 실시간 저장</strong>: 인접한 두 구역 사이의 경계선(리사이즈 핸들)을 드래그하여 높이 비율을 조절할 수 있습니다 (더블클릭 시 균등 복원). 조절 후 하단 바의 <span class="badge">[저장]</span>을 클릭하면 서버에 영구 반영되어 연결된 모든 TV와 PC 화면에 동일하게 적용됩니다.</li>
+          <li><strong>구역별 열 배치 (1열/2열/3열/자동)</strong>: 상단 <span class="badge">설정</span> 창에서 각 구역의 열 수를 1열, 2열, 3열, 또는 '자동(0)'으로 지정할 수 있습니다. '자동'으로 설정하면 구역 높이에 따라 내부 1단~3단으로 가변 분기되어 빈 공간을 최소화합니다.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 4. 월별 계획 & TV 공고 알림 -->
+    <section id="section-4" class="section-card">
+      <div class="section-header">
+        <span class="section-num">4</span>
+        <h2>월별 계획 & TV 공고 알림</h2>
+      </div>
+      <div class="section-content">
+        <p>현장의 중장기 공정 일정과 긴급 안전 알림을 효과적으로 운영합니다.</p>
+        <ul>
+          <li><strong>월별 계획 관리 (달력 메모)</strong>: 관리자 로그인 후 상단 헤더의 <span class="badge">월별계획</span> 버튼을 누르면 7열 달력이 열립니다. 날짜를 클릭하여 주요 공정 일정을 추가/수정/삭제할 수 있습니다.
+            <ul style="margin-top: 0.3rem;">
+              <li>일반 일정만 있는 날: 날짜 아래 <strong>회색 점(<span style="color: #64748b;">●</span>)</strong> 표출</li>
+              <li>공고 일정이 포함된 날: 날짜 아래 <strong>하늘색 강조 점(<span style="color: #38bdf8;">●</span>)</strong> 표출</li>
+            </ul>
+          </li>
+          <li><strong>TV 예약 공고 (지정 시각 자동 표출)</strong>: 일정 등록 시 <strong>"공고로 표시"</strong>를 체크하고 시작 시각(<span class="badge">HH:MM</span>)과 지속 시간(분)을 지정하면, 해당 시각에 현장 TV(<span class="badge">/tv</span>) 화면 위로 뒷배경을 가리지 않는 떠다니는(floating) 알림 카드가 자동 표출되며 시간이 지나면 자동 소멸합니다.</li>
+          <li><strong>TV 즉시 공고 (오버레이)</strong>: 월별계획 창 하단의 <strong>🚨 TV 즉시 공고 (오버레이)</strong> 영역에서 긴급 공지 내용을 적고 <span class="badge">[지금 표시]</span>를 누르면 연결된 모든 TV 전광판에 즉시 알림이 표출됩니다. 표출 중 관리자가 <span class="badge">[공고 해제]</span>를 누르면 즉시 사라집니다.</li>
+          <li><strong>TV 화면 무결성 유지</strong>: 공고 알림은 반투명 오버레이로 띄워져 뒷배경의 작업 현황을 가리지 않으며, TV 화면의 고정 높이(<span class="badge">scrollHeight == innerHeight</span>) 및 10초 구역 순환 타이머에 일체 간섭하지 않습니다.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 5. 환경설정 & 날씨 -->
+    <section id="section-5" class="section-card">
+      <div class="section-header">
+        <span class="section-num">5</span>
+        <h2>환경설정 & 날씨</h2>
+      </div>
+      <div class="section-content">
+        <p>상단 우측의 <span class="badge">설정</span> 버튼(관리자 전용)에서 현장 환경을 맞춤 설정할 수 있습니다.</p>
+        <ol>
+          <li><strong>현장명 설정</strong>: 상단 타이틀과 TV 화면에 표출되는 현장 명칭(예: "OO지구 신축공사 현장")을 입력합니다. 헤더 중앙에 배치되며 긴 현장명(최대 40자 이상)도 시계나 버튼과 겹치지 않게 자동 적응합니다.</li>
+          <li><strong>날씨 위치 설정 (Open-Meteo)</strong>: 기상 API 키 없이 30분 간격으로 당일 6~20시(2시간 간격 8칸) 날씨를 자동 수신합니다. 한글 주요 20개 도시 검색 또는 영문 도시명/위도·경도를 직접 입력할 수 있으며, 설정된 좌표는 재시작 후에도 안전하게 유지됩니다.</li>
+          <li><strong>날씨 칸 컬러화 & 기온 색상</strong>: 맑음, 구름/흐림, 비, 눈, 안개, 천둥번개 등 날씨 상태에 맞춰 파스텔 톤 배경이 적용되며, 5℃ 이하 저온은 파란색, 28℃ 이상 고온은 빨간색으로 기온이 강조 표출됩니다.</li>
+          <li><strong>강풍 / 강우 안전 경고 기준</strong>: 풍속(m/s) 및 강수량(mm/h) 기준을 설정합니다. 기준 초과 시 해당 시간대 슬롯이 붉은색으로 강조되며 경고 배지가 표출됩니다 (0 입력 시 해당 경고 끔).</li>
+          <li><strong>오늘 수동 날씨</strong>: 인터넷이 연결되지 않은 현장이거나 기상 수신이 3시간 이상 지연될 경우, 관리자가 직접 입력한 수동 8칸 날씨(날씨 아이콘, 기온, 풍속)로 자동 전환(fallback)되어 화면이 중단되지 않습니다.</li>
+          <li><strong>레이아웃 설정</strong>: 5개 구역의 표출 순서 변경(▲/▼), 전체 폭 확장 여부, 구역 내부 다단(자동 0단, 1단, 2단, 3단)을 설정합니다.</li>
+          <li><strong>비밀번호 관리</strong>: 관리자 및 사무실 비밀번호 변경 및 분실 방지 힌트를 설정합니다.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 6. 비밀번호 관리 & 보안 -->
+    <section id="section-6" class="section-card">
+      <div class="section-header">
+        <span class="section-num">6</span>
+        <h2>비밀번호 관리 & 보안</h2>
+      </div>
+      <div class="section-content">
+        <p>현장 권한 분리와 안전한 보안 관리를 위해 비밀번호 체계를 제공합니다.</p>
+        <ul>
+          <li><strong>관리자 비밀번호 (<span class="badge">password</span>)</strong>: 일일 작업 일보 입력, 공지사항 등록, 환경설정, 파일박스 파일 삭제에 사용되는 현장 최고 권한 비밀번호입니다 (기본값: <span class="badge">0000</span>).</li>
+          <li><strong>사무실 비밀번호 (<span class="badge">officePassword</span>)</strong>: 파일박스(/files)에서 파일을 올리고 조회/다운로드할 수 있는 사무실 공용 비밀번호입니다 (기본값: <span class="badge">0000</span>).</li>
+          <li><strong>화면에서 비밀번호 변경</strong>: 관리자 로그인 후 설정 모달의 <strong>비밀번호 관리</strong> 메뉴에서 현재 비밀번호를 확인하고 새 비밀번호(4~32자, 공백 불가)와 힌트(최대 60자)를 설정할 수 있습니다. 변경 즉시 <span class="badge">config.json</span>에 scrypt 안전 해시로 암호화 저장됩니다.</li>
+          <li><strong>비밀번호 힌트 확인</strong>: 로그인 창 하단의 <span class="badge">힌트 보기</span> 버튼을 누르면 설정해 둔 힌트가 즉시 표출됩니다.</li>
+          <li><strong>비밀번호 분실 시 마스터 복구 (중요)</strong>: 관리자 로그인 창에서 <span class="badge">비밀번호를 잊으셨나요?</span> 버튼을 클릭하고 마스터 비밀번호를 입력하면 관리자 비밀번호가 즉시 <strong>0000으로 초기화</strong>됩니다.</li>
+        </ul>
+        <div class="callout callout-warning">
+          <strong>마스터 복구 키 확인 방법</strong><br>
+          마스터 복구 키는 기본값이 없으며, <strong>서버 최초 실행 시 16자리 무작위 영문/숫자로 자동 생성되어 서버 PC의 <span class="badge">config.json</span> 파일 내 <span class="badge">"masterPassword"</span> 항목에 저장</strong>됩니다. 보안 유출 방지를 위해 화면이나 서버 콘솔에는 일체 출력되지 않으므로, 비밀번호 분실 시 서버 PC의 <span class="badge">config.json</span> 파일을 열어 확인하십시오.
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. 데이터 관리, 백업 & 설치 운영 -->
+    <section id="section-7" class="section-card">
+      <div class="section-header">
+        <span class="section-num">7</span>
+        <h2>데이터 관리, 백업 & 설치 운영</h2>
+      </div>
+      <div class="section-content">
+        <p>현장 서버 PC에 데이터를 로컬 보관하며 2중 안전 저장 장치와 무중단 운영 환경을 갖추고 있습니다.</p>
+        <ul>
+          <li><strong>데이터 파일 구조</strong>:
+            <ul style="margin-top: 0.3rem;">
+              <li><span class="badge">data.json</span>: 메인 일일 작업 데이터 (최근 180일 캐시).</li>
+              <li><span class="badge">work.db</span>: SQLite 내장 DB (WAL 모드, 과거 모든 일별 이력 무제한 누적 보존).</li>
+              <li><span class="badge">files/</span>: 파일박스에 업로드된 현장 파일 보관 폴더 (최대 5GB 관리).</li>
+              <li><span class="badge">config.json</span>: 포트 번호, 시스템 설정 및 비밀번호 해시.</li>
+            </ul>
+          </li>
+          <li><strong>일일 자동 백업 (<span class="badge">backup/</span>)</strong>: 서버 시작 시 및 그날 첫 저장 시 <span class="badge">backup/data-YYYY-MM-DD.json</span> 및 <span class="badge">backup/work-YYYY-MM-DD.db</span> 스냅샷이 자동 생성되며 최근 30개 분량이 안전하게 유지됩니다.</li>
+          <li><strong>백업 복원 절차</strong>:
+            <ol style="margin-top: 0.4rem;">
+              <li>실행 중인 서버 콘솔 창을 닫아 서버를 완전히 종료합니다.</li>
+              <li><span class="badge">backup/</span> 폴더에서 복원할 날짜의 백업 파일을 복사합니다.</li>
+              <li>프로젝트 루트(또는 데이터 폴더)에 붙여넣고 이름을 <span class="badge">data.json</span> (DB의 경우 <span class="badge">work.db</span>)으로 변경합니다.</li>
+              <li>서버를 다시 시작합니다.</li>
+            </ol>
+          </li>
+          <li><strong>설치 프로그램 및 트레이 런처</strong>:
+            <ul style="margin-top: 0.3rem;">
+              <li>윈도우 전용 설치본(<span class="badge">WorkDashboard-Setup-1.0.0.exe</span>)으로 설치 시, PC 부팅 시 백그라운드로 자동 실행되는 시스템 트레이 런처가 함께 설치됩니다.</li>
+              <li>설치본의 기본 데이터 폴더는 <span class="badge">%LOCALAPPDATA%\WorkDashboard</span>에 안전하게 격리 보관되며, 필요 시 환경변수 <span class="badge">WD_DATA_DIR</span>을 통해 원하는 드라이브나 폴더로 지정할 수 있습니다.</li>
+            </ul>
+          </li>
+          <li><strong>자동 재시작 및 시작프로그램 스크립트</strong>:
+            <ul style="margin-top: 0.3rem;">
+              <li><span class="badge">run_forever.bat</span>: 서버 프로세스가 예기치 않게 종료되면 5초 후 자동으로 다시 시작합니다.</li>
+              <li><span class="badge">install_autostart.bat</span> / <span class="badge">uninstall_autostart.bat</span>: Windows 작업 스케줄러를 통해 사용자 로그온 시 백그라운드 자동 실행을 손쉽게 등록 및 해제할 수 있습니다.</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 8. TV 현장 운영 팁 & FAQ -->
+    <section id="section-8" class="section-card">
+      <div class="section-header">
+        <span class="section-num">8</span>
+        <h2>TV 현장 운영 팁 & FAQ</h2>
+      </div>
+      <div class="section-content">
+        <p>현장 사무실 및 상황실 모니터에서 안정적으로 전광판을 24시간 가동하기 위한 노하우입니다.</p>
+        <ol>
+          <li><strong>전체 화면 전환 (<span class="badge">F11</span>)</strong>: 브라우저에서 키보드 <span class="badge">F11</span> 키를 누르거나 마우스 호버 시 우측 상단에 나타나는 <span class="badge">⛶ 전체 화면</span> 버튼을 누르면 주소창과 탭이 숨겨진 풀스크린 상황판으로 전환됩니다 (원래대로는 <span class="badge">Esc</span> 또는 <span class="badge">F11</span>).</li>
+          <li><strong>부팅 시 자동 실행 설정</strong>:
+            <br><span class="badge">Win + R</span> → <span class="badge">shell:startup</span>(시작프로그램 폴더)에 바로가기를 넣고 대상 경로 끝에 <span class="badge">--kiosk http://localhost:3000/tv</span>를 추가하면 PC 부팅 즉시 전체화면으로 자동 시작됩니다. (또는 <span class="badge">install_autostart.bat</span> 실행)
+          </li>
+          <li><strong>디스플레이 번인 방지 (다크 모드 권장)</strong>: TV 화면을 24시간 켜둘 경우 우측 상단 호버 시 나타나는 <span class="badge">☀/🌙 테마</span> 버튼으로 다크 모드를 적용하면 패널 번인(잔상) 예방과 전력 절감에 효과적입니다.</li>
+          <li><strong>서버 재시작 시 자동 복구</strong>: 서버 PC가 재시작되어 일시적으로 연결이 끊기더라도 브라우저가 SSE(Server-Sent Events)를 통해 몇 초 내로 자동 재연결하여 화면을 복구합니다.</li>
+          <li><strong>자주 묻는 질문 (FAQ)</strong>:
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width: 32%;">증상 및 질문</th>
+                    <th>원인 및 조치 방법</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>다른 PC/TV에서 접속 불가</strong></td>
+                    <td>① 동일 공유기(LAN/Wi-Fi) 연결 확인 ② 서버 PC의 Windows Defender 방화벽 포트 3000(인바운드 허용) 규칙 등록 확인 ③ 서버 좌하단 표시 IP 변경 여부 확인</td>
+                  </tr>
+                  <tr>
+                    <td><strong>TV 화면에서 데이터를 수정하고 싶을 때</strong></td>
+                    <td>마우스를 화면 우측 상단으로 이동하면 나타나는 <strong>✎ 편집</strong> 버튼을 클릭하십시오. 관리자 로그인 창이 열리며, 편집 완료 후 로그아웃하거나 5분간 조작이 없으면 자동으로 모니터링 화면으로 복귀합니다.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>관리자 비밀번호를 잊어버렸을 때</strong></td>
+                    <td>로그인 창에서 <span class="badge">힌트 보기</span>를 누르거나, <span class="badge">비밀번호를 잊으셨나요?</span>를 클릭한 뒤 서버 PC의 <span class="badge">config.json</span> 파일에 등록된 16자리 <span class="badge">masterPassword</span>를 입력하여 <span class="badge">0000</span>으로 초기화합니다.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>일일 보고서 출력 시 글자 잘림이나 서식</strong></td>
+                    <td>상단 헤더의 <span class="badge">출력</span> 버튼(Ctrl+P)을 누르면 A4 서식에 맞춰 외곽 테두리, 구분선, 긴 글자 자동 줄바꿈이 일괄 적용되어 깔끔한 인쇄본이 출력됩니다. (TV 화면 대신 일반 화면 <span class="badge">/</span>에서 출력 권장)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>파일박스 삭제 버튼이 안 보임</strong></td>
+                    <td>파일 삭제는 관리자 전용 권한입니다. 대시보드(<span class="badge">/</span>)에서 관리자로 로그인한 후 파일박스로 이동하십시오.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>화면 구역 순환/스크롤이 멈춤</strong></td>
+                    <td>관리자 편집 중이거나 모달 창이 열려 있으면 편집 편의를 위해 순환이 일시 정지됩니다. 편집 후 창을 닫으면 정상 재개됩니다.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <footer>
+      <p><strong>Minos work dashboard</strong> — 작업현황 대시보드</p>
+      <p style="margin-top: 0.25rem;">문의 및 건의: <a href="mailto:hguyswow@gmail.com">hguyswow@gmail.com</a></p>
+      <p style="margin-top: 0.35rem; color: var(--text-muted); font-size: 0.8rem;">
+        본 프로그램은 현장 업무에 조금이라도 도움이 되고자 직접 제작하여 무료로 배포하고 있으니 부담 없이 많이 사용해 주세요.
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    (function() {
+      // 테마 초기화: localStorage -> prefers-color-scheme -> dark 기본값 (try/catch 방어)
+      const storageKey = 'theme';
+      const toggleBtn = document.getElementById('themeToggleBtn');
+      const themeLabel = document.getElementById('themeLabel');
+      const themeIcon = document.getElementById('themeIcon');
+
+      function getInitialTheme() {
+        try {
+          const saved = localStorage.getItem(storageKey);
+          if (saved === 'light' || saved === 'dark') return saved;
+        } catch (e) {}
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+          return 'light';
+        }
+        return 'dark';
+      }
+
+      function applyTheme(theme) {
+        if (theme === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+          if (themeIcon) themeIcon.textContent = '☀️';
+          if (themeLabel) themeLabel.textContent = '라이트 모드';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          if (themeIcon) themeIcon.textContent = '🌙';
+          if (themeLabel) themeLabel.textContent = '다크 모드';
+        }
+      }
+
+      let currentTheme = getInitialTheme();
+      applyTheme(currentTheme);
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          currentTheme = (currentTheme === 'light') ? 'dark' : 'light';
+          try {
+            localStorage.setItem(storageKey, currentTheme);
+          } catch (e) {}
+          applyTheme(currentTheme);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# 런타임/개인 데이터 (저장소에 올리지 않음)
+config.json
+data.json
+data.json.*
+files/
+backup/
+work.db
+work.db-wal
+work.db-shm
+work.db*
+*.corrupt-*
+.tmp-*
+*.tmp-*
+node_modules/
+
+installer/Output/
+installer/runtime/

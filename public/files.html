@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>파일박스 — 사무실 파일 전달 창구</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+  /* WD-15: FOUC 방지 - DOM 렌더링 전 저장된 테마 즉시 적용 */
+  (function(){
+    try {
+      var t = localStorage.getItem('theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch(e) {}
+  })();
+  </script>
+  <style>
+    /* ========================================================
+       WD-15: 테마 토큰 팔레트 (index.html과 100% 동일한 변수 토큰)
+       ======================================================== */
+    :root, :root[data-theme="light"] {
+      --theme: light;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --card-sub: #f1f5f9;
+      --ink: #0f172a;
+      --sub: #475569;
+      --line: #e2e8f0;
+      --line-strong: #cbd5e1;
+      --strong: #94a3b8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-faint: #eff6ff;
+      --head: #f1f5f9;
+      --th-bg: #f8fafc;
+      --danger: #dc2626;
+      --danger-faint: #fee2e2;
+      --warn: #d97706;
+      --warn-bg: #fef2f2;
+      --warn-border: #fecaca;
+      --warn-text: #991b1b;
+      --warn-faint: #fef3c7;
+      --radius: 0.5rem;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --btn-bg: #ffffff;
+      --btn-hover: #f1f5f9;
+      --input-bg: #ffffff;
+      --input-text: #0f172a;
+      --input-border: #cbd5e1;
+      --modal-bg: #ffffff;
+      --modal-ink: #0f172a;
+      --overlay-bg: rgba(15, 23, 42, 0.45);
+    }
+
+    :root[data-theme="dark"] {
+      --theme: dark;
+      --bg: #0b0f17;
+      --card: #151e2e;
+      --card-sub: #1e293b;
+      --ink: #f1f5f9;
+      --sub: #94a3b8;
+      --line: #263345;
+      --line-strong: #3b4d66;
+      --strong: #3b4d66;
+      --accent: #38bdf8;
+      --accent-hover: #60a5fa;
+      --accent-faint: #17283c;
+      --head: #1c2738;
+      --th-bg: #182333;
+      --danger: #f87171;
+      --danger-faint: #37171a;
+      --warn: #fbbf24;
+      --warn-bg: #37171a;
+      --warn-border: #6b2126;
+      --warn-text: #fca5a5;
+      --warn-faint: #271e0c;
+      --radius: 0.5rem;
+      --shadow: 0 4px 12px rgba(0,0,0,0.35);
+      --btn-bg: #1c2738;
+      --btn-hover: #26354c;
+      --input-bg: #0e1520;
+      --input-text: #f1f5f9;
+      --input-border: #2e3e54;
+      --modal-bg: #151e2e;
+      --modal-ink: #f1f5f9;
+      --overlay-bg: rgba(0, 0, 0, 0.72);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]):not([data-theme="dark"]) {
+        --theme: dark;
+        --bg: #0b0f17;
+        --card: #151e2e;
+        --card-sub: #1e293b;
+        --ink: #f1f5f9;
+        --sub: #94a3b8;
+        --line: #263345;
+        --line-strong: #3b4d66;
+        --strong: #3b4d66;
+        --accent: #38bdf8;
+        --accent-hover: #60a5fa;
+        --accent-faint: #17283c;
+        --head: #1c2738;
+        --th-bg: #182333;
+        --danger: #f87171;
+        --danger-faint: #37171a;
+        --warn: #fbbf24;
+        --warn-bg: #37171a;
+        --warn-border: #6b2126;
+        --warn-text: #fca5a5;
+        --warn-faint: #271e0c;
+        --radius: 0.5rem;
+        --shadow: 0 4px 12px rgba(0,0,0,0.35);
+        --btn-bg: #1c2738;
+        --btn-hover: #26354c;
+        --input-bg: #0e1520;
+        --input-text: #f1f5f9;
+        --input-border: #2e3e54;
+        --modal-bg: #151e2e;
+        --modal-ink: #f1f5f9;
+        --overlay-bg: rgba(0, 0, 0, 0.72);
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 2px solid var(--line);
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      display: flex;
+      align-items: baseline;
+      gap: 0.8rem;
+    }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+    .sub-title {
+      font-size: 0.95rem;
+      color: var(--sub);
+      font-weight: 500;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    /* WD-12: 100% 크기 자동 설정 및 수동 배율 패널 */
+    .zoom-panel {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--card-sub);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      padding: 0.25rem 0.65rem;
+      font-size: 0.85rem;
+      user-select: none;
+    }
+    .zoom-auto-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .zoom-auto-label input[type="checkbox"] {
+      cursor: pointer;
+      accent-color: var(--accent);
+      width: 15px;
+      height: 15px;
+    }
+    .zoom-manual-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .btn.btn-sm {
+      padding: 0.2rem 0.5rem;
+      font-size: 0.78rem;
+      line-height: 1.2;
+    }
+    .zoom-badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--ink);
+      min-width: 42px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    .zoom-status-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-faint);
+      border: 1px solid var(--accent);
+      border-radius: 3px;
+      padding: 0.1rem 0.35rem;
+      white-space: nowrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: var(--radius);
+      border: 1px solid var(--line-strong);
+      background: var(--btn-bg);
+      color: var(--ink);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .btn:hover {
+      background: var(--btn-hover);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn.primary:hover {
+      background: var(--accent-hover);
+      color: #fff;
+    }
+    .btn.danger {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: var(--btn-bg);
+    }
+    .btn.danger:hover {
+      background: var(--danger-faint);
+      border-color: var(--danger);
+    }
+    .btn.sm {
+      padding: 0.25rem 0.6rem;
+      font-size: 0.82rem;
+    }
+
+    #warn-banner {
+      display: none;
+      background: var(--warn-bg);
+      border: 1px solid var(--warn-border);
+      color: var(--warn-text);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--line-strong);
+      border-radius: var(--radius);
+      padding: 1.75rem 1.5rem;
+      text-align: center;
+      background: var(--card-sub);
+      transition: border-color 0.15s, background-color 0.15s;
+      cursor: pointer;
+    }
+    .drop-zone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-faint);
+    }
+    .drop-zone p {
+      color: var(--sub);
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+    .drop-zone p strong {
+      color: var(--ink);
+    }
+    .upload-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .input-text {
+      padding: 0.45rem 0.75rem;
+      font-size: 0.9rem;
+      border: 1px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--input-text);
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .input-text:focus {
+      border-color: var(--accent);
+    }
+
+    #upload-queue {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .queue-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--card-sub);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+    }
+    .queue-item .q-name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 600;
+    }
+    .queue-item .q-size {
+      color: var(--sub);
+      width: 70px;
+      text-align: right;
+    }
+    .queue-item .q-bar-wrap {
+      width: 120px;
+      height: 8px;
+      background: var(--line);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .queue-item .q-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.1s linear;
+    }
+    .queue-item .q-status {
+      width: 90px;
+      text-align: right;
+      font-weight: 600;
+      color: var(--sub);
+    }
+    .queue-item .q-status.done { color: #16a34a; }
+    .queue-item .q-status.err { color: var(--danger); }
+
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .list-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+    }
+    .capacity-info {
+      font-size: 0.88rem;
+      color: var(--sub);
+      font-weight: 400;
+    }
+    .search-box {
+      width: 220px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    th, td {
+      padding: 0.7rem 0.6rem;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+    th {
+      background: var(--th-bg);
+      color: var(--sub);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    td.col-num { width: 45px; text-align: center; color: var(--sub); }
+    td.col-thumb { width: 52px; text-align: center; }
+    td.col-name { font-weight: 600; word-break: break-all; }
+    td.col-size { width: 85px; text-align: right; color: var(--sub); white-space: nowrap; }
+    td.col-uploader { width: 100px; color: var(--sub); white-space: nowrap; }
+    td.col-time { width: 110px; color: var(--sub); white-space: nowrap; }
+    td.col-actions { width: 190px; text-align: right; white-space: nowrap; }
+
+    .thumb {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--line);
+      background: var(--card-sub);
+      vertical-align: middle;
+    }
+    .thumb-empty {
+      width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--card-sub);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: var(--sub);
+      font-weight: 700;
+    }
+
+    .empty-state {
+      padding: 3rem 1rem;
+      text-align: center;
+      color: var(--sub);
+      font-size: 0.95rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+    .modal-box {
+      background: var(--modal-bg);
+      color: var(--modal-ink);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--line);
+      background: var(--th-bg);
+    }
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      margin-right: 1rem;
+    }
+    .modal-body {
+      padding: 1.25rem;
+      overflow: auto;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--card-sub);
+      min-height: 300px;
+    }
+    .modal-body img {
+      max-width: 100%;
+      max-height: 70vh;
+      object-fit: contain;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .modal-body iframe, .modal-body embed {
+      width: 100%;
+      height: 70vh;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--input-bg);
+    }
+    .modal-body video, .modal-body audio {
+      max-width: 100%;
+      max-height: 70vh;
+      outline: none;
+    }
+    .modal-text-wrap {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-text-notice {
+      font-size: 0.85rem;
+      color: var(--warn);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .modal-text-pre {
+      width: 100%;
+      height: 60vh;
+      overflow: auto;
+      background: var(--input-bg);
+      color: var(--input-text);
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .modal-foot {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.6rem;
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid var(--line);
+      background: var(--th-bg);
+    }
+
+    @media (max-width: 800px) {
+      body { padding: 0.75rem; }
+      header { flex-direction: column; align-items: stretch; }
+      .header-right { justify-content: flex-end; }
+      .col-uploader, .col-time { display: none; }
+      td.col-actions { width: 140px; }
+      .list-header { flex-direction: column; align-items: stretch; }
+      .search-box { width: 100%; }
+    }
+
+    /* WD-27, WD-33: 화면 우측 하단 프로그램 이름 및 문의처, 가이드 아이콘 */
+    #brand-footer {
+      position: fixed;
+      right: .8rem;
+      bottom: .5rem;
+      width: max-content;
+      font-size: .78rem;
+      color: var(--sub);
+      z-index: 40;
+      background: var(--head);
+      padding: .2rem .55rem;
+      border-radius: .35rem;
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      pointer-events: none;
+      text-align: right;
+      line-height: 1.35;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+    }
+    #brand-footer .brand-guide {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink);
+      opacity: .75;
+      pointer-events: auto;
+      cursor: pointer;
+      text-decoration: none;
+      padding: .2rem;
+      border-radius: 50%;
+      transition: all .15s ease;
+    }
+    #brand-footer .brand-guide:hover {
+      opacity: 1;
+      color: var(--primary, #2563eb);
+      background: rgba(0,0,0,.05);
+    }
+    #brand-footer .brand-text {
+      text-align: right;
+    }
+    #brand-footer .brand-name {
+      font-weight: 700;
+      color: var(--ink);
+      opacity: .88;
+    }
+    #brand-footer .brand-contact {
+      font-size: .72rem;
+      color: var(--sub);
+      opacity: .85;
+    }
+    @media (max-width: 640px) { #brand-footer { font-size: .7rem; padding: .15rem .4rem; } }
+    @media (max-width: 480px) {
+      #brand-footer .brand-text { display: none; }
+      #brand-footer { padding: .2rem .35rem; pointer-events: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-left">
+        <h1>파일박스</h1>
+        <span class="sub-title">사무실 간편 파일 전달 창구</span>
+      </div>
+      <div class="header-right">
+        <div class="zoom-panel" id="zoom-panel">
+          <label class="zoom-auto-label" title="대시보드 축소 상태에서도 파일박스를 100% 정상 크기로 자동 표시합니다">
+            <input type="checkbox" id="auto-zoom-chk" checked>
+            <span>화면 100% 크기로 자동 보정</span>
+          </label>
+          <div class="zoom-manual-group" id="zoom-manual-group" style="display: none;">
+            <button type="button" class="btn btn-sm" id="btn-zoom-out" title="화면 축소 (−10%)">작게 −</button>
+            <button type="button" class="btn btn-sm" id="btn-zoom-reset" title="100% 크기로 리셋">100%</button>
+            <button type="button" class="btn btn-sm" id="btn-zoom-in" title="화면 확대 (+10%)">크게 +</button>
+            <span class="zoom-badge" id="zoom-val-badge">100%</span>
+          </div>
+          <span class="zoom-status-badge" id="zoom-auto-badge" style="display: none;"></span>
+        </div>
+        <button type="button" class="btn" id="files-theme-btn" title="테마 전환: 라이트 → 다크 → 자동">☀ 라이트</button>
+        <button type="button" class="btn" id="btn-office-logout" style="display: none;">로그아웃</button>
+        <a href="/" class="btn">← 대시보드로 돌아가기</a>
+      </div>
+    </header>
+
+    <!-- 사무실 로그인 섹션 -->
+    <div id="login-sec" class="card" style="display: none; max-width: 440px; margin: 3rem auto; padding: 2rem; text-align: center;">
+      <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--ink);">사무실 파일박스 로그인</h2>
+      <p style="font-size: 0.9rem; color: var(--sub); margin-bottom: 1.2rem;">파일 목록 조회 및 업로드를 위해 비밀번호를 입력하세요.</p>
+      <input type="password" id="office-pass-input" class="input-text" placeholder="사무실 또는 관리자 비밀번호" style="width: 100%; padding: 0.65rem 0.8rem; font-size: 0.95rem; margin-bottom: 0.8rem;">
+      <button type="button" class="btn primary" id="btn-office-login" style="width: 100%; padding: 0.65rem; font-size: 0.95rem;">로그인</button>
+      <div id="login-err" style="color: var(--danger); font-size: 0.88rem; margin-top: 0.8rem; min-height: 1.2rem; font-weight: 600;"></div>
+      <div style="margin-top: 0.6rem; display: flex; justify-content: center;">
+        <button type="button" class="btn btn-sm" id="btn-office-hint" style="font-size: 0.8rem; padding: 0.2rem 0.6rem;">힌트 보기</button>
+      </div>
+      <div id="office-hint-box" style="display: none; margin-top: 0.6rem; font-size: 0.82rem; color: var(--sub); background: var(--card-sub); padding: 0.4rem 0.6rem; border-radius: 4px; border: 1px solid var(--line); word-break: break-all;"></div>
+    </div>
+
+    <!-- 파일박스 메인 섹션 -->
+    <div id="main-sec" style="display: none;">
+      <div id="warn-banner"></div>
+
+      <div class="card">
+        <div class="drop-zone" id="drop-zone">
+          <p><strong>마우스로 파일을 끌어다 놓거나</strong> 아래 버튼을 눌러 파일을 선택하세요.</p>
+          <div class="upload-controls">
+            <input type="text" id="uploader-input" class="input-text" placeholder="올린 사람 이름 (선택)" maxlength="100">
+            <label class="btn primary" for="file-input">
+              파일 선택 (여러 개 가능)
+              <input type="file" id="file-input" multiple style="display: none;">
+            </label>
+          </div>
+        </div>
+        <div id="upload-queue"></div>
+      </div>
+
+      <div class="card">
+        <div class="list-header">
+          <div class="list-title">
+            <span>파일 목록</span>
+            <span class="capacity-info" id="capacity-info"></span>
+          </div>
+          <input type="text" id="search-input" class="input-text search-box" placeholder="파일명 검색…">
+        </div>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-num">번호</th>
+                <th class="col-thumb">미리보기</th>
+                <th class="col-name">파일명</th>
+                <th class="col-size">크기</th>
+                <th class="col-uploader">올린 사람</th>
+                <th class="col-time">올린 시각</th>
+                <th class="col-actions">동작</th>
+              </tr>
+            </thead>
+            <tbody id="file-list-body">
+              <tr><td colspan="7" class="empty-state">파일 목록을 불러오는 중…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-container"></div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    const $ = (sel, el = document) => el.querySelector(sel);
+    const el = (tag, attrs = {}, ...children) => {
+      const elem = document.createElement(tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        if (k === 'text') elem.textContent = v;
+        else if (k.startsWith('on')) elem.addEventListener(k.slice(2), v);
+        else if (k === 'style' && typeof v === 'object') Object.assign(elem.style, v);
+        else elem.setAttribute(k, v);
+      }
+      for (const c of children) {
+        if (c == null) continue;
+        if (typeof c === 'string' || typeof c === 'number') elem.appendChild(document.createTextNode(String(c)));
+        else if (c instanceof Node) elem.appendChild(c);
+      }
+      return elem;
+    };
+
+    // ---------- WD-15: 테마 관리 (라이트 / 다크 / 자동) ----------
+    (function initThemeController() {
+      const themeBtn = $('#files-theme-btn');
+      if (!themeBtn) return;
+
+      const getThemeMode = () => {
+        try {
+          const saved = localStorage.getItem('theme');
+          if (saved === 'light' || saved === 'dark') return saved;
+        } catch (e) {}
+        return 'auto';
+      };
+
+      const applyTheme = (mode) => {
+        if (mode === 'light' || mode === 'dark') {
+          document.documentElement.setAttribute('data-theme', mode);
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+        }
+      };
+
+      const updateBtn = () => {
+        const mode = getThemeMode();
+        if (mode === 'light') {
+          themeBtn.textContent = '☀ 라이트';
+          themeBtn.title = '테마: 라이트 (클릭 시 다크 모드로 전환)';
+        } else if (mode === 'dark') {
+          themeBtn.textContent = '🌙 다크';
+          themeBtn.title = '테마: 다크 (클릭 시 자동 모드로 전환)';
+        } else {
+          themeBtn.textContent = '💻 자동';
+          themeBtn.title = '테마: 자동(시스템 설정 따름, 클릭 시 라이트 모드로 전환)';
+        }
+      };
+
+      themeBtn.onclick = () => {
+        const cur = getThemeMode();
+        const next = (cur === 'auto') ? 'light' : (cur === 'light') ? 'dark' : 'auto';
+        try {
+          if (next === 'auto') {
+            localStorage.removeItem('theme');
+          } else {
+            localStorage.setItem('theme', next);
+          }
+        } catch (e) {}
+        applyTheme(next);
+        updateBtn();
+      };
+
+      updateBtn();
+    })();
+
+    // ---------- WD-12: 화면 100% 크기 자동 보정 및 수동 배율 ----------
+    (function initZoomController() {
+      const autoChk = $('#auto-zoom-chk');
+      const manualGroup = $('#zoom-manual-group');
+      const autoBadge = $('#zoom-auto-badge');
+      const valBadge = $('#zoom-val-badge');
+      const btnOut = $('#btn-zoom-out');
+      const btnIn = $('#btn-zoom-in');
+      const btnReset = $('#btn-zoom-reset');
+
+      if (!autoChk) return;
+
+      // LocalStorage 설정 복원 (기본값: true)
+      let autoEnabled = true;
+      try {
+        const savedAuto = localStorage.getItem('files_auto_zoom');
+        if (savedAuto !== null) autoEnabled = (savedAuto === 'true');
+      } catch {}
+
+      // 수동 배율 (기본값: 100%)
+      let manualScale = 1.0;
+      try {
+        const savedManual = localStorage.getItem('files_manual_zoom');
+        if (savedManual) {
+          const parsed = parseFloat(savedManual);
+          if (!isNaN(parsed) && parsed >= 0.5 && parsed <= 2.0) manualScale = parsed;
+        }
+      } catch {}
+
+      autoChk.checked = autoEnabled;
+
+      // 표준 줌 스텝 (브라우저가 주로 사용하는 줌 배율)
+      const STANDARD_ZOOM_STEPS = [0.25, 0.33, 0.50, 0.67, 0.75, 0.80, 0.90, 1.00, 1.10, 1.25, 1.50, 1.75, 2.00, 2.50, 3.00];
+
+      function detectBrowserZoomRatio() {
+        // window.outerWidth / window.innerWidth: OS 디스플레이 배율(DPR 125%, 150% 등)과 무관하게
+        // 순수 브라우저 창 배율(Page Zoom)에만 반비례함
+        const ow = window.outerWidth;
+        const iw = window.innerWidth;
+        if (!ow || !iw || ow <= 0 || iw <= 0) return 1.0;
+
+        const raw = ow / iw;
+
+        // 창 테두리 및 스크롤바로 인한 0.96 ~ 1.06 구간 오차는 1.0(줌 100%, 보정 안 함)으로 스냅
+        if (raw >= 0.96 && raw <= 1.06) {
+          return 1.0;
+        }
+
+        // 그 외는 Chrome 표준 줌 단계(25, 33, 50, 67, 75, 80, 90, 110, 125, 150, 175, 200...)로 스냅
+        let closest = 1.0;
+        let minDiff = 999;
+        for (const s of STANDARD_ZOOM_STEPS) {
+          const diff = Math.abs(raw - s);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closest = s;
+          }
+        }
+        return (minDiff < 0.12) ? closest : raw;
+      }
+
+      function applyZoom() {
+        if (autoChk.checked) {
+          manualGroup.style.display = 'none';
+          const browserZoom = detectBrowserZoomRatio();
+          // 브라우저가 zoom 상태(예: 0.5)면 1 / browserZoom (예: 2.0)으로 보정
+          const compScale = (browserZoom > 0.1 && browserZoom < 10) ? (1 / browserZoom) : 1.0;
+          document.body.style.zoom = compScale;
+
+          if (Math.abs(browserZoom - 1.0) >= 0.05) {
+            autoBadge.style.display = 'inline-block';
+            autoBadge.textContent = `줌 ${Math.round(browserZoom * 100)}% 감지 → ${Math.round(compScale * 100)}% 보정`;
+          } else {
+            autoBadge.style.display = 'none';
+          }
+        } else {
+          autoBadge.style.display = 'none';
+          manualGroup.style.display = 'inline-flex';
+          valBadge.textContent = `${Math.round(manualScale * 100)}%`;
+          document.body.style.zoom = manualScale;
+        }
+      }
+
+      autoChk.addEventListener('change', () => {
+        try {
+          localStorage.setItem('files_auto_zoom', String(autoChk.checked));
+        } catch {}
+        applyZoom();
+      });
+
+      if (btnOut) {
+        btnOut.addEventListener('click', () => {
+          manualScale = Math.max(0.5, Math.round((manualScale - 0.1) * 10) / 10);
+          try { localStorage.setItem('files_manual_zoom', manualScale.toFixed(2)); } catch {}
+          applyZoom();
+        });
+      }
+
+      if (btnIn) {
+        btnIn.addEventListener('click', () => {
+          manualScale = Math.min(2.0, Math.round((manualScale + 0.1) * 10) / 10);
+          try { localStorage.setItem('files_manual_zoom', manualScale.toFixed(2)); } catch {}
+          applyZoom();
+        });
+      }
+
+      if (btnReset) {
+        btnReset.addEventListener('click', () => {
+          manualScale = 1.0;
+          try { localStorage.setItem('files_manual_zoom', '1.00'); } catch {}
+          applyZoom();
+        });
+      }
+
+      window.addEventListener('resize', applyZoom);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', applyZoom);
+      }
+
+      // 초기 실행
+      applyZoom();
+    })();
+
+    function formatSize(bytes) {
+      if (bytes == null || isNaN(bytes)) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+      return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+    }
+
+    function formatTime(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function getAdminToken() {
+      try {
+        return sessionStorage.getItem('tok') || '';
+      } catch {
+        return '';
+      }
+    }
+
+    // Uploader LocalStorage
+    const uploaderInput = $('#uploader-input');
+    try {
+      const savedUploader = localStorage.getItem('file_uploader');
+      if (savedUploader) uploaderInput.value = savedUploader;
+    } catch {}
+    uploaderInput.addEventListener('change', () => {
+      try {
+        localStorage.setItem('file_uploader', uploaderInput.value.trim());
+      } catch {}
+    });
+
+    // ---------- 사무실 로그인 / 세션 제어 (WD-7) ----------
+    const loginSec = $('#login-sec');
+    const mainSec = $('#main-sec');
+    const passInput = $('#office-pass-input');
+    const loginBtn = $('#btn-office-login');
+    const logoutBtn = $('#btn-office-logout');
+    const loginErr = $('#login-err');
+    const officeHintBtn = $('#btn-office-hint');
+    const officeHintBox = $('#office-hint-box');
+
+    let isAuthenticated = false;
+
+    function showLogin(msg = '') {
+      isAuthenticated = false;
+      mainSec.style.display = 'none';
+      loginSec.style.display = 'block';
+      logoutBtn.style.display = 'none';
+      loginErr.textContent = msg;
+      passInput.value = '';
+      if (officeHintBox) {
+        officeHintBox.style.display = 'none';
+        officeHintBox.textContent = '';
+      }
+      setTimeout(() => passInput.focus(), 50);
+    }
+
+    if (officeHintBtn && officeHintBox) {
+      officeHintBtn.addEventListener('click', async () => {
+        officeHintBtn.disabled = true;
+        try {
+          const res = await fetch('/api/auth/hint?target=office');
+          if (!res.ok) throw new Error('힌트 조회 실패');
+          const data = await res.json();
+          const hintText = (data && data.hint) ? String(data.hint).trim() : '';
+          if (hintText) {
+            officeHintBox.textContent = '💡 힌트: ' + hintText;
+          } else {
+            officeHintBox.textContent = '등록된 힌트가 없습니다.';
+          }
+          officeHintBox.style.display = 'block';
+        } catch (e) {
+          officeHintBox.textContent = '힌트를 불러올 수 없습니다.';
+          officeHintBox.style.display = 'block';
+        } finally {
+          officeHintBtn.disabled = false;
+        }
+      });
+    }
+
+    function showMain() {
+      isAuthenticated = true;
+      loginSec.style.display = 'none';
+      mainSec.style.display = 'block';
+      logoutBtn.style.display = 'inline-flex';
+      loginErr.textContent = '';
+      fetchList();
+    }
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/office/me', { cache: 'no-store' });
+        if (res.ok) {
+          showMain();
+          return true;
+        }
+      } catch {}
+
+      // 관리자 토큰이 있는지 확인하여 자동 발급 시도
+      const adminTok = getAdminToken();
+      if (adminTok) {
+        try {
+          const syncRes = await fetch('/api/office/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ adminToken: adminTok }),
+          });
+          if (syncRes.ok) {
+            showMain();
+            return true;
+          }
+        } catch {}
+      }
+
+      showLogin();
+      return false;
+    }
+
+    async function doLogin() {
+      const pw = passInput.value;
+      if (!pw) {
+        loginErr.textContent = '비밀번호를 입력하세요.';
+        return;
+      }
+      loginErr.textContent = '로그인 확인 중…';
+      try {
+        const res = await fetch('/api/office/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw }),
+        });
+        if (res.ok) {
+          showMain();
+        } else {
+          let err = '비밀번호가 올바르지 않습니다.';
+          try {
+            const data = await res.json();
+            if (data.error) err = data.error;
+          } catch {}
+          loginErr.textContent = err;
+        }
+      } catch (e) {
+        loginErr.textContent = '서버 통신 오류가 발생했습니다.';
+      }
+    }
+
+    async function doLogout() {
+      try {
+        await fetch('/api/office/logout', { method: 'POST' });
+      } catch {}
+      showLogin('로그아웃되었습니다.');
+    }
+
+    loginBtn.addEventListener('click', doLogin);
+    passInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') doLogin();
+    });
+    logoutBtn.addEventListener('click', doLogout);
+
+    let currentFiles = [];
+    let lastDataHash = '';
+    let isWarnGlobal = false;
+
+    // Search filter
+    const searchInput = $('#search-input');
+    searchInput.addEventListener('input', () => {
+      renderTable();
+    });
+
+    // Fetch files list
+    async function fetchList() {
+      if (!isAuthenticated) return;
+      try {
+        const res = await fetch('/api/files', { cache: 'no-store' });
+        if (res.status === 401) {
+          showLogin('로그인 세션이 만료되었습니다. 다시 로그인해 주세요.');
+          return;
+        }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        
+        const newHash = JSON.stringify(data.files.map(f => [f.id, f.name, f.size, f.at])) + ':' + data.totalBytes;
+        if (newHash !== lastDataHash) {
+          lastDataHash = newHash;
+          currentFiles = data.files || [];
+          isWarnGlobal = !!data.isWarn;
+          updateCapacity(data.totalBytes, data.warnBytes, data.isWarn);
+          renderTable();
+        }
+      } catch (err) {
+        console.warn('파일 목록 조회 실패:', err);
+      }
+    }
+
+    function updateCapacity(total, warnLimit, isWarn) {
+      const capEl = $('#capacity-info');
+      capEl.textContent = `(총 ${formatSize(total)} / 경고 ${formatSize(warnLimit)})`;
+
+      const warnBanner = $('#warn-banner');
+      if (isWarn) {
+        warnBanner.textContent = `⚠️ 저장 용량이 ${formatSize(warnLimit)}를 넘었습니다 (${formatSize(total)} 사용 중). 오래된 파일을 정리해 주세요.`;
+        warnBanner.style.display = 'block';
+      } else {
+        warnBanner.style.display = 'none';
+      }
+    }
+
+    function renderTable() {
+      const tbody = $('#file-list-body');
+      tbody.replaceChildren();
+
+      const query = searchInput.value.trim().toLowerCase();
+      const filtered = query
+        ? currentFiles.filter(f => (f.name || '').toLowerCase().includes(query))
+        : currentFiles;
+
+      if (filtered.length === 0) {
+        const msg = query ? '검색 결과와 일치하는 파일이 없습니다.' : '등록된 파일이 없습니다.';
+        tbody.append(el('tr', {}, el('td', { colspan: '7', class: 'empty-state', text: msg })));
+        return;
+      }
+
+      const adminToken = getAdminToken();
+
+      filtered.forEach((f, idx) => {
+        const tr = el('tr', {});
+        tr.append(el('td', { class: 'col-num', text: String(idx + 1) }));
+
+        // 썸네일
+        const tdThumb = el('td', { class: 'col-thumb' });
+        if (f.preview === 'image') {
+          const img = el('img', {
+            src: `/api/files/${f.id}/raw`,
+            alt: f.name,
+            class: 'thumb',
+            loading: 'lazy'
+          });
+          img.onerror = () => {
+            tdThumb.replaceChildren(el('div', { class: 'thumb-empty', text: 'IMG' }));
+          };
+          tdThumb.append(img);
+        } else if (f.preview === 'pdf') {
+          tdThumb.append(el('div', { class: 'thumb-empty', text: 'PDF' }));
+        } else if (f.preview === 'video') {
+          tdThumb.append(el('div', { class: 'thumb-empty', text: 'VID' }));
+        } else if (f.preview === 'audio') {
+          tdThumb.append(el('div', { class: 'thumb-empty', text: 'AUD' }));
+        } else if (f.preview === 'text') {
+          tdThumb.append(el('div', { class: 'thumb-empty', text: 'TXT' }));
+        } else {
+          tdThumb.append(el('div', { class: 'thumb-empty', text: 'FILE' }));
+        }
+        tr.append(tdThumb);
+
+        tr.append(el('td', { class: 'col-name', text: f.name }));
+        tr.append(el('td', { class: 'col-size', text: formatSize(f.size) }));
+        tr.append(el('td', { class: 'col-uploader', text: f.uploader || '-' }));
+        tr.append(el('td', { class: 'col-time', text: formatTime(f.at) }));
+
+        // 액션 버튼
+        const tdActions = el('td', { class: 'col-actions' });
+        if (f.preview) {
+          tdActions.append(el('button', {
+            class: 'btn sm',
+            text: '미리보기',
+            onclick: () => openModal(f)
+          }), ' ');
+        }
+        tdActions.append(el('a', {
+          href: `/api/files/${f.id}/download`,
+          class: 'btn sm primary',
+          text: '다운로드'
+        }));
+
+        if (adminToken) {
+          tdActions.append(' ', el('button', {
+            class: 'btn sm danger',
+            text: '삭제',
+            onclick: () => deleteFile(f)
+          }));
+        }
+
+        tr.append(tdActions);
+        tbody.append(tr);
+      });
+    }
+
+    async function deleteFile(file) {
+      if (!confirm(`'${file.name}' 파일을 삭제하시겠습니까?`)) return;
+      const token = getAdminToken();
+      if (!token) {
+        alert('관리자 로그인이 필요합니다. 대시보드 화면에서 로그인 후 다시 시도하세요.');
+        return;
+      }
+      try {
+        const res = await fetch(`/api/files/${file.id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.status === 401) {
+          alert('관리자 로그인이 만료되었습니다. 대시보드 화면에서 다시 로그인하세요.');
+          return;
+        }
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error || '삭제 실패');
+        }
+        fetchList();
+      } catch (err) {
+        alert('삭제 오류: ' + err.message);
+      }
+    }
+
+    // Modal
+    function openModal(file) {
+      const modalCont = $('#modal-container');
+      modalCont.replaceChildren();
+
+      const overlay = el('div', { class: 'modal-overlay' });
+      const box = el('div', { class: 'modal-box' });
+
+      // Head
+      const head = el('div', { class: 'modal-head' },
+        el('div', { class: 'modal-title', text: file.name }),
+        el('button', { class: 'btn sm', text: '✕', onclick: closeModal })
+      );
+
+      // Body
+      const body = el('div', { class: 'modal-body' });
+      let activeMedia = null;
+
+      if (file.preview === 'image') {
+        body.append(el('img', { src: `/api/files/${file.id}/raw`, alt: file.name }));
+      } else if (file.preview === 'pdf') {
+        body.append(el('iframe', { src: `/api/files/${file.id}/raw` }));
+      } else if (file.preview === 'video') {
+        activeMedia = el('video', { src: `/api/files/${file.id}/raw`, controls: 'true', autoplay: 'true' });
+        body.append(activeMedia);
+      } else if (file.preview === 'audio') {
+        activeMedia = el('audio', { src: `/api/files/${file.id}/raw`, controls: 'true', autoplay: 'true' });
+        body.append(activeMedia);
+      } else if (file.preview === 'text') {
+        const wrap = el('div', { class: 'modal-text-wrap' });
+        const notice = el('div', { class: 'modal-text-notice', text: '' });
+        const pre = el('pre', { class: 'modal-text-pre', text: '내용을 불러오는 중…' });
+        wrap.append(notice, pre);
+        body.append(wrap);
+        loadTextPreview(file, pre, notice);
+      }
+
+      // Foot
+      const foot = el('div', { class: 'modal-foot' },
+        el('a', { href: `/api/files/${file.id}/download`, class: 'btn primary sm', text: '다운로드' }),
+        el('button', { class: 'btn sm', text: '닫기', onclick: closeModal })
+      );
+
+      box.append(head, body, foot);
+      overlay.append(box);
+      modalCont.append(overlay);
+
+      function closeModal() {
+        if (activeMedia) {
+          try {
+            activeMedia.pause();
+            activeMedia.src = '';
+          } catch {}
+        }
+        overlay.remove();
+        document.removeEventListener('keydown', onKey);
+      }
+
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal();
+      });
+
+      function onKey(e) {
+        if (e.key === 'Escape') closeModal();
+      }
+      document.addEventListener('keydown', onKey);
+    }
+
+    async function loadTextPreview(file, preEl, noticeEl) {
+      try {
+        const res = await fetch(`/api/files/${file.id}/raw`, {
+          headers: { Range: 'bytes=0-1048575' }
+        });
+        if (!res.ok && res.status !== 206) throw new Error('HTTP ' + res.status);
+        const buf = await res.arrayBuffer();
+        let text = new TextDecoder('utf-8').decode(buf);
+        const replacementCount = (text.match(/\uFFFD/g) || []).length;
+        if (replacementCount > 3) {
+          try {
+            const eucText = new TextDecoder('euc-kr').decode(buf);
+            const eucCount = (eucText.match(/\uFFFD/g) || []).length;
+            if (eucCount < replacementCount) {
+              text = eucText;
+            }
+          } catch {}
+        }
+        preEl.textContent = text;
+        if (file.size > 1048576) {
+          noticeEl.textContent = `(파일 크기가 ${formatSize(file.size)}로 커서 앞 1MB만 표시 중입니다)`;
+        }
+      } catch (err) {
+        preEl.textContent = '미리보기 로드 실패: ' + err.message;
+      }
+    }
+
+    // Upload Queue
+    const uploadQueue = [];
+    let isUploading = false;
+
+    function addFilesToQueue(files) {
+      const uploader = uploaderInput.value.trim();
+      for (const file of files) {
+        if (file.size > 100 * 1024 * 1024) {
+          alert(`'${file.name}' 파일은 100MB를 초과하여 올릴 수 없습니다. (${formatSize(file.size)})`);
+          continue;
+        }
+        if (file.size === 0) {
+          alert(`'${file.name}' 파일은 빈 파일(0바이트)이므로 올릴 수 없습니다.`);
+          continue;
+        }
+
+        const item = {
+          file,
+          uploader,
+          status: '대기 중',
+          ui: null
+        };
+        uploadQueue.push(item);
+        createQueueItemUI(item);
+      }
+      processQueue();
+    }
+
+    function createQueueItemUI(item) {
+      const queueContainer = $('#upload-queue');
+      const itemEl = el('div', { class: 'queue-item' });
+      const nameEl = el('span', { class: 'q-name', text: item.file.name });
+      const sizeEl = el('span', { class: 'q-size', text: formatSize(item.file.size) });
+      const barEl = el('div', { class: 'q-bar' });
+      const barWrap = el('div', { class: 'q-bar-wrap' }, barEl);
+      const statusEl = el('span', { class: 'q-status', text: '대기 중' });
+
+      itemEl.append(nameEl, sizeEl, barWrap, statusEl);
+      queueContainer.append(itemEl);
+
+      item.ui = { barEl, statusEl, itemEl };
+    }
+
+    async function processQueue() {
+      if (isUploading) return;
+      if (uploadQueue.length === 0) return;
+
+      isUploading = true;
+      const current = uploadQueue.shift();
+
+      current.ui.statusEl.textContent = '0%';
+      current.ui.statusEl.classList.remove('done', 'err');
+
+      try {
+        await uploadSingleFile(current);
+        current.ui.statusEl.textContent = '완료';
+        current.ui.statusEl.classList.add('done');
+        current.ui.barEl.style.width = '100%';
+        fetchList();
+      } catch (err) {
+        current.ui.statusEl.textContent = err.message || '실패';
+        current.ui.statusEl.classList.add('err');
+      } finally {
+        isUploading = false;
+        // 다음 항목 처리
+        processQueue();
+      }
+    }
+
+    function uploadSingleFile(item) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        const url = `/api/files?name=${encodeURIComponent(item.file.name)}&uploader=${encodeURIComponent(item.uploader)}`;
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            item.ui.barEl.style.width = percent + '%';
+            item.ui.statusEl.textContent = percent + '%';
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status === 201) {
+            resolve();
+          } else {
+            if (xhr.status === 401) {
+              showLogin('로그인 세션이 만료되었습니다. 다시 로그인해 주세요.');
+              reject(new Error('세션 만료'));
+              return;
+            }
+            let errMsg = `오류 (${xhr.status})`;
+            try {
+              const res = JSON.parse(xhr.responseText);
+              if (res.error) errMsg = res.error;
+            } catch {}
+            reject(new Error(errMsg));
+          }
+        };
+
+        xhr.onerror = () => {
+          reject(new Error('네트워크 오류'));
+        };
+
+        xhr.onabort = () => {
+          reject(new Error('업로드 취소'));
+        };
+
+        xhr.send(item.file);
+      });
+    }
+
+    // Drag and Drop (drop-zone 내부에서만!)
+    const dropZone = $('#drop-zone');
+    const fileInput = $('#file-input');
+
+    dropZone.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      if (!dropZone.contains(e.relatedTarget)) {
+        dropZone.classList.remove('dragover');
+      }
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        addFilesToQueue(e.dataTransfer.files);
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files && fileInput.files.length > 0) {
+        addFilesToQueue(fileInput.files);
+        fileInput.value = '';
+      }
+    });
+
+    // Initial check auth and polling
+    checkAuth();
+    setInterval(() => {
+      if (isAuthenticated) fetchList();
+    }, 10000);
+
+    // WD-16: 개발 모드 자동 새로고침
+    (function initDevReloader() {
+      fetch('/api/info').then((r) => r.json()).then((d) => {
+        if (!d || !d.dev) return;
+        window.__IS_DEV = true;
+        const es = new EventSource('/events');
+
+        function isBusy() {
+          if (isUploading) return true;
+          const modalCont = document.getElementById('modal-container');
+          if (modalCont && modalCont.childElementCount > 0) return true;
+          const active = document.activeElement;
+          if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return true;
+          return false;
+        }
+
+        function showBanner() {
+          if (document.getElementById('dev-reload-banner')) return;
+          const b = el('div', {
+            id: 'dev-reload-banner',
+            style: 'position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#0f172a;padding:8px 16px;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.3);z-index:999999;font-weight:700;font-size:14px;display:flex;align-items:center;gap:12px;border:1px solid #d97706;'
+          },
+            el('span', { text: '⚡ [개발 모드] 파일이 변경되었습니다. 작업 완료 후 새로고침하세요.' }),
+            el('button', {
+              type: 'button',
+              class: 'btn sm',
+              style: 'background:#0f172a;color:#fff;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;',
+              text: '지금 새로고침',
+              onclick: () => location.reload()
+            }),
+            el('button', {
+              type: 'button',
+              style: 'background:transparent;color:#0f172a;border:none;padding:2px 6px;cursor:pointer;font-size:16px;line-height:1;',
+              text: '✕',
+              onclick: () => b.remove()
+            })
+          );
+          document.body.appendChild(b);
+        }
+
+        es.addEventListener('reload', () => {
+          if (isBusy()) showBanner();
+          else location.reload();
+        });
+
+        let sseOnce = false;
+        let sseDisconn = false;
+        es.addEventListener('open', () => {
+          if (sseOnce && sseDisconn) {
+            if (isBusy()) showBanner();
+            else location.reload();
+          }
+          sseOnce = true;
+          sseDisconn = false;
+        });
+        es.addEventListener('error', () => {
+          if (sseOnce) sseDisconn = true;
+        });
+      }).catch(() => {});
+    })();
+  })();
+  </script>
+  <div id="brand-footer"><a href="/guide.html" target="_blank" rel="noopener noreferrer" class="brand-guide" title="프로그램 상세 가이드" aria-label="프로그램 상세 가이드"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></a><div class="brand-text"><span class="brand-name">Minos work dashboard</span><br><span class="brand-contact">문의: hguyswow@gmail.com</span></div></div>
+</body>
+</html>
