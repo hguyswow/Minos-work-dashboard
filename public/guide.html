@@ -527,7 +527,7 @@
       <div class="section-content">
         <p>작업 데이터를 입력하거나 수정할 때 필요한 관리자 기능입니다.</p>
         <ul>
-          <li><strong>관리자 로그인</strong>: 화면 우측 상단의 옅은 <span class="badge">관리자</span> 글씨(또는 TV 화면의 ✎ 편집 버튼)를 누르고 관리자 비밀번호(기본값: <span class="badge">0000</span>)를 입력합니다. 초기 비밀번호인 0000 상태로 로그인하면 세션당 1회 설정 창이 자동으로 열려 비밀번호 변경을 안내합니다.</li>
+          <li><strong>관리자 로그인</strong>: 화면 우측 상단의 옅은 <span class="badge">관리자</span> 글씨(또는 TV 화면의 ✎ 편집 버튼)를 누르고 관리자 비밀번호(최초 기본값: <span class="badge">admin1234</span>)를 입력합니다. 초기 비밀번호 상태(기본값 admin1234 또는 마스터 초기화 0000)로 로그인하면 세션당 1회 설정 창이 자동으로 열려 비밀번호 변경을 안내합니다.</li>
           <li><strong>어제 내용 → 오늘 복사 (항목별 선택 복사)</strong>: 상단의 <span class="badge">어제 내용 → 오늘 복사</span> 버튼을 누르면 모달 창이 열려 작업현황, 장비, 인원, 자재, 특이사항 중 원하는 항목만 체크박스로 골라 복사할 수 있습니다. 오늘 칸에 이미 작성된 내용이 있을 경우 덮어쓰기 전 확인 창이 제공됩니다.</li>
           <li><strong>장비 수량 입력</strong>: 장비 등록 시 대수를 "수량" 칸에 숫자로 입력합니다. 수량이 비어있으면 붉은 테두리로 안내되며, 직영 장비의 수량만큼 식수 인원에 실시간으로 자동 합산됩니다.</li>
           <li><strong>직영 ON/OFF 토글</strong>: 장비, 인원, 자재의 행마다 위치한 [직영] 버튼을 원클릭으로 켜고 끌 수 있으며, 켜진 항목은 밑줄 처리 및 식수 인원 집계에 실시간 반영됩니다.</li>
@@ -590,7 +590,7 @@
       <div class="section-content">
         <p>현장 권한 분리와 안전한 보안 관리를 위해 비밀번호 체계를 제공합니다.</p>
         <ul>
-          <li><strong>관리자 비밀번호 (<span class="badge">password</span>)</strong>: 일일 작업 일보 입력, 공지사항 등록, 환경설정, 파일박스 파일 삭제에 사용되는 현장 최고 권한 비밀번호입니다 (기본값: <span class="badge">0000</span>).</li>
+          <li><strong>관리자 비밀번호 (<span class="badge">password</span>)</strong>: 일일 작업 일보 입력, 공지사항 등록, 환경설정, 파일박스 파일 삭제에 사용되는 현장 최고 권한 비밀번호입니다 (최초 기본값: <span class="badge">admin1234</span>, config.json에 password 설정 시 해당 값 우선, 마스터 복구 시 <span class="badge">0000</span>으로 초기화).</li>
           <li><strong>사무실 비밀번호 (<span class="badge">officePassword</span>)</strong>: 파일박스(/files)에서 파일을 올리고 조회/다운로드할 수 있는 사무실 공용 비밀번호입니다 (기본값: <span class="badge">0000</span>).</li>
           <li><strong>화면에서 비밀번호 변경</strong>: 관리자 로그인 후 설정 모달의 <strong>비밀번호 관리</strong> 메뉴에서 현재 비밀번호를 확인하고 새 비밀번호(4~32자, 공백 불가)와 힌트(최대 60자)를 설정할 수 있습니다. 변경 즉시 <span class="badge">config.json</span>에 scrypt 안전 해시로 암호화 저장됩니다.</li>
           <li><strong>비밀번호 힌트 확인</strong>: 로그인 창 하단의 <span class="badge">힌트 보기</span> 버튼을 누르면 설정해 둔 힌트가 즉시 표출됩니다.</li>
@@ -631,7 +631,7 @@
           </li>
           <li><strong>설치 프로그램 및 트레이 런처</strong>:
             <ul style="margin-top: 0.3rem;">
-              <li>윈도우 전용 설치본(<span class="badge">WorkDashboard-Setup-1.1.0.exe</span>)으로 설치 시, PC 부팅 시 백그라운드로 자동 실행되는 시스템 트레이 런처가 함께 설치됩니다.</li>
+              <li>윈도우 전용 설치본(<span class="badge">WorkDashboard-Setup-1.1.1.exe</span>)으로 설치 시, PC 부팅 시 백그라운드로 자동 실행되는 시스템 트레이 런처가 함께 설치됩니다.</li>
               <li>설치본의 기본 데이터 폴더는 <span class="badge">%LOCALAPPDATA%\WorkDashboard</span>에 안전하게 격리 보관되며, 필요 시 환경변수 <span class="badge">WD_DATA_DIR</span>을 통해 원하는 드라이브나 폴더로 지정할 수 있습니다.</li>
             </ul>
           </li>

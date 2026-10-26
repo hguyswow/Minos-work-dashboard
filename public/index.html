@@ -4169,7 +4169,7 @@ function copyPrev() {
   })]);
 }
 
-// 기본 비밀번호(0000)로 로그인 중이면 세션당 한 번 설정 창을 열어 변경을 유도
+// 초기 관리자 비밀번호(admin1234 또는 0000)로 로그인 중이면 세션당 한 번 설정 창을 열어 변경을 유도
 async function checkDefaultPassword() {
   if (!S.admin || store.get('pwWarned') === '1') return;
   try {
@@ -5363,7 +5363,7 @@ async function openSettingsModal() {
       const st = await api('/api/auth/status');
       if (st && st.adminDefault) {
         defaultWarnBox.style.display = 'block';
-        defaultWarnBox.textContent = '⚠️ 관리자 비밀번호가 초기값(0000)입니다. 안전을 위해 새 비밀번호를 설정하세요.';
+        defaultWarnBox.textContent = '⚠️ 관리자 비밀번호가 초기 비밀번호 상태입니다. 안전을 위해 새 비밀번호를 설정하세요.';
       }
     } catch {}
   })();
