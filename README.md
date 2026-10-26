@@ -24,7 +24,7 @@
 
 ## 0. Windows 설치 프로그램 (간편 설치본)
 
-Node.js를 별도로 설치하지 않고 바로 사용할 수 있는 원클릭 Windows 설치 패키지(`WorkDashboard-Setup-1.0.0.exe`)를 제공합니다.
+Node.js를 별도로 설치하지 않고 바로 사용할 수 있는 원클릭 Windows 설치 패키지(`WorkDashboard-Setup-1.1.0.exe`)를 제공합니다.
 
 - **설치 및 구동**: 설치 마법사를 실행하면 관리자 권한 없이 사용자 영역(`%LOCALAPPDATA%\Programs\WorkDashboard`)에 설치되며, 윈도우 시작 시 트레이 아이콘 백그라운드 자동 실행이 지원됩니다.
 - **데이터 보관 위치**: 작업 데이터 및 설정은 프로그램 업데이트 및 재설치 시에도 안전하게 보존되도록 사용자 로컬 앱데이터 폴더(`%LOCALAPPDATA%\WorkDashboard`)에 분리 저장됩니다 (`data.json`, `work.db`, `config.json`, `files/`, `backup/`).

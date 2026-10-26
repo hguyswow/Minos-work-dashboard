@@ -58,7 +58,7 @@ exit /b 2
 echo   -^> Found Inno Setup: "%ISCC%"
 
 echo.
-echo [4/4] Compiling WorkDashboard-Setup-1.0.0.exe...
+echo [4/4] Compiling WorkDashboard-Setup-1.1.0.exe...
 if not exist "installer\Output" mkdir "installer\Output"
 
 "%ISCC%" installer\WorkDashboard.iss

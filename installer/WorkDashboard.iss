@@ -1,9 +1,9 @@
 ; Minos Work Dashboard - Inno Setup Script
-; 버전: 1.0.0
+; 버전: 1.1.0
 ; 특징: 관리자 권한 불필요(PrivilegesRequired=lowest), Node 24 내장 동봉, 데이터는 %LOCALAPPDATA%\WorkDashboard에 영구 보존
 
 #define MyAppName "Minos Work Dashboard"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "Minos"
 #define MyAppURL "https://github.com/minos"
 #define MyAppExeName "run-launcher.vbs"
