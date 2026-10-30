@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>현장 선택 — 작업 현황</title>
+  <script>
+    /* WD-15: FOUC 방지 - DOM 렌더링 전 저장된 테마 즉시 적용 */
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) { }
+    })();
+  </script>
+  <style>
+    :root,
+    :root[data-theme="light"] {
+      --theme: light;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --card-sub: #f1f5f9;
+      --ink: #0f172a;
+      --sub: #475569;
+      --line: #e2e8f0;
+      --strong: #94a3b8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-soft: #eff6ff;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --ok: #15803d;
+      --ok-soft: #f0fdf4;
+      --warn: #b45309;
+      --warn-bg: #fffbeb;
+      --warn-line: #fde68a;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    :root[data-theme="dark"] {
+      --theme: dark;
+      --bg: #0b1120;
+      --card: #111827;
+      --card-sub: #1e293b;
+      --ink: #f8fafc;
+      --sub: #cbd5e1;
+      --line: #1e293b;
+      --strong: #475569;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --accent-soft: #172554;
+      --danger: #f87171;
+      --danger-soft: #450a0a;
+      --ok: #4ade80;
+      --ok-soft: #052e16;
+      --warn: #fbbf24;
+      --warn-bg: #451a03;
+      --warn-line: #92400e;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]):not([data-theme="dark"]) {
+        --theme: dark;
+        --bg: #0b1120;
+        --card: #111827;
+        --card-sub: #1e293b;
+        --ink: #f8fafc;
+        --sub: #cbd5e1;
+        --line: #1e293b;
+        --strong: #475569;
+        --accent: #38bdf8;
+        --accent-hover: #0ea5e9;
+        --accent-soft: #172554;
+        --danger: #f87171;
+        --danger-soft: #450a0a;
+        --ok: #4ade80;
+        --ok-soft: #052e16;
+        --warn: #fbbf24;
+        --warn-bg: #451a03;
+        --warn-line: #92400e;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+        --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Pretendard', 'Malgun Gothic', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.5;
+      padding: 1.5rem 1rem 4rem;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--strong);
+    }
+
+    .title-wrap h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .title-wrap p {
+      font-size: 0.9rem;
+      color: var(--sub);
+      margin-top: 0.15rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      border: 1px solid var(--strong);
+      background: var(--card);
+      color: var(--ink);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    :root[data-theme="dark"] .btn.primary {
+      color: #0b1120;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]):not([data-theme="dark"]) .btn.primary {
+        color: #0b1120;
+      }
+    }
+
+    .btn.primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn.danger {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .btn.danger:hover:not(:disabled) {
+      background: var(--danger);
+      color: #ffffff;
+    }
+
+    .sites-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .site-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1rem;
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .site-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    .site-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .site-card-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--ink);
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
+
+    .site-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .site-card-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .site-last-tag {
+      font-size: 0.78rem;
+      color: var(--sub);
+      font-weight: 600;
+    }
+
+    .manage-panel {
+      background: var(--card);
+      border: 1px solid var(--strong);
+      border-radius: 10px;
+      padding: 1.35rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2rem;
+    }
+
+    .manage-panel h2 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+    }
+
+    .manage-desc {
+      font-size: 0.86rem;
+      color: var(--sub);
+      margin-bottom: 1rem;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      min-width: 110px;
+      color: var(--ink);
+    }
+
+    .input-text {
+      font: inherit;
+      font-size: 0.9rem;
+      padding: 0.45rem 0.7rem;
+      border-radius: 6px;
+      border: 1px solid var(--strong);
+      background: var(--bg);
+      color: var(--ink);
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .input-text:focus {
+      outline: 2px solid var(--accent);
+      border-color: var(--accent);
+    }
+
+    .notice-box {
+      padding: 0.7rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .notice-box.ok {
+      display: block;
+      background: var(--ok-soft);
+      color: var(--ok);
+      border: 1px solid var(--ok);
+    }
+
+    .notice-box.err {
+      display: block;
+      background: var(--danger-soft);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
+    .manage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .manage-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      background: var(--card-sub);
+      border: 1px solid var(--line);
+    }
+
+    .manage-item-main {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .manage-id-badge {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.2rem 0.45rem;
+      border-radius: 4px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: var(--sub);
+      min-width: 54px;
+      text-align: center;
+    }
+
+    .delete-confirm-box {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem;
+      border-radius: 6px;
+      background: var(--danger-soft);
+      border: 1px solid var(--danger);
+      margin-top: 0.25rem;
+    }
+
+    .delete-confirm-text {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--danger);
+      width: 100%;
+    }
+
+    .empty-msg {
+      padding: 2rem;
+      text-align: center;
+      color: var(--sub);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 1rem 0.75rem 3rem;
+      }
+
+      .title-wrap h1 {
+        font-size: 1.25rem;
+      }
+
+      .sites-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-label {
+        min-width: 100%;
+      }
+
+      .input-text {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="title-wrap">
+        <h1>현장 선택</h1>
+        <p>입장할 작업 현황 대시보드 현장을 선택하세요.</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn" id="sites-theme-btn">☀ 라이트</button>
+        <button type="button" class="btn" id="btn-toggle-manage">현장 관리</button>
+        <a href="/" class="btn" id="btn-back-dashboard">← 대시보드로</a>
+      </div>
+    </header>
+
+    <div id="sites-grid" class="sites-grid"></div>
+
+    <section id="manage-section" class="manage-panel" style="display: none;">
+      <h2>현장 관리</h2>
+      <p class="manage-desc">현장 추가·이름 변경·삭제를 위해 <strong>총괄 마스터 키</strong>를 입력하세요. 관리자 비밀번호와 다른 값입니다. 처음에는 0000이며, 서버 PC의 config.json 안 masterPassword 값입니다. 초기값이면 config.json에서 바꿔 두세요.</p>
+
+      <div id="manage-notice" class="notice-box"></div>
+
+      <div class="form-row">
+        <label class="form-label" for="master-key-input">총괄 마스터 키</label>
+        <input type="password" id="master-key-input" class="input-text" placeholder="총괄 마스터 키 입력" autocomplete="off">
+      </div>
+
+      <div class="form-row">
+        <label class="form-label" for="new-site-name">새 현장 추가</label>
+        <input type="text" id="new-site-name" class="input-text" placeholder="현장 이름 (예: 제2현장, 1~40자)" maxlength="40">
+        <button type="button" class="btn primary" id="btn-add-site">현장 추가</button>
+      </div>
+
+      <div id="manage-list" class="manage-list"></div>
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const $ = (sel, root = document) => root.querySelector(sel);
+      const el = (tag, props = {}, ...kids) => {
+        const e = document.createElement(tag);
+        for (const [k, v] of Object.entries(props)) {
+          if (v == null) continue;
+          if (k === 'class') e.className = v;
+          else if (k === 'text') e.textContent = v;
+          else if (k === 'value') e.value = v;
+          else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+          else e.setAttribute(k, v);
+        }
+        for (const c of kids) {
+          if (c == null) continue;
+          if (typeof c === 'string' || typeof c === 'number') e.appendChild(document.createTextNode(String(c)));
+          else if (c instanceof Node) e.appendChild(c);
+        }
+        return e;
+      };
+
+      // 마스터 키는 저장소/URL/DOM 속성에 절대 남기지 않고 클로저 변수에만 유지
+      let masterKey = '';
+      let sitesList = [];
+      let manageOpen = false;
+
+      // ---------- 테마 토글 ----------
+      (function initTheme() {
+        const btn = $('#sites-theme-btn');
+        const getMode = () => {
+          try {
+            const s = localStorage.getItem('theme');
+            if (s === 'light' || s === 'dark') return s;
+          } catch { }
+          return 'auto';
+        };
+        const apply = (m) => {
+          if (m === 'light' || m === 'dark') document.documentElement.setAttribute('data-theme', m);
+          else document.documentElement.removeAttribute('data-theme');
+        };
+        const updateBtn = () => {
+          const m = getMode();
+          if (m === 'light') {
+            btn.textContent = '☀ 라이트';
+            btn.title = '테마: 라이트 (클릭 시 다크 모드로 전환)';
+          } else if (m === 'dark') {
+            btn.textContent = '🌙 다크';
+            btn.title = '테마: 다크 (클릭 시 자동 모드로 전환)';
+          } else {
+            btn.textContent = '💻 자동';
+            btn.title = '테마: 자동 (클릭 시 라이트 모드로 전환)';
+          }
+        };
+        btn.addEventListener('click', () => {
+          const cur = getMode();
+          const next = (cur === 'auto') ? 'light' : (cur === 'light') ? 'dark' : 'auto';
+          try {
+            if (next === 'auto') localStorage.removeItem('theme');
+            else localStorage.setItem('theme', next);
+          } catch { }
+          apply(next);
+          updateBtn();
+        });
+        updateBtn();
+      })();
+
+      function showNotice(msg, isError) {
+        const box = $('#manage-notice');
+        if (!box) return;
+        if (!msg) {
+          box.className = 'notice-box';
+          box.textContent = '';
+          return;
+        }
+        box.className = 'notice-box ' + (isError ? 'err' : 'ok');
+        box.textContent = msg;
+      }
+
+      function enterSite(id) {
+        try {
+          localStorage.setItem('wd_last_site', id);
+        } catch { }
+        location.href = '/s/' + id + '/';
+      }
+
+      function renderSitesGrid() {
+        const grid = $('#sites-grid');
+        grid.replaceChildren();
+        if (!sitesList.length) {
+          grid.appendChild(el('div', { class: 'empty-msg', text: '등록된 현장이 없습니다.' }));
+          return;
+        }
+        let lastSite = '';
+        try { lastSite = localStorage.getItem('wd_last_site') || ''; } catch { }
+
+        for (const s of sitesList) {
+          const isLast = (lastSite && lastSite === s.id);
+          const enterBtn = el('button', {
+            type: 'button',
+            class: 'btn primary',
+            text: '입장 →',
+            onclick: (e) => {
+              e.stopPropagation();
+              enterSite(s.id);
+            }
+          });
+          const card = el('div', {
+            class: 'site-card',
+            onclick: () => enterSite(s.id),
+          },
+            el('div', { class: 'site-card-head' },
+              el('div', { class: 'site-card-name', text: s.name }),
+              s.isDefault ? el('span', { class: 'site-badge', text: '기본 현장' }) : null
+            ),
+            el('div', { class: 'site-card-foot' },
+              el('span', { class: 'site-last-tag', text: isLast ? '최근 입장 현장' : `경로: /s/${s.id}/` }),
+              enterBtn
+            )
+          );
+          grid.appendChild(card);
+        }
+      }
+
+      function renderManageList() {
+        const listEl = $('#manage-list');
+        listEl.replaceChildren();
+        for (const s of sitesList) {
+          const nameInput = el('input', {
+            type: 'text',
+            class: 'input-text',
+            value: s.name,
+            maxlength: '40',
+            'aria-label': `${s.name} 현장 이름 수정`,
+          });
+          const renameBtn = el('button', {
+            type: 'button',
+            class: 'btn',
+            text: '이름 변경',
+            onclick: () => handleRenameSite(s.id, nameInput.value),
+          });
+
+          const itemWrap = el('div', { class: 'manage-item' });
+          const mainRow = el('div', { class: 'manage-item-main' },
+            el('span', { class: 'manage-id-badge', text: s.id }),
+            nameInput,
+            renameBtn
+          );
+
+          let confirmBox = null;
+          if (s.id !== 'main') {
+            const toggleDelBtn = el('button', {
+              type: 'button',
+              class: 'btn danger',
+              text: '삭제',
+              onclick: () => {
+                if (!confirmBox) return;
+                const showing = confirmBox.style.display !== 'none';
+                confirmBox.style.display = showing ? 'none' : 'flex';
+              },
+            });
+            mainRow.appendChild(toggleDelBtn);
+
+            const confirmInput = el('input', {
+              type: 'text',
+              class: 'input-text',
+              placeholder: `삭제 확인: "${s.name}" 직접 입력`,
+            });
+            const execDelBtn = el('button', {
+              type: 'button',
+              class: 'btn danger',
+              text: '영구 삭제 확인',
+              disabled: 'disabled',
+              onclick: () => handleDeleteSite(s.id, s.name),
+            });
+            confirmInput.addEventListener('input', () => {
+              if (confirmInput.value.trim() === s.name) {
+                execDelBtn.removeAttribute('disabled');
+              } else {
+                execDelBtn.setAttribute('disabled', 'disabled');
+              }
+            });
+            confirmBox = el('div', { class: 'delete-confirm-box', style: 'display: none;' },
+              el('div', { class: 'delete-confirm-text', text: `⚠️ "${s.name}" 현장의 모든 작업 데이터와 파일이 삭제됩니다. 계속하려면 현장 이름을 정확히 입력하세요.` }),
+              confirmInput,
+              execDelBtn
+            );
+          }
+
+          itemWrap.appendChild(mainRow);
+          if (confirmBox) itemWrap.appendChild(confirmBox);
+          listEl.appendChild(itemWrap);
+        }
+      }
+
+      function updateBackLink() {
+        const backBtn = $('#btn-back-dashboard');
+        if (!backBtn) return;
+        let last = '';
+        try { last = localStorage.getItem('wd_last_site') || ''; } catch { }
+        if (last && last !== 'main' && (!sitesList.length || sitesList.some((s) => s && s.id === last))) {
+          backBtn.setAttribute('href', '/s/' + last + '/');
+        } else {
+          backBtn.setAttribute('href', '/');
+        }
+      }
+
+      async function loadSites() {
+        try {
+          const r = await fetch('/gw/sites');
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const d = await r.json();
+          sitesList = Array.isArray(d) ? d : ((d && Array.isArray(d.sites)) ? d.sites : []);
+          updateBackLink();
+          renderSitesGrid();
+          renderManageList();
+        } catch {
+          updateBackLink();
+          const grid = $('#sites-grid');
+          grid.replaceChildren(el('div', { class: 'empty-msg', text: '현장 목록을 불러올 수 없습니다.' }));
+        }
+      }
+
+      async function gwRequest(url, method, bodyObj) {
+        const keyVal = masterKey.trim();
+        if (!keyVal) {
+          showNotice('총괄 마스터 키를 먼저 입력해 주세요.', true);
+          $('#master-key-input').focus();
+          return null;
+        }
+        try {
+          const opts = {
+            method,
+            headers: {
+              'Content-Type': 'application/json',
+              'x-master-key': keyVal,
+            },
+          };
+          if (bodyObj !== undefined) opts.body = JSON.stringify(bodyObj);
+          const r = await fetch(url, opts);
+          const data = await r.json().catch(() => ({}));
+          if (!r.ok) {
+            showNotice(data.error || `요청 실패 (HTTP ${r.status})`, true);
+            return null;
+          }
+          return data;
+        } catch {
+          showNotice('서버와 통신할 수 없습니다.', true);
+          return null;
+        }
+      }
+
+      async function handleAddSite() {
+        const nameInput = $('#new-site-name');
+        const name = nameInput.value.trim();
+        if (!name) {
+          showNotice('현장 이름을 입력해 주세요.', true);
+          nameInput.focus();
+          return;
+        }
+        const res = await gwRequest('/gw/sites', 'POST', { name });
+        if (!res) return;
+        nameInput.value = '';
+        showNotice('새 현장의 관리자 비밀번호는 초기값입니다. 입장 후 바꿔 주세요', false);
+        await loadSites();
+      }
+
+      async function handleRenameSite(id, newName) {
+        const trimmed = String(newName || '').trim();
+        if (!trimmed) {
+          showNotice('현장 이름을 입력해 주세요.', true);
+          return;
+        }
+        const res = await gwRequest('/gw/sites/' + encodeURIComponent(id), 'PUT', { name: trimmed });
+        if (!res) return;
+        showNotice(`현장 이름이 "${res.site.name}"(으)로 변경되었습니다.`, false);
+        await loadSites();
+      }
+
+      async function handleDeleteSite(id, name) {
+        const res = await gwRequest('/gw/sites/' + encodeURIComponent(id), 'DELETE');
+        if (!res) return;
+        try {
+          if (localStorage.getItem('wd_last_site') === id) {
+            localStorage.removeItem('wd_last_site');
+          }
+        } catch { }
+        showNotice(`"${name}" 현장이 삭제되었습니다.`, false);
+        await loadSites();
+      }
+
+      $('#btn-toggle-manage').addEventListener('click', () => {
+        manageOpen = !manageOpen;
+        $('#manage-section').style.display = manageOpen ? 'block' : 'none';
+        $('#btn-toggle-manage').classList.toggle('primary', manageOpen);
+        if (manageOpen) {
+          setTimeout(() => { $('#master-key-input')?.focus(); }, 30);
+        }
+      });
+
+      $('#btn-back-dashboard').addEventListener('click', () => {
+        if (sitesList.length >= 2) {
+          try {
+            const last = localStorage.getItem('wd_last_site') || '';
+            if (!last || !sitesList.some((s) => s && s.id === last)) {
+              localStorage.setItem('wd_last_site', 'main');
+            }
+          } catch { }
+        }
+      });
+
+      if (new URLSearchParams(location.search).get('manage') === '1') {
+        manageOpen = true;
+        $('#manage-section').style.display = 'block';
+        $('#btn-toggle-manage').classList.add('primary');
+        setTimeout(() => { $('#master-key-input')?.focus(); }, 50);
+      }
+
+      $('#master-key-input').addEventListener('input', (e) => {
+        masterKey = e.target.value;
+      });
+
+      $('#btn-add-site').addEventListener('click', handleAddSite);
+      $('#new-site-name').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleAddSite();
+        }
+      });
+
+      updateBackLink();
+      loadSites();
+    })();
+  </script>
+</body>
+
+</html>

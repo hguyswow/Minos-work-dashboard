@@ -8,7 +8,10 @@
   /* WD-15: FOUC 방지 - DOM 렌더링 전 저장된 테마 즉시 적용 */
   (function(){
     try {
-      var t = localStorage.getItem('theme');
+      var m = location.pathname.match(/^\/s\/([a-z0-9-]{1,20})(?=\/|$)/);
+      var sid = m ? m[1] : '';
+      var k = (sid && sid !== 'main') ? 'theme@' + sid : 'theme';
+      var t = localStorage.getItem(k);
       if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
     } catch(e) {}
   })();
@@ -726,6 +729,26 @@
   (function () {
     'use strict';
 
+    const SITE_MATCH = location.pathname.match(/^\/s\/([a-z0-9-]{1,20})(?=\/|$)/);
+    const SITE_ID = SITE_MATCH ? SITE_MATCH[1] : '';
+    const SITE_PREFIX = SITE_ID ? '/s/' + SITE_ID : '';
+    const siteKey = (k) => (k === 'wd_last_site' || !SITE_ID || SITE_ID === 'main') ? k : (k + '@' + SITE_ID);
+    const withSitePrefix = (u) => {
+      if (!SITE_PREFIX || typeof u !== 'string' || !u.startsWith('/') || u.startsWith('//')) return u;
+      if (u === '/s' || u.startsWith('/s/') || u === '/gw' || u.startsWith('/gw/') || u.startsWith('/sites.html')) return u;
+      return SITE_PREFIX + u;
+    };
+    // WD-56: 멀티 현장(/s/<id>/...) 경로 진입 시 모든 내부 API·SSE·XHR 요청에 현장 접두사를 자동 부여
+    const _origFetch = window.fetch.bind(window);
+    window.fetch = (input, init) => _origFetch(typeof input === 'string' ? withSitePrefix(input) : input, init);
+    const _OrigEventSource = window.EventSource;
+    window.EventSource = function (url, conf) { return new _OrigEventSource(withSitePrefix(url), conf); };
+    window.EventSource.prototype = _OrigEventSource.prototype;
+    const _origXhrOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+      return _origXhrOpen.call(this, method, typeof url === 'string' ? withSitePrefix(url) : url, ...rest);
+    };
+
     const $ = (sel, el = document) => el.querySelector(sel);
     const el = (tag, attrs = {}, ...children) => {
       const elem = document.createElement(tag);
@@ -733,6 +756,7 @@
         if (k === 'text') elem.textContent = v;
         else if (k.startsWith('on')) elem.addEventListener(k.slice(2), v);
         else if (k === 'style' && typeof v === 'object') Object.assign(elem.style, v);
+        else if ((k === 'href' || k === 'src') && typeof v === 'string') elem.setAttribute(k, withSitePrefix(v));
         else elem.setAttribute(k, v);
       }
       for (const c of children) {
@@ -743,6 +767,15 @@
       return elem;
     };
 
+    const backDashLink = $('header a[href="/"]');
+    if (backDashLink) backDashLink.setAttribute('href', withSitePrefix('/'));
+    const syncBrandGuide = () => {
+      const g = $('#brand-footer a.brand-guide');
+      if (g) g.setAttribute('href', withSitePrefix('/guide.html'));
+    };
+    syncBrandGuide();
+    document.addEventListener('DOMContentLoaded', syncBrandGuide);
+
     // ---------- WD-15: 테마 관리 (라이트 / 다크 / 자동) ----------
     (function initThemeController() {
       const themeBtn = $('#files-theme-btn');
@@ -750,7 +783,7 @@
 
       const getThemeMode = () => {
         try {
-          const saved = localStorage.getItem('theme');
+          const saved = localStorage.getItem(siteKey('theme'));
           if (saved === 'light' || saved === 'dark') return saved;
         } catch (e) {}
         return 'auto';
@@ -783,9 +816,9 @@
         const next = (cur === 'auto') ? 'light' : (cur === 'light') ? 'dark' : 'auto';
         try {
           if (next === 'auto') {
-            localStorage.removeItem('theme');
+            localStorage.removeItem(siteKey('theme'));
           } else {
-            localStorage.setItem('theme', next);
+            localStorage.setItem(siteKey('theme'), next);
           }
         } catch (e) {}
         applyTheme(next);
@@ -810,14 +843,14 @@
       // LocalStorage 설정 복원 (기본값: true)
       let autoEnabled = true;
       try {
-        const savedAuto = localStorage.getItem('files_auto_zoom');
+        const savedAuto = localStorage.getItem(siteKey('files_auto_zoom'));
         if (savedAuto !== null) autoEnabled = (savedAuto === 'true');
       } catch {}
 
       // 수동 배율 (기본값: 100%)
       let manualScale = 1.0;
       try {
-        const savedManual = localStorage.getItem('files_manual_zoom');
+        const savedManual = localStorage.getItem(siteKey('files_manual_zoom'));
         if (savedManual) {
           const parsed = parseFloat(savedManual);
           if (!isNaN(parsed) && parsed >= 0.5 && parsed <= 2.0) manualScale = parsed;
@@ -880,7 +913,7 @@
 
       autoChk.addEventListener('change', () => {
         try {
-          localStorage.setItem('files_auto_zoom', String(autoChk.checked));
+          localStorage.setItem(siteKey('files_auto_zoom'), String(autoChk.checked));
         } catch {}
         applyZoom();
       });
@@ -888,7 +921,7 @@
       if (btnOut) {
         btnOut.addEventListener('click', () => {
           manualScale = Math.max(0.5, Math.round((manualScale - 0.1) * 10) / 10);
-          try { localStorage.setItem('files_manual_zoom', manualScale.toFixed(2)); } catch {}
+          try { localStorage.setItem(siteKey('files_manual_zoom'), manualScale.toFixed(2)); } catch {}
           applyZoom();
         });
       }
@@ -896,7 +929,7 @@
       if (btnIn) {
         btnIn.addEventListener('click', () => {
           manualScale = Math.min(2.0, Math.round((manualScale + 0.1) * 10) / 10);
-          try { localStorage.setItem('files_manual_zoom', manualScale.toFixed(2)); } catch {}
+          try { localStorage.setItem(siteKey('files_manual_zoom'), manualScale.toFixed(2)); } catch {}
           applyZoom();
         });
       }
@@ -904,7 +937,7 @@
       if (btnReset) {
         btnReset.addEventListener('click', () => {
           manualScale = 1.0;
-          try { localStorage.setItem('files_manual_zoom', '1.00'); } catch {}
+          try { localStorage.setItem(siteKey('files_manual_zoom'), '1.00'); } catch {}
           applyZoom();
         });
       }
@@ -936,7 +969,7 @@
 
     function getAdminToken() {
       try {
-        return sessionStorage.getItem('tok') || '';
+        return sessionStorage.getItem(siteKey('tok')) || '';
       } catch {
         return '';
       }
@@ -945,12 +978,12 @@
     // Uploader LocalStorage
     const uploaderInput = $('#uploader-input');
     try {
-      const savedUploader = localStorage.getItem('file_uploader');
+      const savedUploader = localStorage.getItem(siteKey('file_uploader'));
       if (savedUploader) uploaderInput.value = savedUploader;
     } catch {}
     uploaderInput.addEventListener('change', () => {
       try {
-        localStorage.setItem('file_uploader', uploaderInput.value.trim());
+        localStorage.setItem(siteKey('file_uploader'), uploaderInput.value.trim());
       } catch {}
     });
 

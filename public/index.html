@@ -8,7 +8,10 @@
 /* WD-15: FOUC 방지 - DOM 렌더링 전 저장된 테마 즉시 적용 */
 (function(){
   try {
-    var t = localStorage.getItem('theme');
+    var m = location.pathname.match(/^\/s\/([a-z0-9-]{1,20})(?=\/|$)/);
+    var sid = m ? m[1] : '';
+    var k = (sid && sid !== 'main') ? 'theme@' + sid : 'theme';
+    var t = localStorage.getItem(k);
     if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
   } catch(e) {}
 })();
@@ -225,6 +228,12 @@ header{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align
 #header-title .site-name{color:var(--accent);margin-right:.6rem;font-weight:800}
 
 #right{justify-self:end;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;justify-content:flex-end;flex:none}
+@media screen and (min-width:801px){
+  header.header-stack{grid-template-columns:auto minmax(0,1fr);row-gap:.25rem}
+  header.header-stack #clock-weather{grid-column:1;grid-row:1}
+  header.header-stack #right{grid-column:2;grid-row:1;justify-self:end}
+  header.header-stack #header-title{grid-column:1 / -1;grid-row:2;width:100%;max-width:100% !important}
+}
 #status{font-size:.85rem;color:var(--sub)}#status.err{color:var(--danger);font-weight:700}
 button{font:inherit;cursor:pointer}
 .btn{border:1px solid var(--line);background:var(--btn-bg);border-radius:.4rem;padding:.25rem .7rem;font-size:.9rem;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center}
@@ -250,26 +259,40 @@ button{font:inherit;cursor:pointer}
 .copy-prev-list{display:flex;flex-direction:column;gap:.45rem;margin:.4rem 0}
 .copy-prev-list label{display:flex;gap:.5rem;align-items:center;cursor:pointer}
 .print-val{display:none !important}
+@page{size:A4;margin:10mm}
 @media print{
-  body, body.tv{height:auto !important;min-height:0 !important;overflow:visible !important;background:#fff !important;color:#000 !important}
-  header{background:#fff !important;color:#000 !important;border-bottom:1px solid #111 !important;display:grid !important;grid-template-columns:1fr auto 1fr !important;align-items:center !important}
+  :root,:root[data-theme="dark"],:root[data-theme="light"]{
+    --theme:light;--bg:#fff;--card:#fff;--card-sub:#f1f5f9;--ink:#000;--sub:#334155;
+    --line:#ccc;--strong:#64748b;--accent:#1d4ed8;--accent-faint:#eff6ff;--head:#f1f5f9;
+    --th-bg:#f8fafc;--row-line:#cbd5e1;--sec-work:#000;--sec-equip:#000;--sec-crew:#000;--sec-material:#000;--sec-notes:#000;
+  }
+  body, body.tv{display:block !important;height:auto !important;min-height:0 !important;padding-bottom:0 !important;overflow:visible !important;background:#fff !important;color:#000 !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+  header{background:#fff !important;color:#000 !important;border-bottom:1px solid #111 !important;display:grid !important;grid-template-columns:1fr auto 1fr !important;align-items:center !important;break-inside:avoid !important;break-after:avoid !important}
   header::after{content:"" !important;display:block !important}
   #clock #time,#clock #date,#header-title,#header-title .site-name{color:#000 !important}
   #header-title{max-width:none !important;overflow:visible !important;text-overflow:clip !important;white-space:normal !important;font-size:1.5rem !important;text-align:center !important}
-  #right,#banner,#weather,#tv-controls,#conn-info,.tools,.toast,.ov,.btn,button,#datalists,.acts,.sec-resize-handle{display:none !important}
-  .sec-page.is-hidden,.work-page.is-hidden,.sec-col-page.is-hidden{display:block !important}
-  .sec-page,.sec-col-page{height:auto !important;overflow:visible !important}
-  main{display:grid !important;grid-template-columns:1fr 1fr !important;height:auto !important;overflow:visible !important;align-items:stretch !important;border:1px solid #111 !important;box-sizing:border-box !important}
+  #right,#banner,#weather,#tv-controls,#conn-info,#brand-footer,#layout-draft-bar,#height-draft-bar,#toast,.page-badge,.work-page-badge,.tools,.toast,.ov,.btn,button,#datalists,.acts,.sec-resize-handle{display:none !important}
+  main .sec-page.is-hidden,main .work-page.is-hidden,main .sec-col-page.is-hidden{display:block !important}
+  main .sec-col-page + .sec-col-page > .tbl-h-clone{display:none !important}
+  .sec-page,.sec-col-page,.sec-inner-grid,.sec-inner-col{height:auto !important;overflow:visible !important;break-inside:auto !important}
+  main{display:grid !important;grid-template-columns:1fr 1fr !important;height:auto !important;overflow:visible !important;align-items:stretch !important;border:1px solid #111 !important;box-sizing:border-box !important;-webkit-box-decoration-break:clone !important;box-decoration-break:clone !important}
   main.view-single{grid-template-columns:1fr !important}
-  .col{height:100% !important;background:transparent !important;box-sizing:border-box !important;border:none !important}
+  .col{height:auto !important;min-height:0 !important;background:#fff !important;box-sizing:border-box !important;border:none !important;overflow:visible !important;break-inside:auto !important;-webkit-box-decoration-break:clone !important;box-decoration-break:clone !important}
   .col + .col{border-left:1px solid #111 !important}
   main.view-single .col{border-left:none !important}
-  .col,.sec,.sec-body{break-inside:avoid;overflow:visible !important;height:auto !important;max-height:none !important}
-  .sec{border-bottom:1px solid #999 !important;background:transparent !important}
+  .colhead{background:#fff !important;color:#000 !important;border-bottom:2px solid #111 !important;break-inside:avoid !important;break-after:avoid !important}
+  .colhead small{color:#333 !important}
+  .sec,.sec-body,.tree-block{break-inside:auto !important;overflow:visible !important;height:auto !important;max-height:none !important}
+  .sec{border-bottom:1px solid #999 !important;background:#fff !important}
   .col > .sec:last-child{border-bottom:none !important}
   main .sec-inner-col + .sec-inner-col{border-left:1px solid #999 !important;padding-left:.3rem !important}
-  .sec-h{background:#f1f5f9 !important;border-bottom:1px solid #ccc !important;border-left:none !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;font-weight:700 !important;color:#000 !important}
-  .sec-body{background:transparent !important}
+  .sec-h{background:#f1f5f9 !important;border-bottom:1px solid #ccc !important;border-left:none !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;font-weight:700 !important;color:#000 !important;break-inside:avoid !important;break-after:avoid !important}
+  .sec-h > span:first-child,.sec-h .badge,.legend-direct{color:#000 !important}
+  .sec-body{background:#fff !important}
+  .tbl-h{background:#f8fafc !important;color:#111 !important;border-bottom:1px solid #ccc !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;break-inside:avoid !important;break-after:avoid !important}
+  .tbl-row,.empty,.none{background:#fff !important;color:#000 !important;border-bottom:1px solid #e2e8f0 !important;break-inside:avoid !important;page-break-inside:avoid !important}
+  .tbl-row .num,.tbl-row .cell,.br,.work-val{color:#000 !important}
+  .work-val{display:inline !important}
   main input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),main select,main textarea{display:none !important}
   input,select,textarea{border:none !important;background:transparent !important;box-shadow:none !important;outline:none !important;outline-width:0 !important;-webkit-appearance:none !important;appearance:none !important;padding:0 !important;font:inherit !important;color:#000 !important}
   ::placeholder{color:transparent !important}
@@ -1323,12 +1346,37 @@ body:not(.admin) .col > .sec:last-child{border-bottom:none}
   border: 1px solid var(--input-border);
   border-radius: .3rem;
 }
+.plan-item-row2 input[type="checkbox"] {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--primary, #2563eb);
+  cursor: pointer;
+}
+.plan-item-row2 input:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.plan-item-row2.is-disabled-ann .plan-ann-label,
+.plan-item-row2.is-disabled-ann .plan-time-sep {
+  opacity: .5;
+}
 .plan-item-row2 input.plan-time {
-  width: 7.8rem;
+  width: 2.4rem;
+  text-align: center;
+}
+.plan-item-row2 .plan-time-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+}
+.plan-item-row2 .plan-time-sep {
+  font-weight: 700;
+  color: var(--sub);
+  user-select: none;
 }
 .plan-item-row2 input.plan-dur,
 .quick-ann-form input.plan-dur {
-  width: 3.5rem;
+  width: 4.5rem;
 }
 .quick-ann-sec {
   border-top: 1px solid var(--line);
@@ -1596,7 +1644,28 @@ body:not(.tv):not(.admin) .work-val[data-field] {
 
 <script>
 'use strict';
-const TV_MODE = location.pathname.startsWith('/tv');
+const SITE_MATCH = location.pathname.match(/^\/s\/([a-z0-9-]{1,20})(?=\/|$)/);
+const SITE_ID = SITE_MATCH ? SITE_MATCH[1] : '';
+const SITE_PREFIX = SITE_ID ? '/s/' + SITE_ID : '';
+const SITE_PATH = SITE_PREFIX ? (location.pathname.slice(SITE_PREFIX.length) || '/') : location.pathname;
+const siteKey = (k) => (k === 'wd_last_site' || !SITE_ID || SITE_ID === 'main') ? k : (k + '@' + SITE_ID);
+const withSitePrefix = (u) => {
+  if (!SITE_PREFIX || typeof u !== 'string' || !u.startsWith('/') || u.startsWith('//')) return u;
+  if (u === '/s' || u.startsWith('/s/') || u === '/gw' || u.startsWith('/gw/') || u.startsWith('/sites.html')) return u;
+  return SITE_PREFIX + u;
+};
+// WD-56: 멀티 현장(/s/<id>/...) 경로 진입 시 모든 내부 API·SSE 요청에 현장 접두사를 자동 부여
+const _origFetch = window.fetch.bind(window);
+window.fetch = (input, init) => _origFetch(typeof input === 'string' ? withSitePrefix(input) : input, init);
+const _OrigEventSource = window.EventSource;
+window.EventSource = function (url, conf) { return new _OrigEventSource(withSitePrefix(url), conf); };
+window.EventSource.prototype = _OrigEventSource.prototype;
+if (SITE_ID) {
+  try { localStorage.setItem('wd_last_site', SITE_ID); } catch {}
+}
+const brandGuideLink = document.querySelector('#brand-footer a.brand-guide');
+if (brandGuideLink) brandGuideLink.setAttribute('href', withSitePrefix('/guide.html'));
+const TV_MODE = SITE_PATH.startsWith('/tv');
 if (TV_MODE) document.body.classList.add('tv');
 const CATS = [
   { key: 'work', label: '작업현황' },
@@ -1616,12 +1685,14 @@ const S = {
   token: null,
   admin: false,
   authExpired: false,
+  adminDefault: false,
   focusId: null,
   focusCol: null,
   modalOpen: false,
   layoutDraft: null,
   layoutSavedNotice: false,
   heightsDraft: null,
+  sitesCount: 1,
 };
 let activeInlineEdit = null;
 let pendingRenderAfterInline = false;
@@ -1629,7 +1700,7 @@ let pendingRenderAfterInline = false;
 // ---------- WD-15: 테마 관리 (라이트 / 다크 / 자동) ----------
 function getThemeMode() {
   try {
-    const saved = localStorage.getItem('theme');
+    const saved = localStorage.getItem(siteKey('theme'));
     if (saved === 'light' || saved === 'dark') return saved;
   } catch (e) {}
   return 'auto';
@@ -1648,9 +1719,9 @@ function cycleThemeMode() {
   const next = (cur === 'auto') ? 'light' : (cur === 'light') ? 'dark' : 'auto';
   try {
     if (next === 'auto') {
-      localStorage.removeItem('theme');
+      localStorage.removeItem(siteKey('theme'));
     } else {
-      localStorage.setItem('theme', next);
+      localStorage.setItem(siteKey('theme'), next);
     }
   } catch (e) {}
   applyTheme(next);
@@ -1699,7 +1770,7 @@ function getViewMode() {
   const urlView = params.get('view');
   if (urlView === 'today' || urlView === 'yesterday' || urlView === 'both') return urlView;
   try {
-    const stored = localStorage.getItem('view_mode');
+    const stored = localStorage.getItem(siteKey('view_mode'));
     if (stored === 'today' || stored === 'yesterday' || stored === 'both') return stored;
   } catch (e) {}
   return 'both';
@@ -1708,7 +1779,7 @@ function getViewMode() {
 function setViewMode(mode) {
   if (mode !== 'today' && mode !== 'yesterday' && mode !== 'both') return;
   try {
-    localStorage.setItem('view_mode', mode);
+    localStorage.setItem(siteKey('view_mode'), mode);
   } catch (e) {}
   updateViewModeControls();
   render();
@@ -1805,6 +1876,7 @@ const el = (tag, props = {}, ...kids) => {
     else if (k === 'text') e.textContent = v;
     else if (k === 'value') e.value = v;
     else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else if ((k === 'href' || k === 'src') && typeof v === 'string') e.setAttribute(k, withSitePrefix(v));
     else e.setAttribute(k, v);
   }
   e.append(...kids);
@@ -1960,8 +2032,8 @@ const fmt = (d) => {
 };
 
 const store = {
-  get: (k) => { try { return sessionStorage.getItem(k); } catch { return null; } },
-  set: (k, v) => { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch {} },
+  get: (k) => { try { return sessionStorage.getItem(siteKey(k)); } catch { return null; } },
+  set: (k, v) => { try { const sk = siteKey(k); v == null ? sessionStorage.removeItem(sk) : sessionStorage.setItem(sk, v); } catch {} },
 };
 
 // ---------- 통신 ----------
@@ -2219,37 +2291,85 @@ function toast(t) {
   toast.t = setTimeout(() => e.classList.remove('on'), 1800);
 }
 
+const HEADER_TITLE_MIN_WIDTH = 220;
+const HEADER_STACK_HYSTERESIS = 40;
+
 function fitHeaderTitle() {
   const titleEl = $('#header-title');
-  if (!titleEl) return;
-  if (window.innerWidth <= 800) {
+  const headerEl = $('header');
+  if (!titleEl || !headerEl) return;
+  const W = window.innerWidth;
+  if (W <= 800) {
+    if (headerEl.classList.contains('header-stack')) headerEl.classList.remove('header-stack');
     if (titleEl.style.maxWidth !== '100%') titleEl.style.maxWidth = '100%';
     return;
   }
+
+  const cs = getComputedStyle(headerEl);
+  const padL = parseFloat(cs.paddingLeft) || 0;
+  const padR = parseFloat(cs.paddingRight) || 0;
+
   const clockEl = $('#clock');
   const weatherEl = $('#weather');
   const cwEl = $('#clock-weather');
-  let leftEdge = cwEl ? cwEl.getBoundingClientRect().right : 0;
-  if (clockEl) leftEdge = Math.max(leftEdge, clockEl.getBoundingClientRect().right);
-  if (weatherEl) {
-    leftEdge = Math.max(leftEdge, weatherEl.getBoundingClientRect().right);
-    const lastChild = weatherEl.lastElementChild;
-    if (lastChild) leftEdge = Math.max(leftEdge, lastChild.getBoundingClientRect().right);
-    const lastSlot = weatherEl.querySelector('.w-slot:last-child');
-    if (lastSlot) leftEdge = Math.max(leftEdge, lastSlot.getBoundingClientRect().right);
-  }
+  const clockW = clockEl ? Math.max(clockEl.offsetWidth, Math.ceil(clockEl.getBoundingClientRect().width)) : 0;
+  const weatherW = (weatherEl && weatherEl.children.length > 0)
+    ? Math.max(weatherEl.scrollWidth, weatherEl.offsetWidth, Math.ceil(weatherEl.getBoundingClientRect().width))
+    : 0;
+  const cwGap = (clockW > 0 && weatherW > 0 && cwEl) ? (parseFloat(getComputedStyle(cwEl).columnGap || getComputedStyle(cwEl).gap) || 0) : 0;
+  const leftW = Math.max(cwEl ? cwEl.scrollWidth : 0, clockW + cwGap + weatherW);
+  const leftSpan = padL + leftW;
 
   const rightEl = $('#right');
-  let rightEdge = rightEl ? rightEl.getBoundingClientRect().left : window.innerWidth;
+  let rightEffW = 0;
   if (rightEl && rightEl.children.length > 0) {
-    const firstChild = rightEl.firstElementChild;
-    if (firstChild) rightEdge = Math.min(rightEdge, firstChild.getBoundingClientRect().left);
+    const rGap = parseFloat(getComputedStyle(rightEl).columnGap || getComputedStyle(rightEl).gap) || 0;
+    const chWidths = [];
+    for (const ch of rightEl.children) {
+      const w = Math.max(ch.offsetWidth, Math.ceil(ch.getBoundingClientRect().width));
+      if (w > 0) chWidths.push(w);
+    }
+    if (chWidths.length > 0) {
+      const right1LineW = chWidths.reduce((a, b) => a + b, 0) + (chWidths.length - 1) * rGap;
+      let right2LineW = right1LineW;
+      for (let m = 1; m < chWidths.length; m++) {
+        let l1 = 0, l2 = 0;
+        for (let i = 0; i < m; i++) l1 += chWidths[i] + (i > 0 ? rGap : 0);
+        for (let i = m; i < chWidths.length; i++) l2 += chWidths[i] + (i > m ? rGap : 0);
+        const w2 = Math.max(l1, l2);
+        if (w2 < right2LineW) right2LineW = w2;
+      }
+      rightEffW = Math.round(right2LineW * 1.05);
+    }
   }
+  const rightSpan = padR + rightEffW;
 
-  const center = window.innerWidth / 2;
-  const avail = 2 * Math.min(center - leftEdge, rightEdge - center) - 16;
-  const nextVal = Math.max(0, Math.floor(avail)) + 'px';
-  if (titleEl.style.maxWidth !== nextVal) titleEl.style.maxWidth = nextVal;
+  const center = W / 2;
+  const avail = 2 * Math.min(center - leftSpan, center - rightSpan) - 16;
+
+  const wasStacked = headerEl.classList.contains('header-stack');
+  const shouldStack = wasStacked
+    ? (avail < HEADER_TITLE_MIN_WIDTH + HEADER_STACK_HYSTERESIS)
+    : (avail < HEADER_TITLE_MIN_WIDTH);
+
+  if (shouldStack) {
+    if (!wasStacked) {
+      headerEl.classList.add('header-stack');
+      if (!S.admin && typeof layoutAndPaginateAll === 'function') {
+        requestAnimationFrame(layoutAndPaginateAll);
+      }
+    }
+    if (titleEl.style.maxWidth !== '100%') titleEl.style.maxWidth = '100%';
+  } else {
+    if (wasStacked) {
+      headerEl.classList.remove('header-stack');
+      if (!S.admin && typeof layoutAndPaginateAll === 'function') {
+        requestAnimationFrame(layoutAndPaginateAll);
+      }
+    }
+    const nextVal = Math.max(HEADER_TITLE_MIN_WIDTH, Math.floor(avail)) + 'px';
+    if (titleEl.style.maxWidth !== nextVal) titleEl.style.maxWidth = nextVal;
+  }
 }
 window.addEventListener('resize', fitHeaderTitle);
 let fitHeaderTitleRaf = 0;
@@ -2277,6 +2397,7 @@ function updateHeaderTitle() {
   const titleEl = $('#header-title');
   titleEl.replaceChildren();
   const siteName = (S.settings && S.settings.siteName) ? String(S.settings.siteName).trim() : '';
+  document.title = siteName ? `${siteName} - 작업 현황` : '작업 현황';
   const fullText = siteName ? `[${siteName}] 작업 현황` : '작업 현황';
   titleEl.title = fullText;
   if (fullText.length > 30) {
@@ -2293,6 +2414,32 @@ function updateHeaderTitle() {
   fitHeaderTitle();
 }
 
+function renderBanner() {
+  const banner = $('#banner');
+  if (!banner) return;
+  if (S.authExpired) {
+    banner.className = 'warn';
+    banner.replaceChildren(
+      document.createTextNode('⚠️ 로그인이 만료되었습니다. 이 화면을 새로고침하지 말고 다시 로그인하세요. '),
+      el('button', { class: 'btn primary', style: 'margin-left:.5rem;padding:.1rem .5rem;font-size:.85rem', text: '다시 로그인', onclick: openLogin })
+    );
+  } else {
+    const curL = getLayout();
+    const colNote = (curL.cols > 1 || Object.values(curL.inner).some((v) => v !== 1)) ? ` (구역 편집은 세로 1열로 표시됩니다. 조회 화면: ${curL.cols}열)` : '';
+    const baseText = '관리자 모드 — 입력하면 자동 저장되고 모든 화면에 바로 반영됩니다' + colNote;
+    if (S.admin && S.adminDefault) {
+      banner.className = 'warn';
+      banner.replaceChildren(
+        document.createTextNode(baseText + ' · ⚠️ 관리자 비밀번호가 초기 상태입니다. '),
+        el('button', { id: 'btn-banner-change-pwd', class: 'btn primary', style: 'margin-left:.5rem;padding:.1rem .5rem;font-size:.85rem', text: '비밀번호 변경', onclick: openSettingsModal })
+      );
+    } else {
+      banner.className = '';
+      banner.textContent = baseText;
+    }
+  }
+}
+
 function render() {
   if (S.modalOpen || activeInlineEdit) {
     if (activeInlineEdit) pendingRenderAfterInline = true;
@@ -2303,31 +2450,20 @@ function render() {
   $('#date').textContent = S.today ? fmt(S.today) : '';
   updateHeaderTitle();
   renderWeatherBar();
+  renderBanner();
 
   const banner = $('#banner');
-  if (S.authExpired) {
-    banner.className = 'warn';
-    banner.replaceChildren(
-      document.createTextNode('⚠️ 로그인이 만료되었습니다. 이 화면을 새로고침하지 말고 다시 로그인하세요. '),
-      el('button', { class: 'btn primary', style: 'margin-left:.5rem;padding:.1rem .5rem;font-size:.85rem', text: '다시 로그인', onclick: openLogin })
-    );
-  } else {
-    banner.className = '';
-    const curL = getLayout();
-    const colNote = (curL.cols > 1 || Object.values(curL.inner).some((v) => v !== 1)) ? ` (구역 편집은 세로 1열로 표시됩니다. 조회 화면: ${curL.cols}열)` : '';
-    banner.textContent = '관리자 모드 — 입력하면 자동 저장되고 모든 화면에 바로 반영됩니다' + colNote;
-  }
-
   const r = $('#right');
   r.replaceChildren();
   if (TV_MODE) {
     if (banner) banner.style.display = 'none';
   } else {
-    // 3-1: 헤더 메뉴 링크 영역 (대시보드 · 파일박스 · 모니터 화면)
+    // 3-1: 헤더 메뉴 링크 영역 (대시보드 · 파일박스 · 모니터 화면 · 현장 전환)
     const navGroup = el('div', { class: 'nav-group' },
-      el('a', { href: '/', class: 'btn faint' + (location.pathname === '/' ? ' active' : ''), text: '대시보드' }),
+      el('a', { href: '/', class: 'btn faint' + (SITE_PATH === '/' ? ' active' : ''), text: '대시보드' }),
       el('a', { href: '/files', class: 'btn faint', text: '파일박스' }),
-      el('a', { href: '/tv', target: '_blank', class: 'btn faint', text: '모니터 화면' })
+      el('a', { href: '/tv', target: '_blank', class: 'btn faint', text: '모니터 화면' }),
+      ...(S.sitesCount >= 2 ? [el('a', { href: '/sites.html?pick=1', class: 'btn faint', text: '현장 전환' })] : [])
     );
     const themeBtn = createThemeToggleBtn();
     const viewControl = createViewModeControl();
@@ -2357,6 +2493,7 @@ function render() {
       r.append(navGroup, viewControl, themeBtn, el('button', { class: 'btn faint', text: '지난 날짜', onclick: openHistoryModal }), el('button', { class: 'btn faint', text: '출력', title: '일일 보고용 인쇄 / PDF 저장', onclick: printReport }), el('button', { class: 'btn faint', text: '관리자', onclick: openLogin }));
     }
   }
+  fitHeaderTitle();
 
   const viewMode = getViewMode();
   const showSingle = !S.admin && (viewMode === 'yesterday' || viewMode === 'today');
@@ -4129,6 +4266,7 @@ function logout() {
   S.token = null;
   S.admin = false;
   S.authExpired = false;
+  S.adminDefault = false;
   store.set('tok', null);
   for (const k of Object.keys(timers)) clearTimeout(timers[k]);
   for (const k of Object.keys(retryTimers)) clearTimeout(retryTimers[k]);
@@ -4169,16 +4307,20 @@ function copyPrev() {
   })]);
 }
 
-// 초기 관리자 비밀번호(admin1234 또는 0000)로 로그인 중이면 세션당 한 번 설정 창을 열어 변경을 유도
+// 초기 관리자 비밀번호 상태로 로그인 중이면 상단 배너에 변경 안내 및 버튼 표시 (WD-52, WD-54: 중복 토스트 제거)
 async function checkDefaultPassword() {
-  if (!S.admin || store.get('pwWarned') === '1') return;
+  if (!S.admin) {
+    if (S.adminDefault) {
+      S.adminDefault = false;
+      renderBanner();
+    }
+    return;
+  }
   try {
     const st = await api('/api/auth/status');
-    if (st && st.adminDefault) {
-      store.set('pwWarned', '1');
-      toast('관리자 비밀번호가 초기값입니다. 설정에서 변경하세요');
-      openSettingsModal();
-    }
+    const isDef = Boolean(st && st.adminDefault);
+    S.adminDefault = isDef;
+    renderBanner();
   } catch {}
 }
 
@@ -4194,7 +4336,7 @@ function initIdleReturnToTv() {
       if (busy) return arm();
       store.set('tok', null);
       store.set('fromTv', null);
-      location.href = '/tv';
+      location.href = withSitePrefix('/tv');
     }, IDLE_RETURN_MS);
   };
   for (const ev of ['mousemove', 'keydown', 'click', 'touchstart', 'input']) {
@@ -4397,6 +4539,15 @@ async function openPlansModal() {
   const quickForm = el('div', { class: 'quick-ann-form' });
   const quickTxt = el('input', { type: 'text', class: 'qa-txt', placeholder: '즉시 띄울 공고 내용 (최대 200자)', maxlength: '200' });
   const quickDur = el('input', { type: 'number', class: 'plan-dur', min: '1', max: '720', value: '10', title: '지속 시간(분)' });
+  quickDur.addEventListener('wheel', (e) => {
+    if (quickDur.disabled) return;
+    e.preventDefault();
+    const step = e.deltaY < 0 ? 1 : (e.deltaY > 0 ? -1 : 0);
+    if (!step) return;
+    let num = parseInt(quickDur.value, 10) || 10;
+    num = Math.max(1, Math.min(720, num + step));
+    quickDur.value = String(num);
+  }, { passive: false });
   const quickDurLabel = el('span', { style: 'font-size:.8rem;color:var(--sub)', text: '분 동안' });
   const btnShowQuick = el('button', { type: 'button', class: 'btn primary', text: '지금 표시' });
   quickForm.append(quickTxt, quickDur, quickDurLabel, btnShowQuick);
@@ -4543,16 +4694,109 @@ async function openPlansModal() {
       });
       chkAnn.checked = !!p.announce;
 
-      const timeInput = el('input', {
-        type: 'time',
-        class: 'plan-time',
-        value: p.time || '09:00',
-        onchange: (e) => {
-          p.time = e.target.value || '09:00';
-          isDirty = true;
-        },
+      // WD-50: 시작 시각 24시간제 시·분 분리
+      let curH = '09';
+      let curM = '00';
+      if (typeof p.time === 'string' && p.time.includes(':')) {
+        const parts = p.time.split(':');
+        const hNum = parseInt(parts[0], 10);
+        const mNum = parseInt(parts[1], 10);
+        if (!isNaN(hNum) && hNum >= 0 && hNum <= 23) curH = String(hNum).padStart(2, '0');
+        if (!isNaN(mNum) && mNum >= 0 && mNum <= 59) curM = String(mNum).padStart(2, '0');
+      }
+      p.time = `${curH}:${curM}`;
+
+      const timeHInput = el('input', {
+        type: 'text',
+        inputmode: 'numeric',
+        maxlength: '2',
+        class: 'plan-time plan-time-hh',
+        value: curH,
+        title: '시 (00~23)',
+        'aria-label': '시',
       });
-      timeInput.disabled = !p.announce;
+
+      const timeMInput = el('input', {
+        type: 'text',
+        inputmode: 'numeric',
+        maxlength: '2',
+        class: 'plan-time plan-time-mm',
+        value: curM,
+        title: '분 (00~59)',
+        'aria-label': '분',
+      });
+
+      const updatePlanTime = () => {
+        const newTime = `${curH}:${curM}`;
+        if (p.time !== newTime) {
+          p.time = newTime;
+          isDirty = true;
+        }
+      };
+
+      const commitH = () => {
+        const raw = timeHInput.value.trim();
+        const num = parseInt(raw, 10);
+        if (isNaN(num) || num < 0 || num > 23 || !/^\d+$/.test(raw)) {
+          timeHInput.value = curH;
+        } else {
+          curH = String(num).padStart(2, '0');
+          timeHInput.value = curH;
+        }
+        updatePlanTime();
+      };
+
+      const commitM = () => {
+        const raw = timeMInput.value.trim();
+        const num = parseInt(raw, 10);
+        if (isNaN(num) || num < 0 || num > 59 || !/^\d+$/.test(raw)) {
+          timeMInput.value = curM;
+        } else {
+          curM = String(num).padStart(2, '0');
+          timeMInput.value = curM;
+        }
+        updatePlanTime();
+      };
+
+      const onTimeKeydown = (e) => {
+        if (e.key === 'Enter') e.target.blur();
+      };
+
+      timeHInput.onchange = commitH;
+      timeHInput.onblur = commitH;
+      timeHInput.onkeydown = onTimeKeydown;
+      timeMInput.onchange = commitM;
+      timeMInput.onblur = commitM;
+      timeMInput.onkeydown = onTimeKeydown;
+
+      // WD-51: 마우스 휠로 시·분·지속 값 변경 (위 = +1, 아래 = -1, 경계 순환/클램프)
+      timeHInput.addEventListener('wheel', (e) => {
+        if (timeHInput.disabled) return;
+        e.preventDefault();
+        const step = e.deltaY < 0 ? 1 : (e.deltaY > 0 ? -1 : 0);
+        if (!step) return;
+        let num = parseInt(timeHInput.value.trim(), 10);
+        if (isNaN(num)) num = parseInt(curH, 10) || 0;
+        num = (num + step) % 24;
+        if (num < 0) num += 24;
+        curH = String(num).padStart(2, '0');
+        timeHInput.value = curH;
+        updatePlanTime();
+      }, { passive: false });
+
+      timeMInput.addEventListener('wheel', (e) => {
+        if (timeMInput.disabled) return;
+        e.preventDefault();
+        const step = e.deltaY < 0 ? 1 : (e.deltaY > 0 ? -1 : 0);
+        if (!step) return;
+        let num = parseInt(timeMInput.value.trim(), 10);
+        if (isNaN(num)) num = parseInt(curM, 10) || 0;
+        num = (num + step) % 60;
+        if (num < 0) num += 60;
+        curM = String(num).padStart(2, '0');
+        timeMInput.value = curM;
+        updatePlanTime();
+      }, { passive: false });
 
       const durInput = el('input', {
         type: 'number',
@@ -4565,12 +4809,23 @@ async function openPlansModal() {
           isDirty = true;
         },
       });
-      durInput.disabled = !p.announce;
 
+      durInput.addEventListener('wheel', (e) => {
+        if (durInput.disabled) return;
+        e.preventDefault();
+        const step = e.deltaY < 0 ? 1 : (e.deltaY > 0 ? -1 : 0);
+        if (!step) return;
+        let num = parseInt(durInput.value, 10) || p.durMin || 10;
+        num = Math.max(1, Math.min(720, num + step));
+        durInput.value = String(num);
+        p.durMin = num;
+        isDirty = true;
+      }, { passive: false });
+
+      let updateAnnounceState = null;
       chkAnn.onchange = (e) => {
         p.announce = e.target.checked;
-        timeInput.disabled = !p.announce;
-        durInput.disabled = !p.announce;
+        if (updateAnnounceState) updateAnnounceState();
         isDirty = true;
         renderCalendar();
       };
@@ -4589,15 +4844,35 @@ async function openPlansModal() {
         },
       });
 
+      const timeWrap = el('span', { class: 'plan-time-wrap' },
+        timeHInput,
+        el('span', { class: 'plan-time-sep', text: ':' }),
+        timeMInput
+      );
+
       const row1 = el('div', { class: 'plan-item-row1' }, txtInput, btnDel);
       const row2 = el('div', { class: 'plan-item-row2' },
         el('label', {}, chkAnn, el('span', { text: '공고로 표시' })),
-        el('span', { text: '시작:' }),
-        timeInput,
-        el('span', { text: '지속:' }),
+        el('span', { class: 'plan-ann-label', text: '시작:' }),
+        timeWrap,
+        el('span', { class: 'plan-ann-label', text: '지속:' }),
         durInput,
-        el('span', { text: '분' })
+        el('span', { class: 'plan-ann-label', text: '분' })
       );
+
+      updateAnnounceState = () => {
+        timeHInput.disabled = !p.announce;
+        timeMInput.disabled = !p.announce;
+        durInput.disabled = !p.announce;
+        if (!p.announce) {
+          row2.classList.add('is-disabled-ann');
+          row2.title = '‘공고로 표시’를 체크하면 입력할 수 있습니다';
+        } else {
+          row2.classList.remove('is-disabled-ann');
+          row2.removeAttribute('title');
+        }
+      };
+      updateAnnounceState();
 
       dayList.append(el('div', { class: 'plan-item' }, row1, row2));
     });
@@ -5095,6 +5370,21 @@ async function openSettingsModal() {
     el('div', { class: 'hint', text: '헤더 중앙 타이틀 좌측에 [현장명] 형식으로 표시됩니다.' })
   ));
 
+  // 현장 관리 (WD-58: 현장이 1개일 때도 설정 창에서 현장 추가·관리 진입 가능)
+  formWrap.append(el('div', { id: 'sec-site-manage', class: 'form-row' },
+    el('label', { text: '현장 관리' }),
+    el('div', { style: 'display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap' },
+      el('div', { class: 'hint', style: 'margin:0;flex:1;min-width:180px', text: '여러 현장을 추가·이름 변경·삭제합니다. 총괄 마스터 키가 필요합니다' }),
+      el('button', {
+        id: 'btn-open-site-manage',
+        type: 'button',
+        class: 'btn',
+        text: '현장 관리',
+        onclick: () => { location.href = '/sites.html?manage=1'; },
+      })
+    )
+  ));
+
   // ② 날씨 위치
   let selectedPlace = curPlace ? { ...curPlace } : null;
   const placeLabel = el('div', { style: 'font-weight:700;color:var(--ink);margin-bottom:.2rem', text: selectedPlace ? `${selectedPlace.name} (위도: ${selectedPlace.lat}, 경도: ${selectedPlace.lon})` : '지정된 위치 없음' });
@@ -5429,6 +5719,7 @@ async function openSettingsModal() {
           hintInput.value = '';
           defaultWarnBox.style.display = 'none';
           toast('비밀번호가 변경되었습니다.');
+          await checkDefaultPassword();
         }
       } catch (err) {
         pwdMsg.style.color = 'var(--danger)';
@@ -6701,7 +6992,7 @@ function initTvControls() {
     type: 'button',
     title: '관리자 로그인 후 편집 화면으로 이동',
     text: '✎ 편집',
-    onclick: () => { store.set('fromTv', '1'); location.href = '/?admin=1'; },
+    onclick: () => { store.set('fromTv', '1'); location.href = withSitePrefix('/?admin=1'); },
   });
 
   const statusEl = el('span', { id: 'tv-status', text: '' });
@@ -6760,6 +7051,28 @@ setInterval(() => { // 큰 화면에서 내용이 넘치면 천천히 스크롤 
 }, 40);
 
 (async () => {
+  try {
+    const r = await fetch('/gw/sites');
+    if (r.ok) {
+      const d = await r.json();
+      const sites = Array.isArray(d) ? d : ((d && Array.isArray(d.sites)) ? d.sites : []);
+      S.sitesCount = sites.length || 1;
+      if (!SITE_ID && !TV_MODE && location.pathname === '/' && sites.length >= 2) {
+        if (new URLSearchParams(location.search).get('pick') === '1') {
+          location.replace('/sites.html');
+          return;
+        }
+        let last = '';
+        try { last = localStorage.getItem('wd_last_site') || ''; } catch {}
+        if (last && sites.some((s) => s && s.id === last)) {
+          location.replace('/s/' + last + '/');
+        } else {
+          location.replace('/sites.html');
+        }
+        return;
+      }
+    }
+  } catch {}
   if (TV_MODE) {
     S.token = null;
     S.admin = false;

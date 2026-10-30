@@ -1,5 +1,14 @@
 'use strict';
 // 작업현황 대시보드 서버 (v2) — 외부 패키지 없이 Node.js만으로 동작
+if (process.env.WD_SITE_CHILD !== '1') {
+  require('./gateway.js');
+  return;
+}
+if (process.env.WD_GATEWAY_PIPE === '1' && process.stdin && typeof process.stdin.on === 'function') {
+  process.stdin.resume();
+  process.stdin.on('close', () => process.exit(0));
+  process.stdin.on('error', () => process.exit(0));
+}
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -15,7 +24,7 @@ try {
 const PUB = path.join(__dirname, 'public');
 const BASE_DATA_DIR = process.env.WD_DATA_DIR ? path.resolve(process.env.WD_DATA_DIR) : __dirname;
 if (!fs.existsSync(BASE_DATA_DIR)) {
-  try { fs.mkdirSync(BASE_DATA_DIR, { recursive: true }); } catch {}
+  try { fs.mkdirSync(BASE_DATA_DIR, { recursive: true }); } catch { }
 }
 const DATA_FILE = path.join(BASE_DATA_DIR, 'data.json');
 const DB_FILE = path.join(BASE_DATA_DIR, 'work.db');
@@ -26,7 +35,7 @@ const FILES_INDEX_FILE = path.join(FILES_DIR, 'index.json');
 const FILE_WARN_BYTES = 5 * 1024 * 1024 * 1024; // 5GB 경고 기준
 const FILE_MAX_BYTES = 100 * 1024 * 1024; // 100MB 단일 파일 제한 (104,857,600B)
 const CATS = ['work', 'equip', 'crew', 'material', 'notes'];
-const DEFAULT_PASSWORD = 'admin1234';
+const DEFAULT_PASSWORD = '0000';
 const DEFAULT_OFFICE_PASSWORD = '0000';
 
 const WEATHER_API_BASE = process.env.WEATHER_API_BASE || 'https://api.open-meteo.com/v1/forecast';
@@ -188,6 +197,18 @@ function verifyMaster(input) {
 
 // 비밀번호 변경/초기화 전용 속도 제한 맵 (로그인 실패 제한과 독립)
 const authActionFails = new Map(); // ip -> { n: number, until: number, history: number[] }
+
+function clientIp(req) {
+  if (process.env.WD_SITE_CHILD === '1') {
+    const xff = req.headers['x-forwarded-for'];
+    if (typeof xff === 'string' && xff.trim()) {
+      const parts = xff.split(',');
+      const last = parts[parts.length - 1].trim();
+      if (last) return last;
+    }
+  }
+  return req.socket.remoteAddress || '127.0.0.1';
+}
 
 function checkAuthRateLimit(ip) {
   const now = Date.now();
@@ -529,7 +550,7 @@ function syncDbDays() {
     }
     db.exec('COMMIT');
   } catch (err) {
-    try { db.exec('ROLLBACK'); } catch {}
+    try { db.exec('ROLLBACK'); } catch { }
     console.error(`[경고] work.db 동기화 실패 (data.json은 정상 저장됨): ${err.message}`);
   }
 }
@@ -547,7 +568,7 @@ function ensureDbBackup(todayStr) {
       .sort();
     if (files.length > 30) {
       for (const oldFile of files.slice(0, files.length - 30)) {
-        try { fs.unlinkSync(path.join(BACKUP_DIR, oldFile)); } catch {}
+        try { fs.unlinkSync(path.join(BACKUP_DIR, oldFile)); } catch { }
       }
     }
   } catch (err) {
@@ -575,7 +596,7 @@ function getHistoryDates() {
     const dates = [];
     for (const r of rows) {
       let parsed = {};
-      try { parsed = JSON.parse(r.json); } catch {}
+      try { parsed = JSON.parse(r.json); } catch { }
       dates.push({
         date: r.date,
         work: Array.isArray(parsed.work) ? parsed.work.length : 0,
@@ -633,7 +654,7 @@ function ensureDailyBackup(todayStr) {
       .sort();
     if (files.length > 30) {
       for (const oldFile of files.slice(0, files.length - 30)) {
-        try { fs.unlinkSync(path.join(BACKUP_DIR, oldFile)); } catch {}
+        try { fs.unlinkSync(path.join(BACKUP_DIR, oldFile)); } catch { }
       }
     }
   } catch (err) {
@@ -1159,7 +1180,7 @@ function initFilesDir() {
     // 잔여 .tmp-* 파일 정리
     for (const f of fs.readdirSync(FILES_DIR)) {
       if (f.startsWith('.tmp-') || f.startsWith('index.json.tmp-')) {
-        try { fs.unlinkSync(path.join(FILES_DIR, f)); } catch {}
+        try { fs.unlinkSync(path.join(FILES_DIR, f)); } catch { }
       }
     }
     // index.json 로드
@@ -1175,7 +1196,7 @@ function initFilesDir() {
         }
       } catch (e) {
         const corruptName = `index.json.corrupt-${Date.now()}`;
-        try { fs.copyFileSync(FILES_INDEX_FILE, path.join(FILES_DIR, corruptName)); } catch {}
+        try { fs.copyFileSync(FILES_INDEX_FILE, path.join(FILES_DIR, corruptName)); } catch { }
       }
     }
     // 실제 파일 목록과 대조하여 복구 및 정리
@@ -1201,7 +1222,7 @@ function initFilesDir() {
             uploader: '복구',
             at: stat.mtime.toISOString(),
           });
-        } catch {}
+        } catch { }
       }
     }
     saveFileIndexSync();
@@ -1312,10 +1333,14 @@ function parseCookies(req) {
   return list;
 }
 
+const OFFICE_COOKIE = (process.env.WD_SITE_ID && process.env.WD_SITE_ID !== 'main')
+  ? `wd_office_${process.env.WD_SITE_ID}`
+  : 'wd_office';
+
 function isOfficeAuthed(req) {
   if (authed(req)) return true; // 관리자 Bearer 토큰이면 통과
   const cookies = parseCookies(req);
-  const tok = cookies['wd_office'];
+  const tok = cookies[OFFICE_COOKIE];
   if (!tok || !/^[0-9a-f]{48}$/.test(tok)) return false;
   const exp = officeSessions.get(tok);
   if (!exp) return false;
@@ -1343,7 +1368,7 @@ const clients = new Set();
 const broadcast = () => { for (const r of clients) r.write('event: update\ndata: 1\n\n'); };
 const broadcastReload = () => {
   for (const r of clients) {
-    try { r.write('event: reload\ndata: 1\n\n'); } catch {}
+    try { r.write('event: reload\ndata: 1\n\n'); } catch { }
   }
 };
 setInterval(() => { for (const r of clients) r.write(': ping\n\n'); }, 25000);
@@ -1409,7 +1434,7 @@ async function handle(req, res) {
       }
     }
     return json(res, 200, {
-      port: conf.port,
+      port: Number(process.env.WD_PUBLIC_PORT) || conf.port,
       host: os.hostname(),
       ips,
       dev: IS_DEV,
@@ -1454,7 +1479,7 @@ async function handle(req, res) {
   }
 
   if (p === '/api/login' && req.method === 'POST') {
-    const ip = req.socket.remoteAddress;
+    const ip = clientIp(req);
     const f = fails.get(ip);
     if (f && f.until > Date.now()) return json(res, 429, { error: '잠시 후 다시 시도하세요' });
     const body = await readBody(req);
@@ -1472,7 +1497,7 @@ async function handle(req, res) {
   // --- 사무실 로그인 (WD-7) ---
   if (p === '/api/office/login' && req.method === 'POST') {
     if (!checkCsrf(req)) return json(res, 403, { error: 'CSRF 검증 실패' });
-    const ip = req.socket.remoteAddress;
+    const ip = clientIp(req);
     const f = officeFails.get(ip);
     if (f && f.until > Date.now()) return json(res, 429, { error: '잠시 후 다시 시도하세요' });
 
@@ -1497,7 +1522,7 @@ async function handle(req, res) {
       officeFails.delete(ip);
       const sessionTok = crypto.randomBytes(24).toString('hex');
       officeSessions.set(sessionTok, Date.now() + OFFICE_SESSION_TTL);
-      res.setHeader('Set-Cookie', `wd_office=${sessionTok}; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200`);
+      res.setHeader('Set-Cookie', `${OFFICE_COOKIE}=${sessionTok}; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200`);
       return json(res, 200, { ok: true });
     }
 
@@ -1525,7 +1550,7 @@ async function handle(req, res) {
 
   if (p === '/api/auth/change' && req.method === 'POST') {
     if (!checkCsrf(req)) return json(res, 403, { error: 'CSRF 검증 실패' });
-    const ip = req.socket.remoteAddress;
+    const ip = clientIp(req);
     const rateCheck = checkAuthRateLimit(ip);
     if (rateCheck.limited) return json(res, 429, { error: rateCheck.error });
 
@@ -1619,7 +1644,7 @@ async function handle(req, res) {
 
   if (p === '/api/auth/reset' && req.method === 'POST') {
     if (!checkCsrf(req)) return json(res, 403, { error: 'CSRF 검증 실패' });
-    const ip = req.socket.remoteAddress;
+    const ip = clientIp(req);
     const rateCheck = checkAuthRateLimit(ip);
     if (rateCheck.limited) return json(res, 429, { error: rateCheck.error });
 
@@ -1678,9 +1703,9 @@ async function handle(req, res) {
 
   if (p === '/api/office/logout' && req.method === 'POST') {
     const cookies = parseCookies(req);
-    const tok = cookies['wd_office'];
+    const tok = cookies[OFFICE_COOKIE];
     if (tok) officeSessions.delete(tok);
-    res.setHeader('Set-Cookie', 'wd_office=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');
+    res.setHeader('Set-Cookie', `${OFFICE_COOKIE}=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0`);
     return json(res, 200, { ok: true });
   }
 
@@ -1734,7 +1759,7 @@ async function handle(req, res) {
             'Connection': 'close',
           });
           res.end(JSON.stringify({ error: '파일 크기는 100MB를 초과할 수 없습니다.' }));
-        } catch {}
+        } catch { }
       };
       // 클라이언트가 스트림을 완전히 닫지 않거나 헤더만 보낸 경우(curl/불완전 전송) 지연 방지용 세이프티 타이머 (800ms)
       const safetyTimer = setTimeout(send413, 800);
@@ -1742,7 +1767,7 @@ async function handle(req, res) {
         clDiscarded += c.length;
         if (clDiscarded > 2 * 1024 * 1024 * 1024) {
           clearTimeout(safetyTimer);
-          try { req.socket.destroy(); } catch {}
+          try { req.socket.destroy(); } catch { }
         }
       });
       req.on('end', () => {
@@ -1766,7 +1791,7 @@ async function handle(req, res) {
     let reqEnded = false;
 
     const cleanupTmp = () => {
-      try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch {}
+      try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch { }
     };
 
     const reject413 = () => {
@@ -1785,14 +1810,14 @@ async function handle(req, res) {
             'Connection': 'close',
           });
           res.end(JSON.stringify({ error: '파일 크기는 100MB를 초과할 수 없습니다.' }));
-        } catch {}
+        } catch { }
       };
       const safetyTimer = setTimeout(send413, 1000);
       req.on('data', (c) => {
         discarded += c.length;
         if (discarded > 2 * 1024 * 1024 * 1024) {
           clearTimeout(safetyTimer);
-          try { req.socket.destroy(); } catch {}
+          try { req.socket.destroy(); } catch { }
         }
       });
       req.on('end', () => {
@@ -2044,7 +2069,7 @@ async function handle(req, res) {
       saveData();
       broadcast();
       if (place) {
-        fetchWeatherAuto().then(() => broadcast()).catch(() => {});
+        fetchWeatherAuto().then(() => broadcast()).catch(() => { });
       } else {
         weatherCache = {
           date: null,
@@ -2143,7 +2168,7 @@ async function handle(req, res) {
       try {
         const targetPath = path.join(FILES_DIR, fileId);
         if (fs.existsSync(targetPath)) fs.unlinkSync(targetPath);
-      } catch {}
+      } catch { }
       return json(res, 200, { ok: true });
     }
 
@@ -2224,13 +2249,18 @@ const server = http.createServer((req, res) => {
   handle(req, res).catch(() => { if (!res.headersSent) json(res, 400, { error: 'bad request' }); else res.end(); });
 });
 server.requestTimeout = 30 * 60 * 1000;
-server.listen(conf.port, '0.0.0.0', () => {
-  console.log(`작업현황 대시보드 v2 실행 중 (포트 ${conf.port})`);
-  if (IS_DEV) console.log('  [개발 모드] 개발 모드(자동 새로고침) 활성화 (public/ 감시 중)');
-  console.log(`  이 PC     : http://localhost:${conf.port}`);
-  console.log(`  TV 전용   : http://localhost:${conf.port}/tv`);
-  for (const list of Object.values(os.networkInterfaces()))
-    for (const i of list || []) if (i.family === 'IPv4' && !i.internal) console.log(`  다른 PC   : http://${i.address}:${conf.port}`);
-  if (verifyPassword('admin', DEFAULT_PASSWORD) || verifyPassword('admin', '0000')) console.log('※ 관리자 비밀번호가 초기/기본값입니다. 화면 설정 또는 config.json에서 변경하세요.');
-  if (verifyPassword('office', DEFAULT_OFFICE_PASSWORD)) console.log('※ 사무실 비밀번호가 기본값(0000)입니다. 화면 설정 또는 config.json에서 변경하세요.');
+const bindHost = process.env.WD_BIND || '0.0.0.0';
+const listenPort = Number(process.env.PORT || process.env.WD_PORT) || conf.port;
+const siteLogPrefix = process.env.WD_SITE_ID ? `[현장:${process.env.WD_SITE_ID}] ` : '';
+server.listen(listenPort, bindHost, () => {
+  console.log(`${siteLogPrefix}작업현황 대시보드 v2 실행 중 (포트 ${listenPort})`);
+  if (IS_DEV) console.log(`  ${siteLogPrefix}[개발 모드] 개발 모드(자동 새로고침) 활성화 (public/ 감시 중)`);
+  if (!process.env.WD_SITE_ID) {
+    console.log(`  이 PC     : http://localhost:${listenPort}`);
+    console.log(`  TV 전용   : http://localhost:${listenPort}/tv`);
+    for (const list of Object.values(os.networkInterfaces()))
+      for (const i of list || []) if (i.family === 'IPv4' && !i.internal) console.log(`  다른 PC   : http://${i.address}:${listenPort}`);
+  }
+  if (verifyPassword('admin', DEFAULT_PASSWORD) || verifyPassword('admin', '0000')) console.log(`※ ${siteLogPrefix}관리자 비밀번호가 초기/기본값입니다. 화면 설정 또는 config.json에서 변경하세요.`);
+  if (verifyPassword('office', DEFAULT_OFFICE_PASSWORD)) console.log(`※ ${siteLogPrefix}사무실 비밀번호가 기본값(0000)입니다. 화면 설정 또는 config.json에서 변경하세요.`);
 });
