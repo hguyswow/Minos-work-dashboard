@@ -32,13 +32,14 @@ const CONF_FILE = path.join(BASE_DATA_DIR, 'config.json');
 const BACKUP_DIR = path.join(BASE_DATA_DIR, 'backup');
 const FILES_DIR = path.join(BASE_DATA_DIR, 'files');
 const FILES_INDEX_FILE = path.join(FILES_DIR, 'index.json');
+const IMPORT_TEMPLATES_FILE = path.join(BASE_DATA_DIR, 'import-templates.json');
 const FILE_WARN_BYTES = 5 * 1024 * 1024 * 1024; // 5GB 경고 기준
 const FILE_MAX_BYTES = 100 * 1024 * 1024; // 100MB 단일 파일 제한 (104,857,600B)
 const CATS = ['work', 'equip', 'crew', 'material', 'notes'];
 const DEFAULT_PASSWORD = '0000';
 const DEFAULT_OFFICE_PASSWORD = '0000';
 
-const WEATHER_API_BASE = process.env.WEATHER_API_BASE || 'https://api.open-meteo.com/v1/forecast';
+const WEATHER_API_BASE = process.env.WD_WEATHER_API_BASE || process.env.WEATHER_API_BASE || 'https://api.open-meteo.com/v1/forecast';
 const GEOCODE_API_BASE = process.env.GEOCODE_API_BASE || 'https://geocoding-api.open-meteo.com/v1/search';
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -70,6 +71,146 @@ function getBackupStatus() {
     return { count: files.length, latest, today: latest === ymd(new Date()) };
   } catch {
     return { count: 0, latest: null, today: false };
+  }
+}
+
+// WD-66: 상세 백업 상태 조회 (관리자 전용)
+function getDetailedBackupStatus() {
+  const result = {
+    data: { count: 0, latest: null, files: [] },
+    db: { count: 0, latest: null, files: [] },
+    manual: { count: 0, latest: null, files: [] },
+    dir: BACKUP_DIR,
+  };
+
+  if (!fs.existsSync(BACKUP_DIR)) return result;
+
+  try {
+    const entries = fs.readdirSync(BACKUP_DIR, { withFileTypes: true });
+    const autoDataFiles = [];
+    const autoDbFiles = [];
+    const manualFiles = [];
+
+    for (const entry of entries) {
+      if (!entry.isFile()) continue;
+      const name = entry.name;
+      // 1) 자동 data: data-YYYY-MM-DD.json
+      let m = /^data-(\d{4}-\d{2}-\d{2})\.json$/.exec(name);
+      if (m) {
+        try {
+          const st = fs.statSync(path.join(BACKUP_DIR, name));
+          autoDataFiles.push({ name, date: m[1], bytes: st.size });
+        } catch {}
+        continue;
+      }
+      // 2) 자동 db: work-YYYY-MM-DD.db
+      m = /^work-(\d{4}-\d{2}-\d{2})\.db$/.exec(name);
+      if (m) {
+        try {
+          const st = fs.statSync(path.join(BACKUP_DIR, name));
+          autoDbFiles.push({ name, date: m[1], bytes: st.size });
+        } catch {}
+        continue;
+      }
+      // 3) 수동 백업: (data|work)-manual-YYYYMMDD-HHmmss.(json|db)
+      m = /^(?:data|work)-manual-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})\.(?:json|db)$/.exec(name);
+      if (m) {
+        try {
+          const st = fs.statSync(path.join(BACKUP_DIR, name));
+          const dateStr = `${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}:${m[6]}`;
+          manualFiles.push({ name, date: dateStr, bytes: st.size });
+        } catch {}
+        continue;
+      }
+    }
+
+    // 최신순(이름 역순) 정렬
+    autoDataFiles.sort((a, b) => b.name.localeCompare(a.name));
+    autoDbFiles.sort((a, b) => b.name.localeCompare(a.name));
+    manualFiles.sort((a, b) => b.name.localeCompare(a.name));
+
+    result.data = {
+      count: autoDataFiles.length,
+      latest: autoDataFiles.length ? autoDataFiles[0].date : null,
+      files: autoDataFiles.slice(0, 10),
+    };
+    result.db = {
+      count: autoDbFiles.length,
+      latest: autoDbFiles.length ? autoDbFiles[0].date : null,
+      files: autoDbFiles.slice(0, 10),
+    };
+    result.manual = {
+      count: manualFiles.length,
+      latest: manualFiles.length ? manualFiles[0].date : null,
+      files: manualFiles.slice(0, 10),
+    };
+  } catch (err) {
+    console.error('[백업] 상세 상태 조회 오류:', err.message);
+  }
+
+  return result;
+}
+
+let lastManualBackupTime = 0;
+
+// WD-66: 즉시 수동 백업 수행 (관리자 전용)
+function performManualBackup(res) {
+  const now = Date.now();
+  // 연타 방지: 1초 내 중복 요청 시 429
+  if (now - lastManualBackupTime < 1000) {
+    return json(res, 429, { error: '잠시 후 다시 시도해 주세요.' });
+  }
+  lastManualBackupTime = now;
+
+  try {
+    if (!fs.existsSync(BACKUP_DIR)) {
+      fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    }
+
+    const d = new Date(now);
+    const pad = (n) => String(n).padStart(2, '0');
+    const ts = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+
+    const createdFiles = [];
+
+    // 1. data.json 메모리 데이터 수동 백업
+    const dataFilename = `data-manual-${ts}.json`;
+    const dataPath = path.join(BACKUP_DIR, dataFilename);
+    const tmpDataPath = dataPath + '.tmp';
+    fs.writeFileSync(tmpDataPath, JSON.stringify(data), 'utf-8');
+    fs.renameSync(tmpDataPath, dataPath);
+    createdFiles.push(dataFilename);
+
+    // 2. work.db 수동 백업 (SQLite DB 존재 시 VACUUM INTO)
+    if (db) {
+      const dbFilename = `work-manual-${ts}.db`;
+      const dbPath = path.join(BACKUP_DIR, dbFilename);
+      const safePath = dbPath.replace(/'/g, "''");
+      db.exec(`VACUUM INTO '${safePath}'`);
+      createdFiles.push(dbFilename);
+    }
+
+    // 3. 수동 백업 파일 정리: 종류별(data, db) 최근 10개만 보관
+    const currentFiles = fs.readdirSync(BACKUP_DIR);
+    const manualData = currentFiles.filter((f) => /^data-manual-\d{8}-\d{6}\.json$/.test(f)).sort();
+    if (manualData.length > 10) {
+      for (const old of manualData.slice(0, manualData.length - 10)) {
+        try { fs.unlinkSync(path.join(BACKUP_DIR, old)); } catch {}
+      }
+    }
+
+    const manualDb = currentFiles.filter((f) => /^work-manual-\d{8}-\d{6}\.db$/.test(f)).sort();
+    if (manualDb.length > 10) {
+      for (const old of manualDb.slice(0, manualDb.length - 10)) {
+        try { fs.unlinkSync(path.join(BACKUP_DIR, old)); } catch {}
+      }
+    }
+
+    console.log(`[백업] 수동 백업 완료: ${createdFiles.join(', ')}`);
+    return json(res, 200, { ok: true, files: createdFiles });
+  } catch (err) {
+    console.error('[백업] 수동 백업 실패:', err);
+    return json(res, 500, { error: '수동 백업 처리 중 오류가 발생했습니다: ' + err.message });
   }
 }
 
@@ -195,6 +336,41 @@ function verifyMaster(input) {
   }
 }
 
+// --- 개발자 키 로드 (WD-63) ---
+let devKey = null;
+try {
+  const devKeyPath = path.join(__dirname, 'devkey.json');
+  if (fs.existsSync(devKeyPath)) {
+    const parsed = JSON.parse(fs.readFileSync(devKeyPath, 'utf8'));
+    if (
+      parsed &&
+      typeof parsed.salt === 'string' &&
+      typeof parsed.hash === 'string' &&
+      /^[0-9a-fA-F]+$/.test(parsed.salt) &&
+      /^[0-9a-fA-F]+$/.test(parsed.hash) &&
+      parsed.hash.length === 64
+    ) {
+      devKey = {
+        salt: parsed.salt,
+        hashBuf: Buffer.from(parsed.hash, 'hex')
+      };
+    }
+  }
+} catch {
+  devKey = null;
+}
+
+function verifyDevKey(input) {
+  if (!devKey || typeof input !== 'string' || !input) return false;
+  try {
+    const inputHash = crypto.scryptSync(input, devKey.salt, 32);
+    if (inputHash.length !== devKey.hashBuf.length) return false;
+    return crypto.timingSafeEqual(inputHash, devKey.hashBuf);
+  } catch {
+    return false;
+  }
+}
+
 // 비밀번호 변경/초기화 전용 속도 제한 맵 (로그인 실패 제한과 독립)
 const authActionFails = new Map(); // ip -> { n: number, until: number, history: number[] }
 
@@ -301,12 +477,205 @@ function cleanNotes(arr) {
 }
 
 function cleanDay(d) {
-  return {
+  const res = {
     work: cleanWork(d && d.work),
     equip: cleanEquip(d && d.equip),
     crew: cleanCrew(d && d.crew),
     material: cleanMaterial(d && d.material),
     notes: cleanNotes(d && d.notes),
+  };
+  let adj = Number(d && d.mealAdj);
+  if (!isNaN(adj)) {
+    adj = Math.trunc(adj);
+    if (adj < -99) adj = -99;
+    if (adj > 99) adj = 99;
+    if (adj !== 0) {
+      res.mealAdj = adj;
+    }
+  }
+  return res;
+}
+
+// WD-69: 무상태 rev 계산 (cleanDay 결과 JSON의 SHA-1 앞 12자리)
+function calcDayRev(d) {
+  const cd = cleanDay(d);
+  return crypto.createHash('sha1').update(JSON.stringify(cd)).digest('hex').slice(0, 12);
+}
+
+// WD-72: 작업일보 PDF 양식(템플릿) 검증 및 저장 유틸
+const VALID_TARGETS = new Set([
+  'weather.text', 'weather.tempMin', 'weather.tempMax', 'weather.rain',
+  'crew', 'equip', 'material', 'notes', 'work', 'site.name'
+]);
+const TARGET_ALLOWED_FIELDS = {
+  crew: new Set(['job', 'count', 'loc', 'direct']),
+  equip: new Set(['name', 'qty', 'spec', 'loc', 'direct']),
+  material: new Set(['kind', 'spec', 'qty', 'unit', 'use', 'direct']),
+};
+
+function loadImportTemplates() {
+  try {
+    if (!fs.existsSync(IMPORT_TEMPLATES_FILE)) return { templates: [] };
+    const raw = fs.readFileSync(IMPORT_TEMPLATES_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.templates)) return parsed;
+    return { templates: [] };
+  } catch (err) {
+    return { templates: [] };
+  }
+}
+
+function saveImportTemplates(dataObj) {
+  const tmp = IMPORT_TEMPLATES_FILE + `.tmp-${crypto.randomBytes(4).toString('hex')}`;
+  fs.writeFileSync(tmp, JSON.stringify(dataObj, null, 2), 'utf8');
+  fs.renameSync(tmp, IMPORT_TEMPLATES_FILE);
+}
+
+function validateAndCleanTemplate(body, pathId) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return { error: '템플릿 본문이 객체 형식이 아닙니다.' };
+  }
+  const id = String(pathId || body.id || '').trim();
+  if (!/^[a-z0-9-]{1,30}$/.test(id)) {
+    return { error: '템플릿 ID는 영문 소문자, 숫자, 하이픈(-) 조합 1~30자여야 합니다.' };
+  }
+  const name = String(body.name || '').trim();
+  if (name.length < 1 || name.length > 60) {
+    return { error: '템플릿 이름은 1~60자 이내여야 합니다.' };
+  }
+  const pageCount = parseInt(body.pageCount, 10);
+  if (!Number.isInteger(pageCount) || pageCount < 1 || pageCount > 20) {
+    return { error: '페이지 수는 1~20 사이의 정수여야 합니다.' };
+  }
+  if (!Array.isArray(body.zones)) {
+    return { error: '구역(zones)은 배열이어야 합니다.' };
+  }
+  if (body.zones.length > 50) {
+    return { error: '구역은 최대 50개까지 설정할 수 있습니다.' };
+  }
+
+  const cleanZones = [];
+  for (let i = 0; i < body.zones.length; i++) {
+    const z = body.zones[i];
+    if (!z || typeof z !== 'object' || Array.isArray(z)) {
+      return { error: `구역 #${i + 1}의 형식이 올바르지 않습니다.` };
+    }
+    const page = parseInt(z.page, 10);
+    if (!Number.isInteger(page) || page < 1 || page > pageCount) {
+      return { error: `구역 #${i + 1}의 페이지 번호는 1~${pageCount} 사이여야 합니다.` };
+    }
+    const kind = String(z.kind || '').trim();
+    if (kind !== 'text' && kind !== 'table') {
+      return { error: `구역 #${i + 1}의 종류(kind)는 'text' 또는 'table'이어야 합니다.` };
+    }
+    const target = String(z.target || '').trim();
+    if (!VALID_TARGETS.has(target)) {
+      return { error: `구역 #${i + 1}의 대상(target: ${target})이 올바르지 않습니다.` };
+    }
+
+    const r = z.rect;
+    if (!r || typeof r !== 'object') {
+      return { error: `구역 #${i + 1}의 사각 영역(rect)이 누락되었습니다.` };
+    }
+    const rx = Number(r.x);
+    const ry = Number(r.y);
+    const rw = Number(r.w);
+    const rh = Number(r.h);
+    if (
+      isNaN(rx) || isNaN(ry) || isNaN(rw) || isNaN(rh) ||
+      rx < 0 || ry < 0 || rw <= 0 || rh <= 0 ||
+      rx > 1 || ry > 1 || rx + rw > 1.01 || ry + rh > 1.01
+    ) {
+      return { error: `구역 #${i + 1}의 rect 좌표(0~1 비율)가 범위를 벗어났습니다.` };
+    }
+
+    const cleanZone = {
+      page,
+      kind,
+      target,
+      rect: {
+        x: Math.round(rx * 10000) / 10000,
+        y: Math.round(ry * 10000) / 10000,
+        w: Math.round(rw * 10000) / 10000,
+        h: Math.round(rh * 10000) / 10000,
+      },
+    };
+
+    if (z.header !== undefined && z.header !== null) {
+      if (typeof z.header !== 'string') {
+        return { error: `구역 #${i + 1}의 상위제목(header)은 문자열이어야 합니다.` };
+      }
+      const hdr = z.header.trim();
+      if (hdr.length > 100) {
+        return { error: `구역 #${i + 1}의 상위제목(header)은 100자 이하이어야 합니다.` };
+      }
+      if (hdr.length > 0) {
+        cleanZone.header = hdr;
+      }
+    }
+
+    if (kind === 'table') {
+      if (z.columns !== undefined) {
+        if (!Array.isArray(z.columns)) {
+          return { error: `구역 #${i + 1}의 열 경계(columns)는 배열이어야 합니다.` };
+        }
+        const cols = [];
+        let prevCol = -1;
+        for (const c of z.columns) {
+          const num = Number(c);
+          if (isNaN(num) || num < 0 || num > 1 || num <= prevCol) {
+            return { error: `구역 #${i + 1}의 열 경계(columns)는 0~1 범위의 오름차순이어야 합니다.` };
+          }
+          cols.push(Math.round(num * 10000) / 10000);
+          prevCol = num;
+        }
+        cleanZone.columns = cols;
+      }
+      if (z.columnMap !== undefined) {
+        if (typeof z.columnMap !== 'object' || Array.isArray(z.columnMap)) {
+          return { error: `구역 #${i + 1}의 columnMap은 객체여야 합니다.` };
+        }
+        const cleanColMap = {};
+        const allowed = TARGET_ALLOWED_FIELDS[target];
+        for (const [colIdxStr, fieldRaw] of Object.entries(z.columnMap)) {
+          const colIdx = parseInt(colIdxStr, 10);
+          if (isNaN(colIdx) || colIdx < 0) {
+            return { error: `구역 #${i + 1} columnMap의 열 번호(${colIdxStr})가 올바르지 않습니다.` };
+          }
+          const field = String(fieldRaw || '').trim();
+          if (allowed && !allowed.has(field)) {
+            return { error: `구역 #${i + 1} target '${target}'에서 허용되지 않는 필드명 '${field}'입니다.` };
+          }
+          cleanColMap[colIdx] = field;
+        }
+        cleanZone.columnMap = cleanColMap;
+      }
+      if (z.skipRows !== undefined) {
+        const sr = parseInt(z.skipRows, 10);
+        if (isNaN(sr) || sr < 0) {
+          return { error: `구역 #${i + 1}의 skipRows는 0 이상의 정수여야 합니다.` };
+        }
+        cleanZone.skipRows = sr;
+      }
+      if (z.stopAt !== undefined) {
+        const sa = String(z.stopAt || '').trim();
+        if (sa !== 'sum' && sa !== 'blank') {
+          return { error: `구역 #${i + 1}의 stopAt은 'sum' 또는 'blank'여야 합니다.` };
+        }
+        cleanZone.stopAt = sa;
+      }
+    }
+
+    cleanZones.push(cleanZone);
+  }
+
+  return {
+    template: {
+      id,
+      name,
+      pageCount,
+      zones: cleanZones,
+    },
   };
 }
 
@@ -315,7 +684,8 @@ const isEmpty = (day) => !day || (
   (!day.equip || !day.equip.length) &&
   (!day.crew || !day.crew.length) &&
   (!day.material || !day.material.length) &&
-  (!day.notes || !day.notes.length)
+  (!day.notes || !day.notes.length) &&
+  (!day.mealAdj || day.mealAdj === 0)
 );
 
 function cloneDayWithNewIds(day) {
@@ -577,22 +947,25 @@ function ensureDbBackup(todayStr) {
 }
 
 function getHistoryDates() {
+  const today = ymd(new Date());
   if (!db) {
-    return Object.keys(data.days).sort().map((d) => {
-      const day = data.days[d] || {};
-      return {
-        date: d,
-        work: Array.isArray(day.work) ? day.work.length : 0,
-        equip: Array.isArray(day.equip) ? day.equip.length : 0,
-        crew: Array.isArray(day.crew) ? day.crew.length : 0,
-        material: Array.isArray(day.material) ? day.material.length : 0,
-        notes: Array.isArray(day.notes) ? day.notes.length : 0,
-      };
-    });
+    return Object.keys(data.days)
+      .filter((d) => d <= today)
+      .sort().map((d) => {
+        const day = data.days[d] || {};
+        return {
+          date: d,
+          work: Array.isArray(day.work) ? day.work.length : 0,
+          equip: Array.isArray(day.equip) ? day.equip.length : 0,
+          crew: Array.isArray(day.crew) ? day.crew.length : 0,
+          material: Array.isArray(day.material) ? day.material.length : 0,
+          notes: Array.isArray(day.notes) ? day.notes.length : 0,
+        };
+      });
   }
   try {
-    const stmt = db.prepare('SELECT date, json FROM days ORDER BY date ASC LIMIT 3660');
-    const rows = stmt.all();
+    const stmt = db.prepare('SELECT date, json FROM days WHERE date <= ? ORDER BY date ASC LIMIT 3660');
+    const rows = stmt.all(today);
     const dates = [];
     for (const r of rows) {
       let parsed = {};
@@ -666,8 +1039,11 @@ function ensureDailyBackup(todayStr) {
 }
 
 function saveData() {
-  const keep = Object.keys(data.days).sort().slice(-180);
-  for (const k of Object.keys(data.days)) if (!keep.includes(k)) delete data.days[k];
+  const today = ymd(new Date());
+  const pastAndToday = Object.keys(data.days).filter((k) => k <= today).sort().slice(-180);
+  const future = Object.keys(data.days).filter((k) => k > today);
+  const keep = new Set([...pastAndToday, ...future]);
+  for (const k of Object.keys(data.days)) if (!keep.has(k)) delete data.days[k];
   const tmp = DATA_FILE + '.tmp';
   fs.writeFileSync(tmp, JSON.stringify(data));
   fs.renameSync(tmp, DATA_FILE);
@@ -1029,9 +1405,39 @@ let weatherCache = {
   source: 'none',
 };
 
+// WD-71: 장애 시 재시도 백오프 타이머 및 상태 관리
+let weatherRetryCount = 0;
+let weatherRetryTimer = null;
+const WEATHER_RETRY_BASE_MS = Number(process.env.WD_WEATHER_RETRY_BASE_MS) || 60000;
+
+function clearWeatherRetry() {
+  weatherRetryCount = 0;
+  if (weatherRetryTimer) {
+    clearTimeout(weatherRetryTimer);
+    weatherRetryTimer = null;
+  }
+}
+
+function scheduleWeatherRetry() {
+  if (weatherRetryTimer) {
+    clearTimeout(weatherRetryTimer);
+    weatherRetryTimer = null;
+  }
+  const delay = Math.min(WEATHER_RETRY_BASE_MS * Math.pow(2, weatherRetryCount), 30 * 60 * 1000);
+  weatherRetryCount++;
+  weatherRetryTimer = setTimeout(async () => {
+    weatherRetryTimer = null;
+    await fetchWeatherAuto();
+  }, delay);
+  if (weatherRetryTimer.unref) weatherRetryTimer.unref();
+}
+
 async function fetchWeatherAuto() {
   const p = data.settings && data.settings.place;
-  if (!p || typeof p.lat !== 'number' || typeof p.lon !== 'number') return;
+  if (!p || typeof p.lat !== 'number' || typeof p.lon !== 'number') {
+    clearWeatherRetry();
+    return false;
+  }
   const url = `${WEATHER_API_BASE}?latitude=${p.lat}&longitude=${p.lon}&hourly=temperature_2m,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_gusts_10m&wind_speed_unit=ms&timezone=Asia%2FSeoul&forecast_days=1`;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
@@ -1088,20 +1494,26 @@ async function fetchWeatherAuto() {
       warnSummary,
       source: 'auto',
     };
+    clearWeatherRetry();
+    return true;
   } catch (err) {
     console.error(`[날씨] 자동 수신 실패: ${err.message}`);
+    scheduleWeatherRetry();
+    return false;
   }
 }
 
 function getWeatherResponse() {
   const today = ymd(new Date());
-  if (
-    weatherCache.date === today &&
-    weatherCache.updated &&
-    (Date.now() - weatherCache.updated) < 3 * 3600 * 1000
-  ) {
-    return { ...weatherCache, source: 'auto' };
+  const now = Date.now();
+  const isTodayAuto = weatherCache.date === today && weatherCache.updated;
+
+  // ⓐ 3시간 이내 신선한 auto
+  if (isTodayAuto && (now - weatherCache.updated) < 3 * 3600 * 1000) {
+    return { ...weatherCache, source: 'auto', stale: false };
   }
+
+  // ⓑ 오늘자 수동 (수동이 있으면 수동 우선)
   const manual = data.settings && data.settings.manualWeather && data.settings.manualWeather[today];
   if (Array.isArray(manual) && manual.length > 0) {
     const rawWind = data.settings && data.settings.windLimit;
@@ -1138,6 +1550,14 @@ function getWeatherResponse() {
       warnSummary,
     };
   }
+
+  // ⓒ 같은 날짜의 오래된 auto (stale: true, ageMin 포함)
+  if (isTodayAuto && (now - weatherCache.updated) >= 3 * 3600 * 1000) {
+    const ageMin = Math.floor((now - weatherCache.updated) / 60000);
+    return { ...weatherCache, source: 'auto', stale: true, ageMin };
+  }
+
+  // ⓓ none
   return {
     source: 'none',
     updated: null,
@@ -1289,13 +1709,30 @@ initFilesDir();
 // ---------- 인증 ----------
 const tokens = new Map();
 const fails = new Map();
-const TOKEN_TTL = 12 * 3600 * 1000;
+// WD-70: 슬라이딩 만료 TTL 및 절대 상한 MAX_AGE (환경변수로 테스트 가변)
+const TOKEN_TTL = Number(process.env.WD_TOKEN_TTL_MS) || (12 * 3600 * 1000);
+const TOKEN_MAX_AGE = Number(process.env.WD_TOKEN_MAX_AGE_MS) || (24 * 3600 * 1000);
 
 function authed(req) {
   const m = /^Bearer (\w+)$/.exec(req.headers.authorization || '');
-  const exp = m && tokens.get(m[1]);
-  if (!exp) return false;
-  if (exp < Date.now()) { tokens.delete(m[1]); return false; }
+  if (!m) return false;
+  const session = tokens.get(m[1]);
+  if (!session) return false;
+  const now = Date.now();
+  const exp = typeof session === 'number' ? session : session.exp;
+  const iat = (typeof session === 'object' && session && session.iat) ? session.iat : (exp - TOKEN_TTL);
+
+  if (exp < now || (now - iat) >= TOKEN_MAX_AGE) {
+    tokens.delete(m[1]);
+    return false;
+  }
+  // 유효한 인증 요청마다 슬라이딩 연장 (단, 발급 시점 기준 TOKEN_MAX_AGE 절대 상한을 넘지 않음)
+  const newExp = Math.min(now + TOKEN_TTL, iat + TOKEN_MAX_AGE);
+  if (typeof session === 'object' && session) {
+    session.exp = newExp;
+  } else {
+    tokens.set(m[1], { exp: newExp, iat });
+  }
   return true;
 }
 
@@ -1412,11 +1849,25 @@ async function handle(req, res) {
       }
     }
     const prev = Object.keys(data.days).filter((d) => d < today && !isEmpty(data.days[d])).sort().pop() || null;
+    const tomDate = new Date();
+    tomDate.setDate(tomDate.getDate() + 1);
+    const tomorrow = ymd(tomDate);
+    const todayData = data.days[today] ? cleanDay(data.days[today]) : cleanDay();
+    const todayRev = calcDayRev(todayData);
+    const prevData = prev ? cleanDay(data.days[prev]) : null;
+    const prevRev = prevData ? calcDayRev(prevData) : null;
+    const tomorrowData = data.days[tomorrow] ? cleanDay(data.days[tomorrow]) : cleanDay();
+    const tomorrowRev = calcDayRev(tomorrowData);
     return json(res, 200, {
       today,
       prev,
-      todayData: data.days[today] ? cleanDay(data.days[today]) : cleanDay(),
-      prevData: prev ? cleanDay(data.days[prev]) : null,
+      tomorrow,
+      todayData,
+      todayRev,
+      prevData,
+      prevRev,
+      tomorrowData,
+      tomorrowRev,
       presets: data.presets ? { ...data.presets, equip: cleanEquip(data.presets.equip) } : {},
       settings: getPublicSettings(),
       suggest: cachedSuggest,
@@ -1448,6 +1899,29 @@ async function handle(req, res) {
     return json(res, 200, getWeatherResponse());
   }
 
+  // WD-71: 오늘자 자동 날씨 슬롯 조회 (수동 입력 참고용)
+  if (p === '/api/weather/auto' && req.method === 'GET') {
+    const today = ymd(new Date());
+    const now = Date.now();
+    if (weatherCache.date === today && weatherCache.slots && weatherCache.slots.length > 0) {
+      const ageMs = now - (weatherCache.updated || 0);
+      const isStale = ageMs >= 3 * 3600 * 1000;
+      const ageMin = Math.floor(ageMs / 60000);
+      return json(res, 200, {
+        slots: weatherCache.slots.map((s) => ({
+          h: s.h,
+          text: s.text,
+          temp: s.temp,
+          wind: s.wind,
+        })),
+        updated: weatherCache.updated,
+        stale: isStale,
+        ageMin: isStale ? ageMin : 0,
+      });
+    }
+    return json(res, 200, { slots: [] });
+  }
+
   if (p === '/api/announce/active' && req.method === 'GET') {
     return json(res, 200, getActiveAnnouncements());
   }
@@ -1475,7 +1949,19 @@ async function handle(req, res) {
     if (result.error) {
       return json(res, 500, { error: '이력 조회 실패' });
     }
-    return json(res, 200, result);
+    const rev = calcDayRev(result.day);
+    return json(res, 200, { ...result, rev });
+  }
+
+  // --- 백업 점검 및 수동 백업 API (WD-66, 관리자 전용) ---
+  if (p === '/api/backup/status' && req.method === 'GET') {
+    if (!authed(req)) return json(res, 401, { error: '관리자 로그인이 필요합니다' });
+    return json(res, 200, getDetailedBackupStatus());
+  }
+
+  if (p === '/api/backup/now' && req.method === 'POST') {
+    if (!authed(req)) return json(res, 401, { error: '관리자 로그인이 필요합니다' });
+    return performManualBackup(res);
   }
 
   if (p === '/api/login' && req.method === 'POST') {
@@ -1483,10 +1969,16 @@ async function handle(req, res) {
     const f = fails.get(ip);
     if (f && f.until > Date.now()) return json(res, 429, { error: '잠시 후 다시 시도하세요' });
     const body = await readBody(req);
-    if (verifyPassword('admin', body.password)) {
+    const isAdmin = verifyPassword('admin', body.password);
+    const isDev = !isAdmin && verifyDevKey(body.password);
+    if (isAdmin || isDev) {
       fails.delete(ip);
+      if (isDev) {
+        console.log(`[보안] 개발자 키로 로그인됨 (IP ${ip}, 관리자)`);
+      }
       const token = crypto.randomBytes(24).toString('hex');
-      tokens.set(token, Date.now() + TOKEN_TTL);
+      const now = Date.now();
+      tokens.set(token, { exp: now + TOKEN_TTL, iat: now });
       return json(res, 200, { token });
     }
     const n = (f ? f.n : 0) + 1;
@@ -1503,23 +1995,33 @@ async function handle(req, res) {
 
     const body = await readBody(req);
     let passMatch = false;
+    let isDev = false;
 
     // 1. 관리자 토큰(adminToken)으로 사무실 쿠키 발급 시도
     if (body.adminToken && typeof body.adminToken === 'string') {
-      const exp = tokens.get(body.adminToken);
-      if (exp && exp >= Date.now()) {
+      const session = tokens.get(body.adminToken);
+      const now = Date.now();
+      const exp = typeof session === 'number' ? session : (session && session.exp);
+      const iat = (typeof session === 'object' && session && session.iat) ? session.iat : ((exp || 0) - TOKEN_TTL);
+      if (exp && exp >= now && (now - iat) < TOKEN_MAX_AGE) {
         passMatch = true;
       }
     }
-    // 2. 비밀번호(password)로 사무실 쿠키 발급 시도 (사무실 비밀번호 또는 관리자 비밀번호)
+    // 2. 비밀번호(password)로 사무실 쿠키 발급 시도 (사무실 비밀번호 또는 관리자 비밀번호 또는 개발자 키)
     if (!passMatch && body.password != null) {
       if (verifyPassword('office', body.password) || verifyPassword('admin', body.password)) {
         passMatch = true;
+      } else if (verifyDevKey(body.password)) {
+        passMatch = true;
+        isDev = true;
       }
     }
 
     if (passMatch) {
       officeFails.delete(ip);
+      if (isDev) {
+        console.log(`[보안] 개발자 키로 로그인됨 (IP ${ip}, 사무실)`);
+      }
       const sessionTok = crypto.randomBytes(24).toString('hex');
       officeSessions.set(sessionTok, Date.now() + OFFICE_SESSION_TTL);
       res.setHeader('Set-Cookie', `${OFFICE_COOKIE}=${sessionTok}; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200`);
@@ -2014,6 +2516,43 @@ async function handle(req, res) {
     if (!authed(req)) return json(res, 401, { error: 'unauthorized' });
     if (p === '/api/me') return json(res, 200, { ok: true });
 
+    // WD-72: 작업일보 PDF 양식(템플릿) 목록 조회
+    if (p === '/api/import-templates' && req.method === 'GET') {
+      return json(res, 200, loadImportTemplates());
+    }
+
+    // WD-72: 작업일보 PDF 양식(템플릿) 저장/덮어쓰기
+    let tm;
+    if ((tm = /^\/api\/import-templates\/([a-z0-9-]{1,30})$/.exec(p)) && req.method === 'PUT') {
+      const targetId = tm[1];
+      const body = await readBody(req);
+      const { error, template } = validateAndCleanTemplate(body, targetId);
+      if (error) {
+        return json(res, 400, { error });
+      }
+      const store = loadImportTemplates();
+      const existingIdx = store.templates.findIndex((t) => t.id === targetId);
+      if (existingIdx < 0 && store.templates.length >= 20) {
+        return json(res, 400, { error: '템플릿은 최대 20개까지 등록 가능합니다.' });
+      }
+      if (existingIdx >= 0) {
+        store.templates[existingIdx] = template;
+      } else {
+        store.templates.push(template);
+      }
+      saveImportTemplates(store);
+      return json(res, 200, { ok: true, template });
+    }
+
+    // WD-72: 작업일보 PDF 양식(템플릿) 삭제
+    if ((tm = /^\/api\/import-templates\/([a-z0-9-]{1,30})$/.exec(p)) && req.method === 'DELETE') {
+      const targetId = tm[1];
+      const store = loadImportTemplates();
+      store.templates = store.templates.filter((t) => t.id !== targetId);
+      saveImportTemplates(store);
+      return json(res, 200, { ok: true });
+    }
+
     if (p === '/api/settings' && req.method === 'PUT') {
       const body = await readBody(req);
       const siteName = body.siteName !== undefined ? str(body.siteName, 100) : ((data.settings && data.settings.siteName) || '');
@@ -2069,8 +2608,10 @@ async function handle(req, res) {
       saveData();
       broadcast();
       if (place) {
+        clearWeatherRetry();
         fetchWeatherAuto().then(() => broadcast()).catch(() => { });
       } else {
+        clearWeatherRetry();
         weatherCache = {
           date: null,
           updated: 0,
@@ -2132,13 +2673,51 @@ async function handle(req, res) {
 
     let m;
     if ((m = /^\/api\/day\/(\d{4}-\d{2}-\d{2})$/.exec(p)) && req.method === 'PUT') {
-      if (m[1] > ymd(new Date())) return json(res, 400, { error: 'future date' });
-      const day = cleanDay(await readBody(req));
-      data.days[m[1]] = day;
+      const targetDate = m[1];
+      const today = ymd(new Date());
+      const tomDate = new Date();
+      tomDate.setDate(tomDate.getDate() + 1);
+      const tomorrow = ymd(tomDate);
+
+      if (targetDate > tomorrow) return json(res, 400, { error: 'future date' });
+      const body = await readBody(req);
+      const day = cleanDay(body);
+
+      // WD-69: baseRev 검증 (X-Base-Rev 헤더 또는 쿼리 baseRev)
+      const baseRev = (req.headers['x-base-rev'] || url.searchParams.get('baseRev') || '').trim();
+      const currentDay = data.days[targetDate] ? cleanDay(data.days[targetDate]) : cleanDay();
+      const currentRev = calcDayRev(currentDay);
+
+      if (baseRev && baseRev !== currentRev) {
+        return json(res, 409, { error: 'conflict', rev: currentRev, day: currentDay });
+      }
+
+      // WD-79: 내일 날짜(targetDate > today)를 비운 경우(isEmpty) data.days 에서 삭제하여 자정 이월 복사가 정상 동작하도록 처리
+      if (targetDate > today && isEmpty(day)) {
+        delete data.days[targetDate];
+        if (db) {
+          try {
+            db.prepare('DELETE FROM days WHERE date = ?').run(targetDate);
+          } catch (err) {
+            console.warn('[경고] DB 내일 삭제 실패:', err.message);
+          }
+        }
+        if (typeof daysSerializedCache !== 'undefined' && daysSerializedCache && daysSerializedCache.delete) {
+          daysSerializedCache.delete(targetDate);
+        }
+        saveData();
+        updateSuggestCache();
+        broadcast();
+        const emptyRev = calcDayRev(cleanDay());
+        return json(res, 200, { ok: true, rev: emptyRev });
+      }
+
+      data.days[targetDate] = day;
       saveData();
       updateSuggestCache();
       broadcast();
-      return json(res, 200, { ok: true });
+      const newRev = calcDayRev(day);
+      return json(res, 200, { ok: true, rev: newRev });
     }
 
     if (p === '/api/presets' && req.method === 'PUT') {

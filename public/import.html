@@ -1,0 +1,3318 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>작업일보 양식 관리 — 작업 현황</title>
+  <script>
+    (function () {
+      try {
+        var p = (location.pathname.match(/^(\/s\/[^/]+)/) || [])[1] || '';
+        var k = 'theme' + (p ? '@' + p.slice(3) : '');
+        var t = localStorage.getItem(k) || localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) { }
+    })();
+  </script>
+  <style>
+    :root,
+    :root[data-theme="light"] {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --card-sub: #f1f5f9;
+      --ink: #0f172a;
+      --sub: #475569;
+      --line: #e2e8f0;
+      --strong: #94a3b8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-soft: #eff6ff;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --ok: #15803d;
+      --ok-soft: #f0fdf4;
+      --warn: #b45309;
+      --warn-bg: #fffbeb;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #0b1120;
+      --card: #111827;
+      --card-sub: #1e293b;
+      --ink: #f8fafc;
+      --sub: #cbd5e1;
+      --line: #1e293b;
+      --strong: #475569;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --accent-soft: #172554;
+      --danger: #f87171;
+      --danger-soft: #450a0a;
+      --ok: #4ade80;
+      --ok-soft: #052e16;
+      --warn: #fbbf24;
+      --warn-bg: #451a03;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .header-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.35rem;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn:hover {
+      background: var(--card-sub);
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .btn.primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn.danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .btn.danger:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn.faint {
+      border-color: transparent;
+      background: transparent;
+      color: var(--sub);
+    }
+
+    .btn.faint:hover {
+      background: var(--card-sub);
+      color: var(--ink);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* 카드 목록 */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .tpl-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .tpl-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0;
+    }
+
+    .tpl-card-meta {
+      font-size: 0.78rem;
+      color: var(--sub);
+    }
+
+    .tpl-card-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.4rem;
+      margin-top: auto;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--line);
+    }
+
+    /* 편집기 2열 레이아웃 */
+    .editor-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(360px, 1fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .editor-layout {
+        grid-template-columns: 1fr;
+      }
+      .editor-layout > * {
+        min-width: 0;
+        max-width: 100%;
+      }
+      .viewer-panel {
+        min-width: 0;
+        max-width: 100%;
+      }
+      .viewer-nav {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .canvas-wrap {
+        min-width: 0;
+        max-width: 100%;
+      }
+      .editor-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .editor-toolbar .form-group {
+        width: 100%;
+      }
+      .editor-toolbar input[type="text"] {
+        width: 100% !important;
+      }
+    }
+
+    .editor-toolbar {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+      padding: 0.7rem 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+    }
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--sub);
+      white-space: nowrap;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      background: var(--card);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 0.3rem;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.82rem;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* 뷰어 영역 */
+    .viewer-panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+      padding: 0.8rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .viewer-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.82rem;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      background: #525659;
+      border-radius: 0.3rem;
+      overflow: auto;
+      max-height: 80vh;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      user-select: none;
+      padding: 0.5rem;
+      box-sizing: border-box;
+    }
+
+    .canvas-inner {
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+
+    #pdf-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #zone-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    /* 구역 박스 */
+    .zone-rect {
+      position: absolute;
+      border: 2px solid #3b82f6;
+      background: rgba(59, 130, 246, 0.15);
+      box-sizing: border-box;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    .zone-rect.selected {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.2);
+      z-index: 10;
+      cursor: move;
+    }
+
+    /* 8개 리사이즈 핸들 */
+    .zone-handle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #ffffff;
+      border: 2px solid #ef4444;
+      box-sizing: border-box;
+      touch-action: none;
+      z-index: 20;
+      pointer-events: auto;
+    }
+    .zone-handle.nw { top: -4px; left: -4px; cursor: nwse-resize; }
+    .zone-handle.n  { top: -4px; left: calc(50% - 4px); cursor: ns-resize; }
+    .zone-handle.ne { top: -4px; right: -4px; cursor: nesw-resize; }
+    .zone-handle.e  { top: calc(50% - 4px); right: -4px; cursor: ew-resize; }
+    .zone-handle.se { bottom: -4px; right: -4px; cursor: nwse-resize; }
+    .zone-handle.s  { bottom: -4px; left: calc(50% - 4px); cursor: ns-resize; }
+    .zone-handle.sw { bottom: -4px; left: -4px; cursor: nesw-resize; }
+    .zone-handle.w  { top: calc(50% - 4px); left: -4px; cursor: ew-resize; }
+
+    .zone-badge {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: #3b82f6;
+      color: #fff;
+      font-size: 10px;
+      padding: 1px 4px;
+      line-height: 1.2;
+      font-weight: 700;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .zone-rect.selected .zone-badge {
+      background: #ef4444;
+    }
+
+    /* 열 경계선 (세로 점선) */
+    .col-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      margin-left: -4px;
+      border-left: 2px dashed #f59e0b;
+      cursor: col-resize;
+      touch-action: none;
+      z-index: 15;
+    }
+
+    .col-divider:hover,
+    .col-divider.dragging,
+    .col-divider.selected {
+      border-left-color: #ef4444;
+      border-left-style: solid;
+    }
+
+    /* 사이드바 패널 */
+    .sidebar-panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .panel-sec-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0 0 0.5rem 0;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .zone-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .zone-chip {
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.3rem;
+      border: 1px solid var(--line);
+      background: var(--card-sub);
+      font-size: 0.76rem;
+      cursor: pointer;
+      color: var(--ink);
+    }
+
+    .zone-chip.selected {
+      border-color: #ef4444;
+      background: var(--danger-soft);
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    /* 미리보기 테이블 */
+    .preview-box {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 0.3rem;
+      padding: 0.5rem;
+      font-size: 0.78rem;
+      overflow-x: auto;
+    }
+
+    .preview-table,
+    .import-preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    .preview-table th,
+    .preview-table td,
+    .import-preview-table th,
+    .import-preview-table td {
+      border: 1px solid var(--line);
+      padding: 0.25rem 0.4rem;
+      text-align: left;
+    }
+
+    .preview-table th,
+    .import-preview-table th {
+      background: var(--card-sub);
+      font-weight: 600;
+    }
+
+    .msg-banner {
+      padding: 0.5rem 0.7rem;
+      border-radius: 0.3rem;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+
+    .msg-banner.warn {
+      background: var(--warn-bg);
+      color: var(--warn);
+      border: 1px solid var(--line);
+    }
+
+    .msg-banner.ok {
+      background: var(--ok-soft);
+      color: var(--ok);
+    }
+
+    .msg-banner.err {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    /* 탭 바 */
+    .tab-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.2rem;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--sub);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover {
+      color: var(--ink);
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* 가져오기 뷰 전용 스타일 */
+    .import-controls-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+      padding: 1.2rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1rem;
+    }
+
+    .import-controls-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+
+    .import-summary-card {
+      background: var(--card-sub);
+      border: 1px solid var(--line);
+      border-radius: 0.4rem;
+      padding: 0.8rem 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .import-sec-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .import-sec-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.7rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .import-sec-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .table-responsive {
+      max-width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 0.3rem;
+    }
+
+    .badge-pill {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 1rem;
+      font-weight: 600;
+      background: var(--card-sub);
+      color: var(--sub);
+      border: 1px solid var(--line);
+    }
+
+    .badge-pill.ok {
+      background: var(--ok-soft);
+      color: var(--ok);
+      border-color: transparent;
+    }
+
+    .badge-pill.warn {
+      background: var(--warn-bg);
+      color: var(--warn);
+      border-color: transparent;
+    }
+
+    .mode-radios {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 0.85rem;
+    }
+
+    .mode-radios label {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+      font-weight: normal;
+    }
+  </style>
+  <script src="/vendor/pdfjs/pdf.min.js"></script>
+  <script src="/pdfzones.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="header-left">
+      <a id="btn-back-home" class="btn faint" href="/">← 메인 화면</a>
+      <h1 class="header-title">작업일보 양식 관리</h1>
+    </div>
+    <div class="header-right">
+      <button id="btn-toggle-theme" type="button" class="btn faint" title="테마 전환">🌓</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 상단 모드 탭 바 -->
+    <div id="import-tab-bar" class="tab-bar" style="display:none;">
+      <button id="tab-import" type="button" class="tab-btn active">작업일보 가져오기</button>
+      <button id="tab-templates" type="button" class="tab-btn">양식 관리</button>
+    </div>
+
+    <!-- 0. 작업일보 가져오기 화면 (WD-74) -->
+    <div id="view-import" style="display:none;">
+      <div class="import-controls-card">
+        <div class="import-controls-grid">
+          <div class="form-group" style="flex:1; min-width:220px;">
+            <label for="import-select-tpl">작업일보 양식 선택</label>
+            <select id="import-select-tpl" style="width:100%;"></select>
+          </div>
+          <div class="form-group" style="flex:1; min-width:240px;">
+            <label>작업일보 PDF 파일</label>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <input type="file" id="import-exec-pdf-input" accept=".pdf" style="display:none;">
+              <button id="btn-select-exec-pdf" type="button" class="btn">📄 PDF 파일 선택</button>
+              <span id="exec-pdf-filename" class="hint" style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">선택된 파일 없음</span>
+            </div>
+          </div>
+          <div class="form-group" style="min-width:150px;">
+            <label for="import-target-date">적용 대상 날짜</label>
+            <input type="date" id="import-target-date">
+          </div>
+          <div class="form-group" style="margin-left:auto;">
+            <button id="btn-run-extract" type="button" class="btn primary" style="font-weight:700;">🔍 작업일보 읽기</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="import-msg-banner" class="msg-banner err" style="display:none; margin-bottom:1rem;"></div>
+
+      <!-- 미리보기 영역 -->
+      <div id="import-preview-area" style="display:none;">
+        <div id="import-summary-bar" class="import-summary-card">
+          <div id="import-meta-info" style="font-size:0.88rem; font-weight:600; color:var(--ink);"></div>
+          <div id="import-date-status" style="font-size:0.82rem; color:var(--sub);"></div>
+        </div>
+
+        <!-- 인원 섹션 -->
+        <div id="import-crew-sec" class="import-sec-card" style="display:none;">
+          <div class="import-sec-header">
+            <div class="import-sec-title">
+              <span>👷 인원 투입 현황</span>
+              <span id="crew-summary-badge" class="badge-pill"></span>
+            </div>
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+              <div class="mode-radios" id="crew-mode-radios">
+                <label><input type="radio" name="crew-apply-mode" value="replace" checked> 교체 (전체 대체)</label>
+                <label><input type="radio" name="crew-apply-mode" value="append"> 추가 (기존 유지+덧붙임)</label>
+              </div>
+              <button id="btn-toggle-crew-all" type="button" class="btn faint" style="padding:0.2rem 0.6rem; font-size:0.75rem;">전체 해제</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="import-preview-table" id="crew-preview-table">
+              <thead>
+                <tr>
+                  <th style="width:40px; text-align:center;">선택</th>
+                  <th style="width:50px;">번호</th>
+                  <th>직종 (job)</th>
+                  <th style="width:80px; text-align:right;">금일 인원</th>
+                  <th>작업 위치 / 내용</th>
+                </tr>
+              </thead>
+              <tbody id="crew-preview-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 장비 섹션 -->
+        <div id="import-equip-sec" class="import-sec-card" style="display:none;">
+          <div class="import-sec-header">
+            <div class="import-sec-title">
+              <span>🚜 장비 투입 현황</span>
+              <span id="equip-summary-badge" class="badge-pill"></span>
+            </div>
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+              <div class="mode-radios" id="equip-mode-radios">
+                <label><input type="radio" name="equip-apply-mode" value="replace" checked> 교체 (전체 대체)</label>
+                <label><input type="radio" name="equip-apply-mode" value="append"> 추가 (기존 유지+덧붙임)</label>
+              </div>
+              <button id="btn-toggle-equip-all" type="button" class="btn faint" style="padding:0.2rem 0.6rem; font-size:0.75rem;">전체 해제</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="import-preview-table" id="equip-preview-table">
+              <thead>
+                <tr>
+                  <th style="width:40px; text-align:center;">선택</th>
+                  <th style="width:50px;">번호</th>
+                  <th>장비명</th>
+                  <th>규격</th>
+                  <th style="width:80px; text-align:right;">금일 수량</th>
+                  <th>작업 위치 / 용도</th>
+                </tr>
+              </thead>
+              <tbody id="equip-preview-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 자재 섹션 -->
+        <div id="import-material-sec" class="import-sec-card" style="display:none;">
+          <div class="import-sec-header">
+            <div class="import-sec-title">
+              <span>🧱 자재 투입 현황</span>
+              <span id="material-summary-badge" class="badge-pill"></span>
+            </div>
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+              <div class="mode-radios" id="material-mode-radios">
+                <label><input type="radio" name="material-apply-mode" value="replace" checked> 교체 (전체 대체)</label>
+                <label><input type="radio" name="material-apply-mode" value="append"> 추가 (기존 유지+덧붙임)</label>
+              </div>
+              <button id="btn-toggle-material-all" type="button" class="btn faint" style="padding:0.2rem 0.6rem; font-size:0.75rem;">전체 해제</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="import-preview-table" id="material-preview-table">
+              <thead>
+                <tr>
+                  <th style="width:40px; text-align:center;">선택</th>
+                  <th style="width:50px;">번호</th>
+                  <th>품명 (kind)</th>
+                  <th>규격 (spec)</th>
+                  <th style="width:60px;">단위</th>
+                  <th style="width:80px; text-align:right;">금일 수량</th>
+                  <th>사용 위치 / 비고</th>
+                </tr>
+              </thead>
+              <tbody id="material-preview-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 작업 내용 섹션 (WD-77) -->
+        <div id="import-work-sec" class="import-sec-card" style="display:none;">
+          <div class="import-sec-header">
+            <div class="import-sec-title">
+              <span>📋 작업 내용 (work)</span>
+              <span id="work-summary-badge" class="badge-pill"></span>
+            </div>
+            <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+              <div class="mode-radios" id="work-mode-radios">
+                <label><input type="radio" name="work-apply-mode" value="replace" checked> 교체 (전체 대체)</label>
+                <label><input type="radio" name="work-apply-mode" value="append"> 추가 (기존 유지+덧붙임)</label>
+              </div>
+              <button id="btn-toggle-work-all" type="button" class="btn faint" style="padding:0.2rem 0.6rem; font-size:0.75rem;">전체 해제</button>
+            </div>
+          </div>
+          <div id="work-preview-tree" style="display:flex; flex-direction:column; gap:0.6rem; margin-top:0.5rem;"></div>
+          <div id="work-count-warn" style="display:none; color:var(--warn); font-size:0.78rem; margin-top:0.4rem;">
+            ⚠ 작업 항목 수가 200개를 초과하여 초과 항목은 제외될 수 있습니다.
+          </div>
+        </div>
+
+        <!-- 참고 항목 섹션 -->
+        <div id="import-other-sec" class="import-sec-card" style="display:none;">
+          <div class="import-sec-header">
+            <div class="import-sec-title">
+              <span>📋 참고 항목 (미리보기 전용)</span>
+            </div>
+            <div style="font-size:0.78rem; color:var(--sub);">
+              ※ 날씨 및 공사내용은 미리보기 전용이며 이번 단계에서는 데이터에 직접 적용되지 않습니다.
+            </div>
+          </div>
+          <div id="import-other-content" style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem;"></div>
+        </div>
+
+        <!-- 경고 메시지 목록 -->
+        <div id="import-warnings-box" class="msg-banner warn" style="display:none; margin:1rem 0;"></div>
+
+        <!-- 409 충돌 박스 -->
+        <div id="import-conflict-box" class="msg-banner err" style="display:none; margin:1rem 0; text-align:center;">
+          <div style="font-weight:700; margin-bottom:0.4rem;">⚠ 그 사이 다른 사용자가 수정했습니다.</div>
+          <div style="font-size:0.82rem; margin-bottom:0.6rem;">최신 데이터를 다시 조회하여 미리보기를 갱신해 주세요.</div>
+          <button id="btn-reload-preview" type="button" class="btn primary" style="padding:0.3rem 0.8rem;">🔄 최신으로 다시 읽어 미리보기 갱신</button>
+        </div>
+
+        <!-- 성공 배너 -->
+        <div id="import-success-box" class="msg-banner ok" style="display:none; margin:1rem 0;"></div>
+
+        <!-- 하단 액션 바 -->
+        <div class="import-actions-bar" style="margin-top:1.5rem; display:flex; justify-content:flex-end; gap:1rem; align-items:center; flex-wrap:wrap;">
+          <span id="import-apply-summary-text" style="color:var(--sub); font-size:0.85rem;"></span>
+          <button id="btn-apply-import" type="button" class="btn primary" style="padding:0.6rem 1.4rem; font-size:1rem; font-weight:700;">💾 작업일보 적용</button>
+        </div>
+      </div>
+    </div>
+    <!-- 1. 미인증 화면 -->
+    <div id="view-unauth" style="display:none; text-align:center; padding:3rem 1rem;">
+      <div style="font-size:1.1rem; font-weight:700; margin-bottom:0.5rem;">🔒 관리자 권한이 필요합니다</div>
+      <div style="color:var(--sub); margin-bottom:1.5rem;">메인 화면에서 관리자 비밀번호로 로그인한 후 양식 관리를 이용할 수 있습니다.</div>
+      <a id="btn-login-home" class="btn primary" href="/">메인 화면으로 이동</a>
+    </div>
+
+    <!-- 2. 양식 목록 화면 -->
+    <div id="view-list" style="display:none;">
+      <div
+        style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+        <div>
+          <h2 style="margin:0; font-size:1.2rem; font-weight:700;">등록된 작업일보 양식</h2>
+          <div id="tpl-count-badge" style="font-size:0.8rem; color:var(--sub); margin-top:0.2rem;">불러오는 중…</div>
+        </div>
+        <button id="btn-create-template" type="button" class="btn primary">+ 새 양식 만들기</button>
+      </div>
+
+      <div id="tpl-cards-container" class="card-grid"></div>
+    </div>
+
+    <!-- 3. 양식 편집 화면 -->
+    <div id="view-editor" style="display:none;">
+      <div class="editor-toolbar">
+        <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
+          <button id="btn-back-to-list" type="button" class="btn faint">← 목록으로</button>
+          <div class="form-group">
+            <label for="input-tpl-name">양식 이름</label>
+            <input type="text" id="input-tpl-name" style="width:220px;" placeholder="예: 표준 작업일보 (2쪽)" maxlength="60">
+          </div>
+          <div class="form-group">
+            <label for="input-tpl-id">ID</label>
+            <input type="text" id="input-tpl-id" style="width:140px;" placeholder="영문-소문자-숫자" maxlength="30">
+          </div>
+          <div class="form-group">
+            <label>쪽 수</label>
+            <span id="display-page-count" style="font-weight:700; font-size:0.88rem;">-</span>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <input type="file" id="import-pdf-input" accept=".pdf" style="display:none;">
+          <button id="btn-select-pdf" type="button" class="btn">📄 샘플 PDF 선택</button>
+          <span id="pdf-file-name"
+            style="font-size:0.78rem; color:var(--sub); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+          <button id="btn-save-template" type="button" class="btn primary">💾 양식 저장</button>
+        </div>
+      </div>
+
+      <div id="save-msg-banner" class="msg-banner err" style="display:none; margin-bottom:1rem;"></div>
+
+      <div class="editor-layout">
+        <!-- 좌측: PDF 캔버스 뷰어 -->
+        <div class="viewer-panel">
+          <div class="viewer-nav">
+            <div style="display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap;">
+              <button id="btn-prev-page" type="button" class="btn faint" style="padding:0.2rem 0.5rem;">◀ 이전 쪽</button>
+              <span id="page-indicator" style="font-weight:700;">쪽 1 / 1</span>
+              <button id="btn-next-page" type="button" class="btn faint" style="padding:0.2rem 0.5rem;">다음 쪽 ▶</button>
+              <span style="border-left:1px solid var(--line); height:16px; margin:0 0.15rem;"></span>
+              <button id="btn-zoom-out" type="button" class="btn faint" style="padding:0.2rem 0.45rem;" title="축소 (25% 단위)">−</button>
+              <button id="btn-zoom-reset" type="button" class="btn faint" style="padding:0.2rem 0.45rem; font-weight:700;" title="100% 원래 크기">100%</button>
+              <button id="btn-zoom-in" type="button" class="btn faint" style="padding:0.2rem 0.45rem;" title="확대 (25% 단위)">+</button>
+              <button id="btn-zoom-fit" type="button" class="btn faint" style="padding:0.2rem 0.45rem;" title="너비에 맞추기">폭 맞춤</button>
+              <span id="zoom-level-badge" style="font-size:0.75rem; color:var(--sub); font-weight:600;">100%</span>
+            </div>
+            <div style="color:var(--sub); font-size:0.75rem;">
+              ※ 드래그: 구역 생성/이동/리사이즈 · 경계선: 드래그로 이동, 더블클릭으로 삭제
+            </div>
+          </div>
+
+          <div class="canvas-wrap">
+            <div id="canvas-inner" class="canvas-inner">
+              <canvas id="pdf-canvas"></canvas>
+              <div id="zone-overlay"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 우측: 구역 속성 및 읽기 미리보기 사이드바 -->
+        <div class="sidebar-panel">
+          <!-- 구역 목록 -->
+          <div>
+            <h3 class="panel-sec-title">현재 쪽 구역 목록</h3>
+            <div id="zone-chips" class="zone-chip-list">
+              <span style="font-size:0.78rem; color:var(--sub);">등록된 구역이 없습니다.</span>
+            </div>
+          </div>
+
+          <!-- 선택 구역 속성 -->
+          <div id="zone-props-sec" style="display:none; border-top:1px solid var(--line); padding-top:0.8rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <h3 class="panel-sec-title" style="margin:0; border:none; padding:0;">구역 속성 설정</h3>
+              <button id="btn-delete-zone" type="button" class="btn danger"
+                style="padding:0.2rem 0.5rem; font-size:0.75rem;">구역 삭제</button>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:0.5rem;">
+              <div class="form-group">
+                <label>종류</label>
+                <label style="font-weight:normal; margin-left:0.5rem;">
+                  <input type="radio" name="zone-kind" value="text" id="radio-kind-text"> 텍스트
+                </label>
+                <label style="font-weight:normal; margin-left:0.5rem;">
+                  <input type="radio" name="zone-kind" value="table" id="radio-kind-table"> 표(Table)
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label for="select-zone-target">연결 대상</label>
+                <select id="select-zone-target" style="flex:1;">
+                  <option value="weather.text">날씨 (맑음/흐림 등)</option>
+                  <option value="weather.tempMin">최저기온 (°C)</option>
+                  <option value="weather.tempMax">최고기온 (°C)</option>
+                  <option value="weather.rain">강우량 (mm)</option>
+                  <option value="site.name">현장명</option>
+                  <option value="crew">인력 투입 현황 (crew)</option>
+                  <option value="equip">장비 투입 현황 (equip)</option>
+                  <option value="material">자재 투입 현황 (material)</option>
+                  <option value="notes">특이사항 / 비고</option>
+                  <option value="work">작업 내용</option>
+                </select>
+              </div>
+
+              <!-- 구역 상위제목(헤더, WD-77) -->
+              <div id="zone-header-group" class="form-group" style="display:none;">
+                <label for="input-zone-header">상위제목</label>
+                <input type="text" id="input-zone-header" maxlength="100" style="flex:1;" placeholder="예: 보도육교#5 (비우면 최상위 노드)">
+              </div>
+
+              <!-- 구역 위치 및 크기 (%) -->
+              <div class="form-group" style="align-items:center; gap:0.3rem; flex-wrap:wrap;">
+                <label style="margin-right:0.2rem;">좌표(%)</label>
+                <span style="font-size:0.75rem; color:var(--sub);">X</span>
+                <input id="input-zone-x" type="number" step="0.1" min="0" max="100" style="width:48px; padding:0.2rem 0.3rem; font-size:0.78rem;">
+                <span style="font-size:0.75rem; color:var(--sub); margin-left:0.2rem;">Y</span>
+                <input id="input-zone-y" type="number" step="0.1" min="0" max="100" style="width:48px; padding:0.2rem 0.3rem; font-size:0.78rem;">
+                <span style="font-size:0.75rem; color:var(--sub); margin-left:0.2rem;">W</span>
+                <input id="input-zone-w" type="number" step="0.1" min="0.1" max="100" style="width:48px; padding:0.2rem 0.3rem; font-size:0.78rem;">
+                <span style="font-size:0.75rem; color:var(--sub); margin-left:0.2rem;">H</span>
+                <input id="input-zone-h" type="number" step="0.1" min="0.1" max="100" style="width:48px; padding:0.2rem 0.3rem; font-size:0.78rem;">
+              </div>
+
+              <!-- 표 전용 옵션 -->
+              <div id="table-props-box"
+                style="display:none; flex-direction:column; gap:0.5rem; background:var(--card-sub); padding:0.6rem; border-radius:0.3rem;">
+                <div style="font-size:0.78rem; font-weight:700; color:var(--ink);">표 열 경계 및 필드 매핑</div>
+                <div style="font-size:0.74rem; color:var(--sub);">
+                  구역 안을 클릭하면 세로 열 경계선이 추가됩니다. (현재 열 수: <b id="display-col-count">1</b>개)
+                </div>
+
+                <div class="form-group">
+                  <label for="input-skip-rows">건너뛸 헤더 행</label>
+                  <input type="number" id="input-skip-rows" min="0" max="10" value="1" style="width:60px;">
+                </div>
+
+                <div class="form-group">
+                  <label for="select-stop-at">종료 조건</label>
+                  <select id="select-stop-at" style="flex:1;">
+                    <option value="sum">'계' / '합계' 행에서 중단</option>
+                    <option value="blank">빈 행에서 중단</option>
+                    <option value="">끝까지 읽기</option>
+                  </select>
+                </div>
+
+                <div id="col-mapping-container" style="display:flex; flex-direction:column; gap:0.3rem;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 읽기 미리보기 -->
+          <div style="border-top:1px solid var(--line); padding-top:0.8rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+              <h3 class="panel-sec-title" style="margin:0; border:none; padding:0;">읽기 실시간 미리보기</h3>
+              <span id="preview-summary-badge" style="font-size:0.75rem; color:var(--sub);"></span>
+            </div>
+            <div id="preview-content-box" class="preview-box">
+              <span style="color:var(--sub);">샘플 PDF를 선택하고 구역을 지정하면 추출 내용이 표시됩니다.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // 1. 유틸 및 헬퍼 함수
+      function genId() {
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+          try {
+            return crypto.randomUUID().slice(0, 8);
+          } catch (_) {
+            // 비보안 컨텍스트(HTTP LAN 등) 예외 방어
+          }
+        }
+        return Math.random().toString(36).slice(2, 10);
+      }
+
+      function el(tag, attrs, ...children) {
+        const elem = document.createElement(tag);
+        if (attrs) {
+          for (const [k, v] of Object.entries(attrs)) {
+            if (k === 'class') elem.className = v;
+            else if (k === 'text') elem.textContent = v;
+            else if (k.startsWith('on') && typeof v === 'function') elem.addEventListener(k.slice(2), v);
+            else if (k === 'style') elem.style.cssText = v;
+            else elem.setAttribute(k, v);
+          }
+        }
+        for (const child of children) {
+          if (typeof child === 'string' || typeof child === 'number') {
+            elem.appendChild(document.createTextNode(String(child)));
+          } else if (child instanceof Node) {
+            elem.appendChild(child);
+          }
+        }
+        return elem;
+      }
+
+      const SITE_MATCH = location.pathname.match(/^\/s\/([a-z0-9-]{1,20})(?=\/|$)/);
+      const SITE_ID = SITE_MATCH ? SITE_MATCH[1] : '';
+      const SITE_PREFIX = SITE_ID ? '/s/' + SITE_ID : '';
+      const siteKey = (k) => (k === 'wd_last_site' || !SITE_ID || SITE_ID === 'main') ? k : (k + '@' + SITE_ID);
+      function withSitePrefix(path) {
+        return SITE_PREFIX + path;
+      }
+
+      // 테마 토글
+      const btnTheme = document.getElementById('btn-toggle-theme');
+      btnTheme.onclick = () => {
+        const cur = document.documentElement.getAttribute('data-theme') || 'light';
+        const next = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem(siteKey('theme'), next);
+      };
+
+      const btnBackHome = document.getElementById('btn-back-home');
+      btnBackHome.href = withSitePrefix('/');
+      const btnLoginHome = document.getElementById('btn-login-home');
+      btnLoginHome.href = withSitePrefix('/');
+
+      // 인증 토큰 확인
+      const token = sessionStorage.getItem(siteKey('tok')) || localStorage.getItem(siteKey('tok'));
+      if (!token) {
+        document.getElementById('view-unauth').style.display = 'block';
+        return;
+      }
+
+      async function api(path, options = {}) {
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          ...(options.headers || {}),
+        };
+        if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
+          headers['Content-Type'] = 'application/json';
+          options.body = JSON.stringify(options.body);
+        }
+        const res = await fetch(withSitePrefix(path), { ...options, headers });
+        const text = await res.text();
+        let data = null;
+        try { data = JSON.parse(text); } catch { }
+        if (!res.ok) {
+          const err = new Error(data && data.error ? data.error : `HTTP ${res.status}`);
+          err.status = res.status;
+          err.data = data;
+          throw err;
+        }
+        return data;
+      }
+
+      // 상태 모델
+      const S = {
+        templates: [],
+        currentTpl: null,
+        isNew: false,
+        pdfDoc: null,      // PdfZones.load 결과
+        pdfJsDoc: null,    // pdfjsLib 문서 (렌더용)
+        currentPageNum: 1,
+        selectedZoneIndex: -1,
+        selectedColDivider: null,
+        zoomScale: 1.0,
+        fitWidth: false,
+        pdfBuffer: null,
+        viewportScale: 1.0,
+        importState: {
+          selectedTpl: null,
+          pdfBuffer: null,
+          pdfDoc: null,
+          targetDate: '',
+          curDayData: null,
+          curRev: 0,
+          parsedData: {
+            crew: [],
+            equip: [],
+            material: [],
+            work: [],
+            other: [],
+            warnings: [],
+            rawResults: {}
+          },
+          applyModes: {
+            crew: 'replace',
+            equip: 'replace',
+            material: 'replace',
+            work: 'replace'
+          },
+          checkedIndices: {
+            crew: new Set(),
+            equip: new Set(),
+            material: new Set()
+          }
+        }
+      };
+      window.S = S;
+
+      const viewImport = document.getElementById('view-import');
+      const viewList = document.getElementById('view-list');
+      const viewEditor = document.getElementById('view-editor');
+      const tabBar = document.getElementById('import-tab-bar');
+      const tabImport = document.getElementById('tab-import');
+      const tabTemplates = document.getElementById('tab-templates');
+      const tplCards = document.getElementById('tpl-cards-container');
+      const tplCountBadge = document.getElementById('tpl-count-badge');
+      const saveMsgBanner = document.getElementById('save-msg-banner');
+      const importMsgBanner = document.getElementById('import-msg-banner');
+
+      function showImportError(msg) {
+        importMsgBanner.textContent = '⚠ ' + msg;
+        importMsgBanner.style.display = 'block';
+      }
+      function hideImportError() {
+        importMsgBanner.textContent = '';
+        importMsgBanner.style.display = 'none';
+      }
+
+      function switchTab(mode) {
+        try { sessionStorage.setItem(siteKey('import-active-tab'), mode); } catch (_) {}
+        hideImportError();
+        if (mode === 'import') {
+          tabImport.classList.add('active');
+          tabTemplates.classList.remove('active');
+          viewImport.style.display = 'block';
+          viewList.style.display = 'none';
+          viewEditor.style.display = 'none';
+          updateImportTemplateOptions();
+        } else {
+          tabTemplates.classList.add('active');
+          tabImport.classList.remove('active');
+          viewImport.style.display = 'none';
+          viewList.style.display = 'block';
+          viewEditor.style.display = 'none';
+          loadTemplateList();
+        }
+      }
+      tabImport.onclick = () => switchTab('import');
+      tabTemplates.onclick = () => switchTab('templates');
+
+      // 2. 양식 목록 로드 및 렌더링
+      async function loadTemplateList() {
+        viewEditor.style.display = 'none';
+        viewList.style.display = 'block';
+        tplCards.replaceChildren();
+        tplCountBadge.textContent = '불러오는 중…';
+        try {
+          const res = await api('/api/import-templates');
+          S.templates = (res && res.templates) || [];
+          tplCountBadge.textContent = `총 ${S.templates.length} / 20개 등록됨`;
+
+          if (S.templates.length === 0) {
+            tplCards.append(el('div', { style: 'grid-column: 1/-1; color:var(--sub); padding:2rem 0; text-align:center;', text: '등록된 양식이 없습니다. [+ 새 양식 만들기]를 눌러 등록하세요.' }));
+            return;
+          }
+
+          for (const tpl of S.templates) {
+            const card = el('div', { class: 'tpl-card' },
+              el('h3', { class: 'tpl-card-title', text: tpl.name }),
+              el('div', { class: 'tpl-card-meta', text: `ID: ${tpl.id} · ${tpl.pageCount}쪽 · 구역 ${(tpl.zones || []).length}개` }),
+              el('div', { class: 'tpl-card-actions' },
+                el('button', {
+                  type: 'button',
+                  class: 'btn',
+                  text: '편집',
+                  onclick: () => openEditor(tpl, false)
+                }),
+                el('button', {
+                  type: 'button',
+                  class: 'btn danger',
+                  text: '삭제',
+                  onclick: async () => {
+                    if (!confirm(`'${tpl.name}' 양식을 정말 삭제하시겠습니까?`)) return;
+                    try {
+                      await api(`/api/import-templates/${tpl.id}`, { method: 'DELETE' });
+                      await loadTemplateList();
+                    } catch (err) {
+                      alert('삭제 실패: ' + err.message);
+                    }
+                  }
+                })
+              )
+            );
+            tplCards.append(card);
+          }
+        } catch (err) {
+          tplCountBadge.textContent = '양식 목록을 불러오지 못했습니다: ' + err.message;
+        }
+      }
+
+      // 3. 편집기 오픈
+      async function openEditor(tpl, isNew = false) {
+        try { sessionStorage.setItem(siteKey('import-active-tab'), 'templates'); } catch (_) {}
+        S.currentTpl = JSON.parse(JSON.stringify(tpl || {
+          id: 'tpl-' + Date.now().toString(36),
+          name: '',
+          pageCount: 1,
+          zones: []
+        }));
+        S.isNew = isNew;
+        S.currentPageNum = 1;
+        S.selectedZoneIndex = -1;
+        S.selectedColDivider = null;
+        S.zoomScale = 1.0;
+        S.fitWidth = false;
+        S.pdfDoc = null;
+        S.pdfJsDoc = null;
+        S.pdfBuffer = null;
+
+        viewImport.style.display = 'none';
+        viewList.style.display = 'none';
+        viewEditor.style.display = 'block';
+        saveMsgBanner.style.display = 'none';
+        saveMsgBanner.textContent = '';
+        pdfFileName.textContent = '';
+        pdfFileInput.value = '';
+
+        document.getElementById('input-tpl-name').value = S.currentTpl.name || '';
+        const idInput = document.getElementById('input-tpl-id');
+        idInput.value = S.currentTpl.id || '';
+        idInput.disabled = !isNew;
+        const totalP = S.currentTpl.pageCount || 1;
+        document.getElementById('display-page-count').textContent = `${totalP}쪽`;
+        pageIndicator.textContent = `쪽 1 / ${totalP}`;
+
+        await renderPdfPage(S.currentPageNum);
+        renderCanvasAndZones();
+        renderZoneChips();
+        renderZoneProperties();
+        renderZonePreview();
+      }
+
+      // 새 양식 버튼
+      document.getElementById('btn-create-template').onclick = () => {
+        openEditor({ id: 'template-' + (S.templates.length + 1), name: '새 작업일보 양식', pageCount: 1, zones: [] }, true);
+      };
+      document.getElementById('btn-back-to-list').onclick = () => {
+        if (confirm('목록으로 돌아가시겠습니까? 저장하지 않은 내용은 사라집니다.')) {
+          loadTemplateList();
+        }
+      };
+
+      // 4. PDF 로드 및 렌더링
+      const pdfFileInput = document.getElementById('import-pdf-input');
+      const btnSelectPdf = document.getElementById('btn-select-pdf');
+      const pdfFileName = document.getElementById('pdf-file-name');
+
+      function isCancelledError(err) {
+        if (!err) return false;
+        if (err.name === 'RenderingCancelledException') return true;
+        const msg = String(err.message || err);
+        return msg.includes('RenderingCancelledException') || msg.includes('cancelled');
+      }
+
+      btnSelectPdf.onclick = () => pdfFileInput.click();
+      pdfFileInput.onchange = async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        pdfFileName.textContent = file.name;
+        saveMsgBanner.style.display = 'none';
+        saveMsgBanner.textContent = '';
+        try {
+          const buf = await file.arrayBuffer();
+          S.pdfBuffer = buf;
+
+          // PdfZones 문서 로드 (ArrayBuffer detach 방어: 독립 slice 전달)
+          S.pdfDoc = await window.PdfZones.load(buf.slice(0), { baseUrl: withSitePrefix('/') });
+          if (S.pdfDoc.pageCount) {
+            if (S.currentTpl) S.currentTpl.pageCount = S.pdfDoc.pageCount;
+            document.getElementById('display-page-count').textContent = `${S.pdfDoc.pageCount}쪽`;
+          }
+
+          // PDF.js 캔버스 렌더용 문서 로드 (독립 slice 전달)
+          const pdfjs = window.pdfjsLib;
+          const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buf.slice(0)), isEvalSupported: false });
+          S.pdfJsDoc = await loadingTask.promise;
+
+          S.currentPageNum = 1;
+          await renderPdfPage(S.currentPageNum);
+          renderCanvasAndZones();
+          renderZoneChips();
+          renderZonePreview();
+        } catch (err) {
+          if (!isCancelledError(err)) {
+            showSaveError('PDF 파일을 읽지 못했습니다: ' + err.message);
+          }
+        }
+      };
+
+      const canvasWrap = document.querySelector('.canvas-wrap');
+      const canvasInner = document.getElementById('canvas-inner');
+      const canvas = document.getElementById('pdf-canvas');
+      const zoneOverlay = document.getElementById('zone-overlay');
+      const pageIndicator = document.getElementById('page-indicator');
+      const zoomLevelBadge = document.getElementById('zoom-level-badge');
+      const btnZoomOut = document.getElementById('btn-zoom-out');
+      const btnZoomReset = document.getElementById('btn-zoom-reset');
+      const btnZoomIn = document.getElementById('btn-zoom-in');
+      const btnZoomFit = document.getElementById('btn-zoom-fit');
+
+      let currentRenderTask = null;
+      let renderQueue = Promise.resolve();
+
+      function renderPdfPage(pageNum) {
+        // 이전 진행 중인 렌더링 작업 cancel
+        if (currentRenderTask) {
+          try {
+            currentRenderTask.cancel();
+          } catch (_) { }
+          currentRenderTask = null;
+        }
+
+        // 렌더 큐 체인 직렬화 (연타·경쟁 방지)
+        renderQueue = renderQueue.then(async () => {
+          if (!S.pdfJsDoc) {
+            const baseW = 600;
+            const baseH = 800;
+            const wrapW = (canvasWrap && canvasWrap.clientWidth) > 50 ? canvasWrap.clientWidth : 600;
+            const scale = S.fitWidth
+              ? Math.max(0.25, Math.min(3.0, (wrapW - 24) / baseW))
+              : (typeof S.zoomScale === 'number' && !isNaN(S.zoomScale) && S.zoomScale > 0 ? S.zoomScale : 1.0);
+            const safeScale = (typeof scale === 'number' && !isNaN(scale) && scale > 0) ? scale : 1.0;
+            const cssW = Math.round(baseW * safeScale);
+            const cssH = Math.round(baseH * safeScale);
+            canvasInner.style.width = cssW + 'px';
+            canvasInner.style.height = cssH + 'px';
+            canvas.width = cssW;
+            canvas.height = cssH;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, cssW, cssH);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('샘플 PDF를 선택하면 여기에 페이지가 표시됩니다.', cssW / 2, cssH / 2);
+            const totalP = (S.currentTpl && S.currentTpl.pageCount) || 1;
+            pageIndicator.textContent = `쪽 ${pageNum} / ${totalP}`;
+            if (zoomLevelBadge) {
+              const pct = Math.round(safeScale * 100);
+              zoomLevelBadge.textContent = S.fitWidth ? `폭맞춤(${pct}%)` : `${pct}%`;
+            }
+            return;
+          }
+
+          const page = await S.pdfJsDoc.getPage(pageNum);
+          const unscaledViewport = page.getViewport({ scale: 1.0 });
+          const baseW = unscaledViewport.width;
+          const baseH = unscaledViewport.height;
+
+          const wrapW = (canvasWrap && canvasWrap.clientWidth) > 50 ? canvasWrap.clientWidth : 600;
+          let scale = (typeof S.zoomScale === 'number' && !isNaN(S.zoomScale) && S.zoomScale > 0) ? S.zoomScale : 1.0;
+          if (S.fitWidth) {
+            const availableW = Math.max(200, wrapW - 24);
+            scale = Math.max(0.25, Math.min(3.0, availableW / baseW));
+          }
+          const safeScale = (typeof scale === 'number' && !isNaN(scale) && scale > 0) ? scale : 1.0;
+
+          const cssW = Math.round(baseW * safeScale);
+          const cssH = Math.round(baseH * safeScale);
+          canvasInner.style.width = cssW + 'px';
+          canvasInner.style.height = cssH + 'px';
+
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = Math.round(cssW * dpr);
+          canvas.height = Math.round(cssH * dpr);
+
+          const renderViewport = page.getViewport({ scale: (cssW / baseW) * dpr });
+          const ctx = canvas.getContext('2d');
+
+          const task = page.render({ canvasContext: ctx, viewport: renderViewport });
+          currentRenderTask = task;
+          try {
+            await task.promise;
+            pageIndicator.textContent = `쪽 ${pageNum} / ${S.pdfJsDoc.numPages}`;
+            if (zoomLevelBadge) {
+              const pct = Math.round(safeScale * 100);
+              zoomLevelBadge.textContent = S.fitWidth ? `폭맞춤(${pct}%)` : `${pct}%`;
+            }
+          } catch (err) {
+            if (isCancelledError(err)) {
+              return; // 취소된 렌더링은 오류로 표시하지 않음
+            }
+            throw err;
+          } finally {
+            if (currentRenderTask === task) {
+              currentRenderTask = null;
+            }
+          }
+        }).catch((err) => {
+          if (isCancelledError(err)) return;
+          showSaveError('PDF 렌더링 오류: ' + (err && err.message ? err.message : String(err)));
+        });
+
+        return renderQueue;
+      }
+
+      // 확대/축소 버튼 바인딩
+      if (btnZoomOut) {
+        btnZoomOut.onclick = async () => {
+          S.fitWidth = false;
+          const cur = (typeof S.zoomScale === 'number' && !isNaN(S.zoomScale)) ? S.zoomScale : 1.0;
+          S.zoomScale = Math.max(0.25, Math.round((cur - 0.25) * 100) / 100);
+          await renderPdfPage(S.currentPageNum);
+          renderCanvasAndZones();
+        };
+      }
+      if (btnZoomReset) {
+        btnZoomReset.onclick = async () => {
+          S.fitWidth = false;
+          S.zoomScale = 1.0;
+          await renderPdfPage(S.currentPageNum);
+          renderCanvasAndZones();
+        };
+      }
+      if (btnZoomIn) {
+        btnZoomIn.onclick = async () => {
+          S.fitWidth = false;
+          const cur = (typeof S.zoomScale === 'number' && !isNaN(S.zoomScale)) ? S.zoomScale : 1.0;
+          S.zoomScale = Math.min(3.0, Math.round((cur + 0.25) * 100) / 100);
+          await renderPdfPage(S.currentPageNum);
+          renderCanvasAndZones();
+        };
+      }
+      if (btnZoomFit) {
+        btnZoomFit.onclick = async () => {
+          S.fitWidth = true;
+          await renderPdfPage(S.currentPageNum);
+          renderCanvasAndZones();
+        };
+      }
+
+      if (window.ResizeObserver && canvasWrap) {
+        const ro = new ResizeObserver(() => {
+          if (S.fitWidth) {
+            renderPdfPage(S.currentPageNum);
+            renderCanvasAndZones();
+          }
+        });
+        ro.observe(canvasWrap);
+      }
+
+      document.getElementById('btn-prev-page').onclick = async () => {
+        if (S.currentPageNum > 1) {
+          S.currentPageNum--;
+          await renderPdfPage(S.currentPageNum);
+          renderCanvasAndZones();
+          renderZoneChips();
+          renderZonePreview();
+        }
+      };
+      document.getElementById('btn-next-page').onclick = async () => {
+        const maxPage = S.pdfJsDoc ? S.pdfJsDoc.numPages : (S.currentTpl.pageCount || 1);
+        if (S.currentPageNum < maxPage) {
+          S.currentPageNum++;
+          await renderPdfPage(S.currentPageNum);
+          renderCanvasAndZones();
+          renderZoneChips();
+          renderZonePreview();
+        }
+      };
+
+      // 5. Pointer Events 통합 드래그 관리 (생성 / 이동 / 8방향 리사이즈 / 열 경계선 이동)
+      let pointerAction = null;
+
+      zoneOverlay.onpointerdown = (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        const oRect = zoneOverlay.getBoundingClientRect();
+        const startX = e.clientX - oRect.left;
+        const startY = e.clientY - oRect.top;
+
+        // 1. 열 경계선(.col-divider) 클릭 검사
+        const dividerTarget = e.target.closest('.col-divider');
+        if (dividerTarget) {
+          const zIdx = parseInt(dividerTarget.dataset.zoneIdx, 10);
+          const cIdx = parseInt(dividerTarget.dataset.colIdx, 10);
+          const z = S.currentTpl.zones[zIdx];
+          if (z && z.columns && z.columns[cIdx] !== undefined) {
+            const prevX = cIdx > 0 ? z.columns[cIdx - 1] : z.rect.x;
+            const nextX = cIdx < z.columns.length - 1 ? z.columns[cIdx + 1] : z.rect.x + z.rect.w;
+            pointerAction = {
+              type: 'col-drag',
+              pointerId: e.pointerId,
+              startX, startY,
+              startClientX: e.clientX, startClientY: e.clientY,
+              overlayRect: oRect,
+              hasMoved: false,
+              zoneIdx: zIdx,
+              colIdx: cIdx,
+              origColX: z.columns[cIdx],
+              divEl: dividerTarget,
+              minColX: prevX + 0.005,
+              maxColX: nextX - 0.005
+            };
+            dividerTarget.classList.add('dragging');
+            S.selectedColDivider = { zoneIdx: zIdx, colIdx: cIdx };
+            try { zoneOverlay.setPointerCapture(e.pointerId); } catch (_) { }
+            e.stopPropagation();
+            return;
+          }
+        }
+
+        // 2. 리사이즈 핸들(.zone-handle) 클릭 검사
+        const handleTarget = e.target.closest('.zone-handle');
+        if (handleTarget) {
+          const zIdx = parseInt(handleTarget.dataset.zoneIdx, 10);
+          const dir = handleTarget.dataset.dir;
+          const z = S.currentTpl.zones[zIdx];
+          const zoneEl = handleTarget.closest('.zone-rect');
+          if (z && zoneEl) {
+            pointerAction = {
+              type: 'resize',
+              pointerId: e.pointerId,
+              startX, startY,
+              startClientX: e.clientX, startClientY: e.clientY,
+              overlayRect: oRect,
+              hasMoved: false,
+              zoneIdx: zIdx,
+              dir,
+              origRect: { ...z.rect },
+              zoneEl
+            };
+            try { zoneOverlay.setPointerCapture(e.pointerId); } catch (_) { }
+            e.stopPropagation();
+            return;
+          }
+        }
+
+        // 3. 구역 박스(.zone-rect) 클릭 검사
+        const zoneTarget = e.target.closest('.zone-rect');
+        if (zoneTarget) {
+          const zIdx = parseInt(zoneTarget.dataset.zoneIdx, 10);
+          const z = S.currentTpl.zones[zIdx];
+          const isSel = (zIdx === S.selectedZoneIndex);
+
+          if (isSel) {
+            // 이미 선택된 구역 본체 -> 이동 모드 준비
+            pointerAction = {
+              type: 'move',
+              pointerId: e.pointerId,
+              startX, startY,
+              startClientX: e.clientX, startClientY: e.clientY,
+              overlayRect: oRect,
+              hasMoved: false,
+              zoneIdx: zIdx,
+              origRect: { ...z.rect },
+              zoneEl: zoneTarget
+            };
+            try { zoneOverlay.setPointerCapture(e.pointerId); } catch (_) { }
+            e.stopPropagation();
+            return;
+          } else {
+            // 다른 구역 클릭 -> 해당 구역 선택
+            S.selectedZoneIndex = zIdx;
+            S.selectedColDivider = null;
+            renderCanvasAndZones();
+            renderZoneChips();
+            renderZoneProperties();
+            renderZonePreview();
+            e.stopPropagation();
+            return;
+          }
+        }
+
+        // 4. 오버레이 빈 곳 클릭 -> 새 구역 드래그 생성 모드
+        if (e.target === zoneOverlay) {
+          S.selectedZoneIndex = -1;
+          S.selectedColDivider = null;
+          renderCanvasAndZones();
+          renderZoneChips();
+          renderZoneProperties();
+
+          const dragBox = el('div', {
+            style: `position:absolute;left:${startX}px;top:${startY}px;width:0;height:0;border:2px dashed #ef4444;background:rgba(239,68,68,0.2);pointer-events:none;z-index:30;`
+          });
+          zoneOverlay.append(dragBox);
+
+          pointerAction = {
+            type: 'create',
+            pointerId: e.pointerId,
+            startX, startY,
+            startClientX: e.clientX, startClientY: e.clientY,
+            overlayRect: oRect,
+            hasMoved: false,
+            dragBox
+          };
+          try { zoneOverlay.setPointerCapture(e.pointerId); } catch (_) { }
+          e.stopPropagation();
+        }
+      };
+
+      zoneOverlay.onpointermove = (e) => {
+        if (!pointerAction) return;
+        const oRect = zoneOverlay.getBoundingClientRect();
+        const curX = e.clientX - oRect.left;
+        const curY = e.clientY - oRect.top;
+        const dist = Math.hypot(e.clientX - pointerAction.startClientX, e.clientY - pointerAction.startClientY);
+        if (dist >= 3) {
+          pointerAction.hasMoved = true;
+        }
+
+        // 1. 새 구역 생성 드래그
+        if (pointerAction.type === 'create') {
+          const l = Math.min(pointerAction.startX, curX);
+          const t = Math.min(pointerAction.startY, curY);
+          const w = Math.abs(curX - pointerAction.startX);
+          const h = Math.abs(curY - pointerAction.startY);
+          pointerAction.dragBox.style.left = `${l}px`;
+          pointerAction.dragBox.style.top = `${t}px`;
+          pointerAction.dragBox.style.width = `${w}px`;
+          pointerAction.dragBox.style.height = `${h}px`;
+          return;
+        }
+
+        // 2. 구역 본체 이동
+        if (pointerAction.type === 'move') {
+          const dxRatio = (curX - pointerAction.startX) / oRect.width;
+          const dyRatio = (curY - pointerAction.startY) / oRect.height;
+          const orig = pointerAction.origRect;
+          const newX = Math.max(0, Math.min(1 - orig.w, orig.x + dxRatio));
+          const newY = Math.max(0, Math.min(1 - orig.h, orig.y + dyRatio));
+
+          pointerAction.zoneEl.style.left = `${newX * 100}%`;
+          pointerAction.zoneEl.style.top = `${newY * 100}%`;
+          pointerAction.curRect = { x: newX, y: newY, w: orig.w, h: orig.h };
+          return;
+        }
+
+        // 3. 리사이즈 핸들 드래그
+        if (pointerAction.type === 'resize') {
+          const orig = pointerAction.origRect;
+          const dir = pointerAction.dir;
+          const curRelX = curX / oRect.width;
+          const curRelY = curY / oRect.height;
+
+          let x1 = orig.x;
+          let y1 = orig.y;
+          let x2 = orig.x + orig.w;
+          let y2 = orig.y + orig.h;
+
+          const minW = Math.max(0.01, 8 / oRect.width);
+          const minH = Math.max(0.01, 8 / oRect.height);
+
+          if (dir.includes('w')) {
+            x1 = Math.max(0, Math.min(x2 - minW, curRelX));
+          }
+          if (dir.includes('e')) {
+            x2 = Math.min(1, Math.max(x1 + minW, curRelX));
+          }
+          if (dir.includes('n')) {
+            y1 = Math.max(0, Math.min(y2 - minH, curRelY));
+          }
+          if (dir.includes('s')) {
+            y2 = Math.min(1, Math.max(y1 + minH, curRelY));
+          }
+
+          const rx = x1;
+          const ry = y1;
+          const rw = x2 - x1;
+          const rh = y2 - y1;
+
+          pointerAction.zoneEl.style.left = `${rx * 100}%`;
+          pointerAction.zoneEl.style.top = `${ry * 100}%`;
+          pointerAction.zoneEl.style.width = `${rw * 100}%`;
+          pointerAction.zoneEl.style.height = `${rh * 100}%`;
+          pointerAction.curRect = { x: rx, y: ry, w: rw, h: rh };
+          return;
+        }
+
+        // 4. 열 경계선 드래그
+        if (pointerAction.type === 'col-drag') {
+          const z = S.currentTpl.zones[pointerAction.zoneIdx];
+          const curRelX = curX / oRect.width;
+          const clampedColX = Math.max(pointerAction.minColX, Math.min(pointerAction.maxColX, curRelX));
+          const relPercent = ((clampedColX - z.rect.x) / z.rect.w) * 100;
+          pointerAction.divEl.style.left = `${relPercent}%`;
+          pointerAction.curColX = clampedColX;
+          return;
+        }
+      };
+
+      const finishPointerAction = (e) => {
+        if (!pointerAction) return;
+        const act = pointerAction;
+        pointerAction = null;
+        try { zoneOverlay.releasePointerCapture(act.pointerId); } catch (_) { }
+
+        const oRect = zoneOverlay.getBoundingClientRect();
+        const curX = e.clientX - oRect.left;
+        const curY = e.clientY - oRect.top;
+
+        // 1. 새 구역 생성 완료
+        if (act.type === 'create') {
+          if (act.dragBox) act.dragBox.remove();
+          const left = Math.min(act.startX, curX);
+          const top = Math.min(act.startY, curY);
+          const width = Math.abs(curX - act.startX);
+          const height = Math.abs(curY - act.startY);
+
+          if (width >= 8 && height >= 8) {
+            const rx = Math.round((left / oRect.width) * 10000) / 10000;
+            const ry = Math.round((top / oRect.height) * 10000) / 10000;
+            const rw = Math.round((width / oRect.width) * 10000) / 10000;
+            const rh = Math.round((height / oRect.height) * 10000) / 10000;
+
+            const newZone = {
+              page: S.currentPageNum,
+              kind: 'table',
+              target: 'crew',
+              rect: { x: rx, y: ry, w: rw, h: rh },
+              columns: [],
+              columnMap: {},
+              skipRows: 1,
+              stopAt: 'sum'
+            };
+            S.currentTpl.zones.push(newZone);
+            S.selectedZoneIndex = S.currentTpl.zones.length - 1;
+            S.selectedColDivider = null;
+          }
+          renderCanvasAndZones();
+          renderZoneChips();
+          renderZoneProperties();
+          renderZonePreview();
+          return;
+        }
+
+        // 2. 이동 완료
+        if (act.type === 'move') {
+          const z = S.currentTpl.zones[act.zoneIdx];
+          if (act.hasMoved && act.curRect) {
+            const deltaX = act.curRect.x - act.origRect.x;
+            z.rect.x = Math.round(act.curRect.x * 10000) / 10000;
+            z.rect.y = Math.round(act.curRect.y * 10000) / 10000;
+            if (Array.isArray(z.columns)) {
+              z.columns = z.columns.map(c => Math.round((c + deltaX) * 10000) / 10000);
+            }
+          } else if (!act.hasMoved && z.kind === 'table') {
+            // 이동하지 않고 클릭만 한 경우: 표 구역 내 열 경계선 추가
+            const zRect = act.zoneEl.getBoundingClientRect();
+            const clickRelX = (e.clientX - zRect.left) / zRect.width;
+            const newColX = Math.round((z.rect.x + clickRelX * z.rect.w) * 10000) / 10000;
+            if (newColX > z.rect.x + 0.01 && newColX < z.rect.x + z.rect.w - 0.01) {
+              z.columns = z.columns || [];
+              const minGap = 0.005;
+              const canAdd = z.columns.every(c => Math.abs(c - newColX) >= minGap);
+              if (canAdd) {
+                z.columns.push(newColX);
+                z.columns.sort((a, b) => a - b);
+              }
+            }
+          }
+          renderCanvasAndZones();
+          renderZoneProperties();
+          renderZonePreview();
+          return;
+        }
+
+        // 3. 리사이즈 완료
+        if (act.type === 'resize') {
+          const z = S.currentTpl.zones[act.zoneIdx];
+          if (act.hasMoved && act.curRect) {
+            z.rect.x = Math.round(act.curRect.x * 10000) / 10000;
+            z.rect.y = Math.round(act.curRect.y * 10000) / 10000;
+            z.rect.w = Math.round(act.curRect.w * 10000) / 10000;
+            z.rect.h = Math.round(act.curRect.h * 10000) / 10000;
+            // 구역 밖으로 나간 columns 제거
+            if (Array.isArray(z.columns)) {
+              z.columns = z.columns.filter(c => c > z.rect.x + 0.005 && c < z.rect.x + z.rect.w - 0.005);
+            }
+          }
+          renderCanvasAndZones();
+          renderZoneProperties();
+          renderZonePreview();
+          return;
+        }
+
+        // 4. 열 경계선 드래그 완료
+        if (act.type === 'col-drag') {
+          act.divEl.classList.remove('dragging');
+          const z = S.currentTpl.zones[act.zoneIdx];
+          if (act.hasMoved && act.curColX !== undefined) {
+            z.columns[act.colIdx] = Math.round(act.curColX * 10000) / 10000;
+            z.columns.sort((a, b) => a - b);
+          }
+          renderCanvasAndZones();
+          renderZoneProperties();
+          renderZonePreview();
+          return;
+        }
+      };
+
+      zoneOverlay.onpointerup = finishPointerAction;
+      zoneOverlay.onpointercancel = finishPointerAction;
+
+      function renderCanvasAndZones() {
+        zoneOverlay.replaceChildren();
+        if (!S.currentTpl || !S.currentTpl.zones) return;
+
+        const currentZones = S.currentTpl.zones.map((z, idx) => ({ ...z, _idx: idx }))
+          .filter(z => z.page === S.currentPageNum);
+
+        for (const z of currentZones) {
+          const isSel = (z._idx === S.selectedZoneIndex);
+          const zoneEl = el('div', {
+            class: `zone-rect${isSel ? ' selected' : ''}`,
+            style: `left:${z.rect.x * 100}%; top:${z.rect.y * 100}%; width:${z.rect.w * 100}%; height:${z.rect.h * 100}%;`
+          });
+          zoneEl.dataset.zoneIdx = String(z._idx);
+
+          // 라벨 배지
+          let targetName = TARGET_LABELS[z.target] || z.target;
+          if (z.target === 'work' && z.header) {
+            targetName = `작업: ${z.header}`;
+          }
+          zoneEl.append(el('div', { class: 'zone-badge', text: `${z.kind === 'table' ? '[표]' : '[텍스트]'} ${targetName}` }));
+
+          // 선택된 상태일 때 8개 리사이즈 핸들 부착
+          if (isSel) {
+            const dirs = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+            for (const d of dirs) {
+              const handle = el('div', { class: `zone-handle ${d}` });
+              handle.dataset.zoneIdx = String(z._idx);
+              handle.dataset.dir = d;
+              zoneEl.append(handle);
+            }
+          }
+
+          // 표 구역 열 구분선(columns) 렌더링
+          if (z.kind === 'table' && Array.isArray(z.columns)) {
+            for (let cIdx = 0; cIdx < z.columns.length; cIdx++) {
+              const colX = z.columns[cIdx];
+              const relPercent = ((colX - z.rect.x) / z.rect.w) * 100;
+              if (relPercent > 0 && relPercent < 100) {
+                const isColSel = S.selectedColDivider && S.selectedColDivider.zoneIdx === z._idx && S.selectedColDivider.colIdx === cIdx;
+                const divEl = el('div', {
+                  class: `col-divider${isColSel ? ' selected' : ''}`,
+                  style: `left:${relPercent}%;`,
+                  title: `열 경계: ${colX} (드래그로 이동, 더블클릭으로 삭제)`
+                });
+                divEl.dataset.zoneIdx = String(z._idx);
+                divEl.dataset.colIdx = String(cIdx);
+
+                // 더블클릭 삭제
+                divEl.ondblclick = (e) => {
+                  e.stopPropagation();
+                  z.columns.splice(cIdx, 1);
+                  S.selectedColDivider = null;
+                  renderCanvasAndZones();
+                  renderZoneProperties();
+                  renderZonePreview();
+                };
+
+                zoneEl.append(divEl);
+              }
+            }
+          }
+
+          zoneOverlay.append(zoneEl);
+        }
+      }
+
+      // 6. 구역 목록 칩 렌더링
+      const zoneChipsContainer = document.getElementById('zone-chips');
+      function renderZoneChips() {
+        zoneChipsContainer.replaceChildren();
+        if (!S.currentTpl || !S.currentTpl.zones) return;
+
+        const currentZones = S.currentTpl.zones.map((z, idx) => ({ ...z, _idx: idx }))
+          .filter(z => z.page === S.currentPageNum);
+
+        if (currentZones.length === 0) {
+          zoneChipsContainer.append(el('span', { style: 'font-size:0.78rem; color:var(--sub);', text: '이 쪽에는 지정된 구역이 없습니다.' }));
+          return;
+        }
+
+        for (const z of currentZones) {
+          const isSel = (z._idx === S.selectedZoneIndex);
+          let chipLabel = `#${z._idx + 1} ${TARGET_LABELS[z.target] || z.target} (${z.kind})`;
+          if (z.target === 'work' && z.header) {
+            chipLabel = `#${z._idx + 1} [작업] ${z.header}`;
+          }
+          const chip = el('div', {
+            class: `zone-chip${isSel ? ' selected' : ''}`,
+            text: chipLabel,
+            onclick: () => {
+              S.selectedZoneIndex = z._idx;
+              renderCanvasAndZones();
+              renderZoneChips();
+              renderZoneProperties();
+              renderZonePreview();
+            }
+          });
+          zoneChipsContainer.append(chip);
+        }
+      }
+
+      // 7. 선택 구역 속성 편집 패널
+      const zonePropsSec = document.getElementById('zone-props-sec');
+      const radioKindText = document.getElementById('radio-kind-text');
+      const radioKindTable = document.getElementById('radio-kind-table');
+      const selectZoneTarget = document.getElementById('select-zone-target');
+      const zoneHeaderGroup = document.getElementById('zone-header-group');
+      const inputZoneHeader = document.getElementById('input-zone-header');
+      const tablePropsBox = document.getElementById('table-props-box');
+      const displayColCount = document.getElementById('display-col-count');
+      const inputSkipRows = document.getElementById('input-skip-rows');
+      const selectStopAt = document.getElementById('select-stop-at');
+      const colMappingContainer = document.getElementById('col-mapping-container');
+      const btnDeleteZone = document.getElementById('btn-delete-zone');
+
+      const TARGET_LABELS = {
+        'weather.text': '날씨',
+        'weather.tempMin': '최저기온',
+        'weather.tempMax': '최고기온',
+        'weather.rain': '강우량',
+        'site.name': '현장명',
+        'crew': '인력투입 (crew)',
+        'equip': '장비투입 (equip)',
+        'material': '자재투입 (material)',
+        'notes': '특이사항',
+        'work': '작업내용'
+      };
+
+      const TARGET_FIELDS = {
+        crew: [
+          { val: 'job', text: '직종 / 구분' },
+          { val: 'count', text: '금일 수량 / 인원' },
+          { val: 'loc', text: '작업 위치' }
+        ],
+        equip: [
+          { val: 'name', text: '장비명 / 규격' },
+          { val: 'qty', text: '금일 수량' },
+          { val: 'loc', text: '작업 위치' }
+        ],
+        material: [
+          { val: 'kind', text: '품명' },
+          { val: 'unit', text: '단위' },
+          { val: 'qty', text: '금일 입고/사용량' }
+        ]
+      };
+
+      const inputZoneX = document.getElementById('input-zone-x');
+      const inputZoneY = document.getElementById('input-zone-y');
+      const inputZoneW = document.getElementById('input-zone-w');
+      const inputZoneH = document.getElementById('input-zone-h');
+
+      function updateZoneRectFromInputs() {
+        if (S.selectedZoneIndex < 0 || !S.currentTpl || !S.currentTpl.zones[S.selectedZoneIndex]) return;
+        const z = S.currentTpl.zones[S.selectedZoneIndex];
+        const x = Math.max(0, Math.min(99, parseFloat(inputZoneX.value) || 0)) / 100;
+        const y = Math.max(0, Math.min(99, parseFloat(inputZoneY.value) || 0)) / 100;
+        const w = Math.max(0.01, Math.min(1 - x, parseFloat(inputZoneW.value) || 1)) / 100;
+        const h = Math.max(0.01, Math.min(1 - y, parseFloat(inputZoneH.value) || 1)) / 100;
+
+        const deltaX = x - z.rect.x;
+        z.rect = {
+          x: Math.round(x * 10000) / 10000,
+          y: Math.round(y * 10000) / 10000,
+          w: Math.round(w * 10000) / 10000,
+          h: Math.round(h * 10000) / 10000
+        };
+
+        if (Array.isArray(z.columns)) {
+          z.columns = z.columns.map(c => Math.round((c + deltaX) * 10000) / 10000)
+            .filter(c => c > z.rect.x + 0.005 && c < z.rect.x + z.rect.w - 0.005);
+        }
+
+        renderCanvasAndZones();
+        renderZonePreview();
+      }
+
+      if (inputZoneX) inputZoneX.onchange = updateZoneRectFromInputs;
+      if (inputZoneY) inputZoneY.onchange = updateZoneRectFromInputs;
+      if (inputZoneW) inputZoneW.onchange = updateZoneRectFromInputs;
+      if (inputZoneH) inputZoneH.onchange = updateZoneRectFromInputs;
+
+      function renderZoneProperties() {
+        const zone = S.currentTpl && S.currentTpl.zones && S.currentTpl.zones[S.selectedZoneIndex];
+        if (!zone) {
+          zonePropsSec.style.display = 'none';
+          return;
+        }
+        zonePropsSec.style.display = 'block';
+
+        if (inputZoneX && inputZoneY && inputZoneW && inputZoneH) {
+          inputZoneX.value = (zone.rect.x * 100).toFixed(1);
+          inputZoneY.value = (zone.rect.y * 100).toFixed(1);
+          inputZoneW.value = (zone.rect.w * 100).toFixed(1);
+          inputZoneH.value = (zone.rect.h * 100).toFixed(1);
+        }
+
+        if (zone.kind === 'table') radioKindTable.checked = true;
+        else radioKindText.checked = true;
+
+        selectZoneTarget.value = zone.target || 'crew';
+
+        if (zone.target === 'work') {
+          if (zoneHeaderGroup) {
+            zoneHeaderGroup.style.display = 'flex';
+            inputZoneHeader.value = zone.header || '';
+          }
+          radioKindText.checked = true;
+          zone.kind = 'text';
+          radioKindTable.closest('.form-group').style.display = 'none';
+          tablePropsBox.style.display = 'none';
+        } else {
+          if (zoneHeaderGroup) {
+            zoneHeaderGroup.style.display = 'none';
+          }
+          radioKindTable.closest('.form-group').style.display = 'flex';
+          if (zone.kind === 'table') {
+            tablePropsBox.style.display = 'flex';
+            const colCount = (zone.columns ? zone.columns.length : 0) + 1;
+            displayColCount.textContent = `${colCount}`;
+            inputSkipRows.value = zone.skipRows !== undefined ? zone.skipRows : 1;
+            selectStopAt.value = zone.stopAt !== undefined ? zone.stopAt : 'sum';
+
+            // 열 매핑 렌더링
+            colMappingContainer.replaceChildren();
+            const fields = TARGET_FIELDS[zone.target] || [];
+            zone.columnMap = zone.columnMap || {};
+
+            for (let c = 0; c < colCount; c++) {
+              const row = el('div', { style: 'display:flex; align-items:center; gap:0.4rem; font-size:0.76rem;' },
+                el('span', { style: 'min-width:40px; font-weight:600;', text: `열 ${c}:` })
+              );
+              const sel = el('select', {
+                style: 'flex:1; font-size:0.75rem; padding:0.2rem;',
+                onchange: (e) => {
+                  if (e.target.value) {
+                    zone.columnMap[c] = e.target.value;
+                  } else {
+                    delete zone.columnMap[c];
+                  }
+                  renderZonePreview();
+                }
+              });
+              sel.append(el('option', { value: '', text: '(매핑 안 함 / 무시)' }));
+              for (const f of fields) {
+                const optEl = el('option', { value: f.val, text: f.text });
+                if (zone.columnMap[c] === f.val) optEl.selected = true;
+                sel.append(optEl);
+              }
+              row.append(sel);
+              colMappingContainer.append(row);
+            }
+          } else {
+            tablePropsBox.style.display = 'none';
+          }
+        }
+      }
+
+      // 키보드 조작 리스너 (선택 구역 이동 및 경계선/구역 삭제)
+      window.addEventListener('keydown', (e) => {
+        const activeTag = document.activeElement ? document.activeElement.tagName : '';
+        if (['INPUT', 'SELECT', 'TEXTAREA'].includes(activeTag)) return;
+        if (S.selectedZoneIndex < 0 || !S.currentTpl || !S.currentTpl.zones || !S.currentTpl.zones[S.selectedZoneIndex]) return;
+
+        const z = S.currentTpl.zones[S.selectedZoneIndex];
+        const step = e.shiftKey ? 0.001 : 0.01;
+
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+          e.preventDefault();
+          let dx = 0, dy = 0;
+          if (e.key === 'ArrowLeft') dx = -step;
+          else if (e.key === 'ArrowRight') dx = step;
+          else if (e.key === 'ArrowUp') dy = -step;
+          else if (e.key === 'ArrowDown') dy = step;
+
+          const newX = Math.max(0, Math.min(1 - z.rect.w, Math.round((z.rect.x + dx) * 10000) / 10000));
+          const newY = Math.max(0, Math.min(1 - z.rect.h, Math.round((z.rect.y + dy) * 10000) / 10000));
+          const realDx = newX - z.rect.x;
+          z.rect.x = newX;
+          z.rect.y = newY;
+          if (Array.isArray(z.columns)) {
+            z.columns = z.columns.map(c => Math.round((c + realDx) * 10000) / 10000);
+          }
+          renderCanvasAndZones();
+          renderZoneProperties();
+          renderZonePreview();
+          return;
+        }
+
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          e.preventDefault();
+          if (S.selectedColDivider && S.selectedColDivider.zoneIdx === S.selectedZoneIndex) {
+            const cIdx = S.selectedColDivider.colIdx;
+            if (z.columns && z.columns[cIdx] !== undefined) {
+              z.columns.splice(cIdx, 1);
+              S.selectedColDivider = null;
+              renderCanvasAndZones();
+              renderZoneProperties();
+              renderZonePreview();
+              return;
+            }
+          }
+          btnDeleteZone.click();
+        }
+      });
+
+      radioKindText.onchange = () => {
+        const z = S.currentTpl.zones[S.selectedZoneIndex];
+        if (z) {
+          z.kind = 'text';
+          renderCanvasAndZones();
+          renderZoneChips();
+          renderZoneProperties();
+          renderZonePreview();
+        }
+      };
+      radioKindTable.onchange = () => {
+        const z = S.currentTpl.zones[S.selectedZoneIndex];
+        if (z) {
+          z.kind = 'table';
+          z.columns = z.columns || [];
+          renderCanvasAndZones();
+          renderZoneChips();
+          renderZoneProperties();
+          renderZonePreview();
+        }
+      };
+      selectZoneTarget.onchange = () => {
+        const z = S.currentTpl.zones[S.selectedZoneIndex];
+        if (z) {
+          z.target = selectZoneTarget.value;
+          if (z.target === 'work') {
+            z.kind = 'text';
+          }
+          z.columnMap = {};
+          renderCanvasAndZones();
+          renderZoneChips();
+          renderZoneProperties();
+          renderZonePreview();
+        }
+      };
+      if (inputZoneHeader) {
+        inputZoneHeader.oninput = () => {
+          const z = S.currentTpl && S.currentTpl.zones && S.currentTpl.zones[S.selectedZoneIndex];
+          if (z) {
+            z.header = inputZoneHeader.value.trim().slice(0, 100);
+            renderCanvasAndZones();
+            renderZoneChips();
+            renderZonePreview();
+          }
+        };
+      }
+      inputSkipRows.oninput = () => {
+        const z = S.currentTpl.zones[S.selectedZoneIndex];
+        if (z) {
+          z.skipRows = Math.max(0, parseInt(inputSkipRows.value, 10) || 0);
+          renderZonePreview();
+        }
+      };
+      selectStopAt.onchange = () => {
+        const z = S.currentTpl.zones[S.selectedZoneIndex];
+        if (z) {
+          z.stopAt = selectStopAt.value;
+          renderZonePreview();
+        }
+      };
+      btnDeleteZone.onclick = () => {
+        if (S.selectedZoneIndex >= 0) {
+          S.currentTpl.zones.splice(S.selectedZoneIndex, 1);
+          S.selectedZoneIndex = -1;
+          renderCanvasAndZones();
+          renderZoneChips();
+          renderZoneProperties();
+          renderZonePreview();
+        }
+      };
+
+      // 8. 읽기 실시간 미리보기 렌더링
+      const previewSummaryBadge = document.getElementById('preview-summary-badge');
+      const previewContentBox = document.getElementById('preview-content-box');
+
+      function renderZonePreview() {
+        previewContentBox.replaceChildren();
+        previewSummaryBadge.textContent = '';
+
+        if (!S.pdfDoc) {
+          previewContentBox.append(el('span', { style: 'color:var(--sub);', text: '샘플 PDF를 선택하면 이곳에 실시간 추출 결과가 표출됩니다.' }));
+          return;
+        }
+
+        const zone = S.currentTpl && S.currentTpl.zones && S.currentTpl.zones[S.selectedZoneIndex];
+        if (!zone) {
+          previewContentBox.append(el('span', { style: 'color:var(--sub);', text: '왼쪽 캔버스에서 구역을 클릭하여 선택하세요.' }));
+          return;
+        }
+
+        const page = S.pdfDoc.pages[zone.page - 1];
+        if (!page) {
+          previewContentBox.append(el('span', { style: 'color:var(--danger);', text: `${zone.page}쪽 데이터가 PDF에 없습니다.` }));
+          return;
+        }
+
+        if (zone.target === 'work') {
+          const lines = window.PdfZones.readLines ? window.PdfZones.readLines(page, zone.rect) : [];
+          const items = window.PdfZones.splitBullets ? window.PdfZones.splitBullets(lines) : [];
+          const headerText = zone.header || '(헤더 없음: 최상위 노드로 가져옴)';
+          previewSummaryBadge.textContent = `읽은 항목: ${items.length}개`;
+
+          const workBox = el('div', { style: 'background:var(--card); padding:0.6rem; border-radius:0.3rem; border:1px solid var(--line);' });
+          const headerEl = el('div', { style: 'font-weight:700; color:var(--ink); margin-bottom:0.4rem;', text: `📁 ${headerText}` });
+          workBox.append(headerEl);
+
+          if (items.length === 0) {
+            workBox.append(el('div', { style: 'color:var(--sub); font-size:0.78rem;', text: '(추출된 작업 항목 없음)' }));
+          } else {
+            const listEl = el('ul', { style: 'margin:0; padding-left:1.2rem; font-size:0.82rem; color:var(--ink);' });
+            for (const it of items) {
+              listEl.append(el('li', { text: it, style: 'margin-bottom:0.2rem;' }));
+            }
+            workBox.append(listEl);
+          }
+          previewContentBox.append(workBox);
+          return;
+        }
+
+        if (zone.kind === 'text') {
+          const rawText = window.PdfZones.readText(page, zone.rect);
+          const cleanText = window.PdfZones.cleanLabel(rawText);
+          previewSummaryBadge.textContent = `추출 글자: ${cleanText.length}자`;
+
+          previewContentBox.append(
+            el('div', { style: 'font-weight:700; margin-bottom:0.3rem;', text: '추출 결과:' }),
+            el('div', { style: 'background:var(--card); padding:0.5rem; border-radius:0.3rem; border:1px solid var(--line); font-family:monospace;', text: cleanText || '(내용 없음)' })
+          );
+        } else if (zone.kind === 'table') {
+          const rows = window.PdfZones.readTable(page, zone.rect, zone.columns || [], {
+            skipRows: zone.skipRows || 0,
+            stopAt: zone.stopAt || 'sum'
+          });
+
+          const dataRowCount = rows.length;
+          let sumInfo = '';
+          // 합계 검증 (만약 totalRow가 있고 'count' 또는 'qty' 컬럼이 있으면)
+          if (rows.totalRow) {
+            // columnMap 검사
+            let qtyColIdx = -1;
+            for (const [c, field] of Object.entries(zone.columnMap || {})) {
+              if (field === 'count' || field === 'qty') qtyColIdx = parseInt(c, 10);
+            }
+            if (qtyColIdx >= 0) {
+              const chk = window.PdfZones.sumCheck(rows, qtyColIdx, rows.totalRow);
+              sumInfo = chk.match ? ` · 금일 합 ${chk.sum} == 계 ${chk.expected} (일치)` : ` · ⚠ 금일 합 ${chk.sum} != 계 ${chk.expected}`;
+            }
+          }
+          previewSummaryBadge.textContent = `읽은 행: ${dataRowCount}개${sumInfo}`;
+
+          if (rows.length === 0) {
+            previewContentBox.append(el('span', { style: 'color:var(--sub);', text: '추출된 행이 없습니다.' }));
+            return;
+          }
+
+          const tableEl = el('table', { class: 'preview-table' });
+          const thead = el('thead');
+          const headerRow = el('tr');
+          const colCount = (zone.columns ? zone.columns.length : 0) + 1;
+          for (let c = 0; c < colCount; c++) {
+            const mappedField = (zone.columnMap && zone.columnMap[c]) || `열 ${c}`;
+            headerRow.append(el('th', { text: mappedField }));
+          }
+          thead.append(headerRow);
+          tableEl.append(thead);
+
+          const tbody = el('tbody');
+          for (const r of rows) {
+            const tr = el('tr');
+            for (let c = 0; c < colCount; c++) {
+              const val = r[c] || '';
+              tr.append(el('td', { text: window.PdfZones.cleanLabel(val) }));
+            }
+            tbody.append(tr);
+          }
+          if (rows.totalRow) {
+            const tr = el('tr', { style: 'font-weight:700; background:var(--card-sub);' });
+            for (let c = 0; c < colCount; c++) {
+              tr.append(el('td', { text: window.PdfZones.cleanLabel(rows.totalRow[c] || '') }));
+            }
+            tbody.append(tr);
+          }
+          tableEl.append(tbody);
+          previewContentBox.append(tableEl);
+        }
+      }
+
+      // 9. 양식 저장
+      const btnSaveTpl = document.getElementById('btn-save-template');
+      btnSaveTpl.onclick = async () => {
+        saveMsgBanner.style.display = 'none';
+        const name = document.getElementById('input-tpl-name').value.trim();
+        const id = document.getElementById('input-tpl-id').value.trim();
+
+        if (!name) {
+          showSaveError('양식 이름을 입력해 주세요.');
+          return;
+        }
+        if (!/^[a-z0-9-]{1,30}$/.test(id)) {
+          showSaveError('ID는 영문 소문자, 숫자, 하이픈(-) 조합 1~30자여야 합니다.');
+          return;
+        }
+        if (!S.currentTpl.zones || S.currentTpl.zones.length === 0) {
+          showSaveError('구역을 최소 1개 이상 지정해 주세요.');
+          return;
+        }
+
+        S.currentTpl.name = name;
+        S.currentTpl.id = id;
+
+        try {
+          btnSaveTpl.disabled = true;
+          btnSaveTpl.textContent = '저장 중…';
+          const res = await api(`/api/import-templates/${id}`, {
+            method: 'PUT',
+            body: S.currentTpl
+          });
+          if (res && res.ok) {
+            saveMsgBanner.className = 'msg-banner ok';
+            saveMsgBanner.textContent = `✓ '${name}' 양식이 성공적으로 저장되었습니다.`;
+            saveMsgBanner.style.display = 'block';
+            await loadTemplateList();
+          }
+        } catch (err) {
+          showSaveError((err.data && err.data.error) || err.message);
+        } finally {
+          btnSaveTpl.disabled = false;
+          btnSaveTpl.textContent = '💾 양식 저장';
+        }
+      };
+
+      function showSaveError(msg) {
+        saveMsgBanner.textContent = '⚠ ' + msg;
+        saveMsgBanner.style.display = 'block';
+      }
+
+      // ==========================================
+      // 4. 작업일보 가져오기 실행 로직 (WD-74)
+      // ==========================================
+
+      function initTargetDate() {
+        const d = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
+        const todayStr = d.toISOString().slice(0, 10);
+        const dateInput = document.getElementById('import-target-date');
+        if (dateInput) {
+          dateInput.value = todayStr;
+          dateInput.max = todayStr;
+        }
+      }
+
+      function updateImportTemplateOptions() {
+        const sel = document.getElementById('import-select-tpl');
+        if (!sel) return;
+        sel.replaceChildren();
+        if (!S.templates || S.templates.length === 0) {
+          sel.append(el('option', { value: '', text: '등록된 양식 없음 (양식 관리 탭에서 추가)' }));
+          return;
+        }
+        for (const t of S.templates) {
+          sel.append(el('option', { value: t.id, text: `${t.name} (${t.pageCount}쪽)` }));
+        }
+      }
+
+      const btnSelectExecPdf = document.getElementById('btn-select-exec-pdf');
+      const execPdfInput = document.getElementById('import-exec-pdf-input');
+      const execPdfFilename = document.getElementById('exec-pdf-filename');
+
+      btnSelectExecPdf.onclick = () => execPdfInput.click();
+      execPdfInput.onchange = async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        execPdfFilename.textContent = file.name;
+        hideImportError();
+        document.getElementById('import-preview-area').style.display = 'none';
+        try {
+          const buf = await file.arrayBuffer();
+          S.importState.pdfBuffer = buf;
+        } catch (err) {
+          showImportError('파일을 읽지 못했습니다: ' + err.message);
+        }
+      };
+
+      const btnRunExtract = document.getElementById('btn-run-extract');
+      btnRunExtract.onclick = async () => {
+        hideImportError();
+        document.getElementById('import-conflict-box').style.display = 'none';
+        document.getElementById('import-success-box').style.display = 'none';
+
+        const tplId = document.getElementById('import-select-tpl').value;
+        const tpl = S.templates.find(t => t.id === tplId);
+        if (!tpl) {
+          showImportError('작업일보 양식을 선택해 주세요.');
+          return;
+        }
+        if (!S.importState.pdfBuffer) {
+          showImportError('작업일보 PDF 파일을 먼저 선택해 주세요.');
+          return;
+        }
+        const dateInput = document.getElementById('import-target-date');
+        const targetDate = dateInput.value;
+        if (!targetDate) {
+          showImportError('적용 대상 날짜를 선택해 주세요.');
+          return;
+        }
+        const todayStr = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+        if (targetDate > todayStr) {
+          showImportError('미래 날짜에는 적용할 수 없습니다.');
+          return;
+        }
+
+        btnRunExtract.disabled = true;
+        btnRunExtract.textContent = '읽는 중…';
+        try {
+          // 브라우저 로컬 PDF 파싱 (독립 slice 복사본)
+          const pdfDoc = await window.PdfZones.load(S.importState.pdfBuffer.slice(0), { baseUrl: withSitePrefix('/') });
+          S.importState.pdfDoc = pdfDoc;
+          S.importState.selectedTpl = tpl;
+          S.importState.targetDate = targetDate;
+
+          // 쪽 수 불일치 검증
+          if (pdfDoc.pageCount !== tpl.pageCount) {
+            showImportError(`이 양식(${tpl.pageCount}쪽)과 PDF(${pdfDoc.pageCount}쪽)의 쪽 수가 다릅니다.`);
+            document.getElementById('import-preview-area').style.display = 'none';
+            return;
+          }
+
+          // 대상 날짜 최신 데이터 및 rev 조회
+          let curDay = { crew: [], equip: [], material: [] };
+          let curRev = 0;
+          try {
+            if (targetDate === todayStr) {
+              const st = await api('/api/state');
+              curDay = st.todayData || {};
+              curRev = st.todayRev || 0;
+            } else {
+              const h = await api(`/api/history/day/${targetDate}`);
+              curDay = h.day || {};
+              curRev = h.rev || 0;
+            }
+          } catch {
+            curDay = { crew: [], equip: [], material: [] };
+            curRev = 0;
+          }
+          S.importState.curDayData = curDay;
+          S.importState.curRev = curRev;
+
+          // 양식 구역별 데이터 추출 및 후보 행 판정
+          const parsed = {
+            crew: [],
+            equip: [],
+            material: [],
+            work: [],
+            other: [],
+            warnings: [],
+            rawResults: {}
+          };
+
+          for (const zone of (tpl.zones || [])) {
+            const pageIndex = zone.page - 1;
+            const pageObj = pdfDoc.pages[pageIndex];
+            if (!pageObj) continue;
+
+            if (zone.target === 'work') {
+              const lines = window.PdfZones.readLines ? window.PdfZones.readLines(pageObj, zone.rect) : [];
+              const items = window.PdfZones.splitBullets ? window.PdfZones.splitBullets(lines) : [];
+              parsed.work.push({
+                header: (zone.header || '').trim(),
+                items: items.map(text => ({ text, checked: true })),
+                checked: true
+              });
+            } else if (zone.kind === 'table') {
+              const opt = {
+                skipRows: zone.skipRows || 0,
+                stopAt: zone.stopAt || '',
+                columnMap: zone.columnMap || {}
+              };
+              const res = window.PdfZones.readTable(pageObj, zone.rect, zone.columns || [], opt);
+              parsed.rawResults[zone.target] = res;
+
+              if (zone.target === 'crew') {
+                let countColIdx = 2;
+                for (const [ci, f] of Object.entries(zone.columnMap || {})) {
+                  if (f === 'count') countColIdx = parseInt(ci, 10);
+                }
+                const mappedTotal = res.totalRow ? { count: res.totalRow[countColIdx] } : null;
+                const sumCheck = window.PdfZones.sumCheck(res, 'count', mappedTotal);
+                res.sumCheck = sumCheck;
+
+                res.forEach((r, idx) => {
+                  const cntNum = window.PdfZones.num(r.count, 0);
+                  if (cntNum > 0) {
+                    parsed.crew.push({
+                      origIndex: idx + 1,
+                      job: window.PdfZones.cleanLabel(r.job || ''),
+                      count: String(r.count || '').trim(),
+                      loc: window.PdfZones.cleanLabel(r.loc || '')
+                    });
+                  }
+                });
+
+                if (!sumCheck.match && sumCheck.expected !== null) {
+                  parsed.warnings.push(`인원 합계 불일치: 읽은 합계 ${sumCheck.sum} ≠ 기재된 계 ${sumCheck.expected}`);
+                }
+              } else if (zone.target === 'equip') {
+                let qtyColIdx = 2;
+                for (const [ci, f] of Object.entries(zone.columnMap || {})) {
+                  if (f === 'qty') qtyColIdx = parseInt(ci, 10);
+                }
+                const mappedTotal = res.totalRow ? { qty: res.totalRow[qtyColIdx] } : null;
+                const sumCheck = window.PdfZones.sumCheck(res, 'qty', mappedTotal);
+                res.sumCheck = sumCheck;
+
+                res.forEach((r, idx) => {
+                  const qtyNum = window.PdfZones.num(r.qty, 0);
+                  if (qtyNum > 0) {
+                    parsed.equip.push({
+                      origIndex: idx + 1,
+                      name: window.PdfZones.cleanLabel(r.name || ''),
+                      qty: String(r.qty || '').trim(),
+                      spec: window.PdfZones.cleanLabel(r.spec || ''),
+                      loc: window.PdfZones.cleanLabel(r.loc || '')
+                    });
+                  }
+                });
+
+                if (!sumCheck.match && sumCheck.expected !== null) {
+                  parsed.warnings.push(`장비 합계 불일치: 읽은 합계 ${sumCheck.sum} ≠ 기재된 계 ${sumCheck.expected}`);
+                }
+              } else if (zone.target === 'material') {
+                res.forEach((r, idx) => {
+                  const qtyNum = window.PdfZones.num(r.qty, 0);
+                  if (qtyNum > 0) {
+                    parsed.material.push({
+                      origIndex: idx + 1,
+                      kind: window.PdfZones.cleanLabel(r.kind || ''),
+                      qty: String(r.qty || '').trim(),
+                      spec: window.PdfZones.cleanLabel(r.spec || ''),
+                      unit: window.PdfZones.cleanLabel(r.unit || ''),
+                      use: window.PdfZones.cleanLabel(r.use || '')
+                    });
+                  }
+                });
+              }
+            } else if (zone.kind === 'text') {
+              const text = window.PdfZones.readText(pageObj, zone.rect);
+              parsed.other.push({
+                target: zone.target,
+                text: text
+              });
+            }
+          }
+
+          const totalWorkCount = parsed.work.reduce((acc, g) => acc + g.items.length, 0);
+          if (parsed.crew.length === 0 && parsed.equip.length === 0 && parsed.material.length === 0 && totalWorkCount === 0) {
+            parsed.warnings.push('금일 유효 데이터(>0)가 있는 항목이 0건입니다.');
+          }
+
+          S.importState.parsedData = parsed;
+          S.importState.checkedIndices.crew = new Set(parsed.crew.map((_, i) => i));
+          S.importState.checkedIndices.equip = new Set(parsed.equip.map((_, i) => i));
+          S.importState.checkedIndices.material = new Set(parsed.material.map((_, i) => i));
+
+          renderImportPreview();
+        } catch (err) {
+          showImportError('작업일보 분석 중 오류가 발생했습니다: ' + err.message);
+        } finally {
+          btnRunExtract.disabled = false;
+          btnRunExtract.textContent = '🔍 작업일보 읽기';
+        }
+      };
+
+      function updateApplySummaryText() {
+        const crewChecked = S.importState.parsedData.crew.filter((_, i) => S.importState.checkedIndices.crew.has(i));
+        const equipChecked = S.importState.parsedData.equip.filter((_, i) => S.importState.checkedIndices.equip.has(i));
+        const materialChecked = S.importState.parsedData.material.filter((_, i) => S.importState.checkedIndices.material.has(i));
+
+        let workCheckedCount = 0;
+        for (const g of (S.importState.parsedData.work || [])) {
+          if (!g.checked) continue;
+          for (const it of g.items) {
+            if (it.checked && it.text.trim()) workCheckedCount++;
+          }
+        }
+
+        const crewMode = S.importState.applyModes.crew === 'replace' ? '교체' : '추가';
+        const equipMode = S.importState.applyModes.equip === 'replace' ? '교체' : '추가';
+        const materialMode = S.importState.applyModes.material === 'replace' ? '교체' : '추가';
+        const workMode = S.importState.applyModes.work === 'replace' ? '교체' : '추가';
+
+        const parts = [];
+        parts.push(`인원 ${crewChecked.length}건 [${crewChecked.length > 0 ? crewMode : '적용 안 함'}]`);
+        parts.push(`장비 ${equipChecked.length}건 [${equipChecked.length > 0 ? equipMode : '적용 안 함'}]`);
+        parts.push(`자재 ${materialChecked.length}건 [${materialChecked.length > 0 ? materialMode : '적용 안 함'}]`);
+        parts.push(`작업내용 ${workCheckedCount}건 [${workCheckedCount > 0 ? workMode : '적용 안 함'}]`);
+
+        const summaryEl = document.getElementById('import-apply-summary-text');
+        if (summaryEl) summaryEl.textContent = `적용 예정: ${parts.join(', ')}`;
+      }
+
+      function renderImportPreview() {
+        const previewArea = document.getElementById('import-preview-area');
+        previewArea.style.display = 'block';
+
+        const state = S.importState;
+        const parsed = state.parsedData;
+
+        // 1. 상단 정보 바
+        const metaInfo = document.getElementById('import-meta-info');
+        metaInfo.textContent = `📄 ${state.selectedTpl.name} (${state.pdfDoc.pageCount}쪽 일치) · ${execPdfFilename.textContent}`;
+
+        const dateStatus = document.getElementById('import-date-status');
+        const curC = (state.curDayData.crew || []).length;
+        const curE = (state.curDayData.equip || []).length;
+        const curM = (state.curDayData.material || []).length;
+        const curW = (state.curDayData.work || []).length;
+        dateStatus.textContent = `적용 대상: ${state.targetDate} (기존 등록: 인원 ${curC}건, 장비 ${curE}건, 자재 ${curM}건, 작업 ${curW}건)`;
+
+        // 2. 인원(crew) 섹션
+        const crewSec = document.getElementById('import-crew-sec');
+        const crewTbody = document.getElementById('crew-preview-tbody');
+        const crewBadge = document.getElementById('crew-summary-badge');
+        crewTbody.replaceChildren();
+
+        const rawCrew = parsed.rawResults['crew'];
+        const crewSum = rawCrew && rawCrew.sumCheck;
+        if (crewSum) {
+          const matchText = crewSum.match ? '일치' : '불일치';
+          crewBadge.textContent = `읽은 행: ${(rawCrew || []).length}개 · 후보: ${parsed.crew.length}개 · 금일 합 ${crewSum.sum} == 계 ${crewSum.expected} (${matchText})`;
+          crewBadge.className = 'badge-pill ' + (crewSum.match ? 'ok' : 'warn');
+        } else {
+          crewBadge.textContent = `후보: ${parsed.crew.length}개`;
+          crewBadge.className = 'badge-pill';
+        }
+
+        if (parsed.crew.length > 0) {
+          crewSec.style.display = 'block';
+          parsed.crew.forEach((r, idx) => {
+            const tr = el('tr', {},
+              el('td', { style: 'text-align:center;' },
+                el('input', {
+                  type: 'checkbox',
+                  class: 'crew-row-chk',
+                  checked: state.checkedIndices.crew.has(idx),
+                  onchange: (e) => {
+                    if (e.target.checked) state.checkedIndices.crew.add(idx);
+                    else state.checkedIndices.crew.delete(idx);
+                    updateApplySummaryText();
+                  }
+                })
+              ),
+              el('td', { text: r.origIndex, style: 'color:var(--sub);' }),
+              el('td', { text: r.job, style: 'font-weight:600;' }),
+              el('td', { text: r.count, style: 'text-align:right; font-weight:700; color:var(--accent);' }),
+              el('td', { text: r.loc || '-' })
+            );
+            crewTbody.append(tr);
+          });
+        } else {
+          crewSec.style.display = 'block';
+          crewTbody.append(el('tr', {}, el('td', { colspan: 5, style: 'text-align:center; color:var(--sub); padding:1rem;', text: '금일 투입 인원(>0)이 없습니다. (기존 데이터가 유지됩니다)' })));
+        }
+
+        // 인원 모드 라디오 바인딩
+        document.querySelectorAll('input[name="crew-apply-mode"]').forEach(radio => {
+          radio.checked = (radio.value === state.applyModes.crew);
+          radio.onchange = () => {
+            state.applyModes.crew = radio.value;
+            updateApplySummaryText();
+          };
+        });
+        document.getElementById('btn-toggle-crew-all').onclick = () => {
+          const allChecked = state.checkedIndices.crew.size === parsed.crew.length;
+          if (allChecked) {
+            state.checkedIndices.crew.clear();
+          } else {
+            parsed.crew.forEach((_, i) => state.checkedIndices.crew.add(i));
+          }
+          document.querySelectorAll('.crew-row-chk').forEach(c => { c.checked = !allChecked; });
+          document.getElementById('btn-toggle-crew-all').textContent = allChecked ? '전체 선택' : '전체 해제';
+          updateApplySummaryText();
+        };
+
+        // 3. 장비(equip) 섹션
+        const equipSec = document.getElementById('import-equip-sec');
+        const equipTbody = document.getElementById('equip-preview-tbody');
+        const equipBadge = document.getElementById('equip-summary-badge');
+        equipTbody.replaceChildren();
+
+        const rawEquip = parsed.rawResults['equip'];
+        const equipSum = rawEquip && rawEquip.sumCheck;
+        if (equipSum) {
+          const matchText = equipSum.match ? '일치' : '불일치';
+          equipBadge.textContent = `읽은 행: ${(rawEquip || []).length}개 · 후보: ${parsed.equip.length}개 · 금일 합 ${equipSum.sum} == 계 ${equipSum.expected} (${matchText})`;
+          equipBadge.className = 'badge-pill ' + (equipSum.match ? 'ok' : 'warn');
+        } else {
+          equipBadge.textContent = `후보: ${parsed.equip.length}개`;
+          equipBadge.className = 'badge-pill';
+        }
+
+        if (parsed.equip.length > 0) {
+          equipSec.style.display = 'block';
+          parsed.equip.forEach((r, idx) => {
+            const tr = el('tr', {},
+              el('td', { style: 'text-align:center;' },
+                el('input', {
+                  type: 'checkbox',
+                  class: 'equip-row-chk',
+                  checked: state.checkedIndices.equip.has(idx),
+                  onchange: (e) => {
+                    if (e.target.checked) state.checkedIndices.equip.add(idx);
+                    else state.checkedIndices.equip.delete(idx);
+                    updateApplySummaryText();
+                  }
+                })
+              ),
+              el('td', { text: r.origIndex, style: 'color:var(--sub);' }),
+              el('td', { text: r.name, style: 'font-weight:600;' }),
+              el('td', { text: r.spec || '-' }),
+              el('td', { text: r.qty, style: 'text-align:right; font-weight:700; color:var(--accent);' }),
+              el('td', { text: r.loc || '-' })
+            );
+            equipTbody.append(tr);
+          });
+        } else {
+          equipSec.style.display = 'block';
+          equipTbody.append(el('tr', {}, el('td', { colspan: 6, style: 'text-align:center; color:var(--sub); padding:1rem;', text: '금일 투입 장비(>0)가 없습니다. (기존 데이터가 유지됩니다)' })));
+        }
+
+        document.querySelectorAll('input[name="equip-apply-mode"]').forEach(radio => {
+          radio.checked = (radio.value === state.applyModes.equip);
+          radio.onchange = () => {
+            state.applyModes.equip = radio.value;
+            updateApplySummaryText();
+          };
+        });
+        document.getElementById('btn-toggle-equip-all').onclick = () => {
+          const allChecked = state.checkedIndices.equip.size === parsed.equip.length;
+          if (allChecked) {
+            state.checkedIndices.equip.clear();
+          } else {
+            parsed.equip.forEach((_, i) => state.checkedIndices.equip.add(i));
+          }
+          document.querySelectorAll('.equip-row-chk').forEach(c => { c.checked = !allChecked; });
+          document.getElementById('btn-toggle-equip-all').textContent = allChecked ? '전체 선택' : '전체 해제';
+          updateApplySummaryText();
+        };
+
+        // 4. 자재(material) 섹션
+        const matSec = document.getElementById('import-material-sec');
+        const matTbody = document.getElementById('material-preview-tbody');
+        const matBadge = document.getElementById('material-summary-badge');
+        matTbody.replaceChildren();
+
+        const rawMat = parsed.rawResults['material'];
+        matBadge.textContent = `후보: ${parsed.material.length}개`;
+        matBadge.className = 'badge-pill';
+
+        if (parsed.material.length > 0) {
+          matSec.style.display = 'block';
+          parsed.material.forEach((r, idx) => {
+            const tr = el('tr', {},
+              el('td', { style: 'text-align:center;' },
+                el('input', {
+                  type: 'checkbox',
+                  class: 'mat-row-chk',
+                  checked: state.checkedIndices.material.has(idx),
+                  onchange: (e) => {
+                    if (e.target.checked) state.checkedIndices.material.add(idx);
+                    else state.checkedIndices.material.delete(idx);
+                    updateApplySummaryText();
+                  }
+                })
+              ),
+              el('td', { text: r.origIndex, style: 'color:var(--sub);' }),
+              el('td', { text: r.kind, style: 'font-weight:600;' }),
+              el('td', { text: r.spec || '-' }),
+              el('td', { text: r.unit || '-' }),
+              el('td', { text: r.qty, style: 'text-align:right; font-weight:700; color:var(--accent);' }),
+              el('td', { text: r.use || '-' })
+            );
+            matTbody.append(tr);
+          });
+        } else {
+          matSec.style.display = 'block';
+          matTbody.append(el('tr', {}, el('td', { colspan: 7, style: 'text-align:center; color:var(--sub); padding:1rem;', text: '금일 투입 자재(>0)가 없습니다. (기존 데이터가 유지됩니다)' })));
+        }
+
+        document.querySelectorAll('input[name="material-apply-mode"]').forEach(radio => {
+          radio.checked = (radio.value === state.applyModes.material);
+          radio.onchange = () => {
+            state.applyModes.material = radio.value;
+            updateApplySummaryText();
+          };
+        });
+        document.getElementById('btn-toggle-material-all').onclick = () => {
+          const allChecked = state.checkedIndices.material.size === parsed.material.length;
+          if (allChecked) {
+            state.checkedIndices.material.clear();
+          } else {
+            parsed.material.forEach((_, i) => state.checkedIndices.material.add(i));
+          }
+          document.querySelectorAll('.mat-row-chk').forEach(c => { c.checked = !allChecked; });
+          document.getElementById('btn-toggle-material-all').textContent = allChecked ? '전체 선택' : '전체 해제';
+          updateApplySummaryText();
+        };
+
+        // 5. 작업 내용(work) 섹션 (WD-77)
+        const workSec = document.getElementById('import-work-sec');
+        const workTree = document.getElementById('work-preview-tree');
+        const workBadge = document.getElementById('work-summary-badge');
+        const workWarn = document.getElementById('work-count-warn');
+        workTree.replaceChildren();
+
+        const workGroups = parsed.work || [];
+        const totalWorkItems = workGroups.reduce((acc, g) => acc + (g.items || []).length, 0);
+        workBadge.textContent = `후보: ${totalWorkItems}개`;
+        workBadge.className = 'badge-pill';
+        if (workWarn) {
+          workWarn.style.display = totalWorkItems > 200 ? 'block' : 'none';
+        }
+
+        if (totalWorkItems > 0) {
+          workSec.style.display = 'block';
+          workGroups.forEach((g, gIdx) => {
+            const groupCard = el('div', {
+              style: 'background:var(--card); border:1px solid var(--line); border-radius:0.4rem; padding:0.6rem; display:flex; flex-direction:column; gap:0.4rem;'
+            });
+
+            // 그룹 헤더 행
+            const groupHeaderRow = el('div', { style: 'display:flex; align-items:center; gap:0.5rem;' });
+            const groupChk = el('input', {
+              type: 'checkbox',
+              class: 'work-group-chk',
+              checked: g.checked,
+              onchange: (e) => {
+                g.checked = e.target.checked;
+                (g.items || []).forEach(it => { it.checked = g.checked; });
+                groupCard.querySelectorAll('.work-item-chk').forEach(c => { c.checked = g.checked; });
+                updateApplySummaryText();
+              }
+            });
+            const headerTitle = g.header ? `📁 ${g.header}` : '📁 (헤더 없음: 최상위 노드로 등록)';
+            const headerLabel = el('span', { style: 'font-weight:700; color:var(--ink); font-size:0.86rem;', text: headerTitle });
+            const countPill = el('span', { class: 'badge-pill', text: `${(g.items || []).length}건` });
+
+            groupHeaderRow.append(groupChk, headerLabel, countPill);
+            groupCard.append(groupHeaderRow);
+
+            // 자식 항목 목록
+            const itemsBox = el('div', { style: 'margin-left:1.5rem; display:flex; flex-direction:column; gap:0.35rem; margin-top:0.2rem;' });
+            (g.items || []).forEach((it, itIdx) => {
+              const itemRow = el('div', { style: 'display:flex; align-items:center; gap:0.4rem;' });
+              const itemChk = el('input', {
+                type: 'checkbox',
+                class: 'work-item-chk',
+                checked: it.checked,
+                onchange: (e) => {
+                  it.checked = e.target.checked;
+                  const anyChecked = (g.items || []).some(x => x.checked);
+                  g.checked = anyChecked;
+                  groupChk.checked = anyChecked;
+                  updateApplySummaryText();
+                }
+              });
+              const inputEl = el('input', {
+                type: 'text',
+                maxlength: '200',
+                value: it.text,
+                style: 'flex:1; font-size:0.82rem; padding:0.25rem 0.5rem; border:1px solid var(--line); border-radius:0.25rem; background:var(--bg); color:var(--ink);',
+                oninput: (e) => {
+                  it.text = e.target.value.slice(0, 200);
+                  updateApplySummaryText();
+                }
+              });
+              itemRow.append(itemChk, inputEl);
+              itemsBox.append(itemRow);
+            });
+
+            groupCard.append(itemsBox);
+            workTree.append(groupCard);
+          });
+        } else {
+          workSec.style.display = 'block';
+          workTree.append(el('div', { style: 'text-align:center; color:var(--sub); padding:1rem;', text: '추출된 작업 내용이 없습니다. (기존 데이터가 유지됩니다)' }));
+        }
+
+        // 작업 내용 모드 라디오 바인딩
+        document.querySelectorAll('input[name="work-apply-mode"]').forEach(radio => {
+          radio.checked = (radio.value === state.applyModes.work);
+          radio.onchange = () => {
+            state.applyModes.work = radio.value;
+            updateApplySummaryText();
+          };
+        });
+
+        // 작업 내용 전체 선택/해제 토글
+        const btnToggleWorkAll = document.getElementById('btn-toggle-work-all');
+        if (btnToggleWorkAll) {
+          btnToggleWorkAll.onclick = () => {
+            const allItems = workGroups.flatMap(g => g.items || []);
+            const allChecked = allItems.length > 0 && allItems.every(it => it.checked);
+            const nextState = !allChecked;
+
+            workGroups.forEach(g => {
+              g.checked = nextState;
+              (g.items || []).forEach(it => { it.checked = nextState; });
+            });
+
+            document.querySelectorAll('.work-group-chk').forEach(c => { c.checked = nextState; });
+            document.querySelectorAll('.work-item-chk').forEach(c => { c.checked = nextState; });
+            btnToggleWorkAll.textContent = nextState ? '전체 해제' : '전체 선택';
+            updateApplySummaryText();
+          };
+        }
+
+        // 6. 참고 항목 (날씨/공사내용 등)
+        const otherSec = document.getElementById('import-other-sec');
+        const otherContent = document.getElementById('import-other-content');
+        otherContent.replaceChildren();
+        if (parsed.other.length > 0) {
+          otherSec.style.display = 'block';
+          parsed.other.forEach(o => {
+            const item = el('div', { style: 'display:flex; align-items:center; gap:0.5rem;' },
+              el('span', { class: 'badge-pill', text: o.target }),
+              el('span', { style: 'color:var(--ink); font-weight:600;', text: o.text || '(빈칸)' })
+            );
+            otherContent.append(item);
+          });
+        } else {
+          otherSec.style.display = 'none';
+        }
+
+        // 7. 경고 목록
+        const warnBox = document.getElementById('import-warnings-box');
+        if (parsed.warnings.length > 0) {
+          warnBox.replaceChildren();
+          warnBox.append(el('div', { style: 'font-weight:700; margin-bottom:0.2rem;', text: '⚠ 다음 사항을 확인해 주세요:' }));
+          parsed.warnings.forEach(w => {
+            warnBox.append(el('div', { style: 'font-size:0.8rem; margin-left:0.5rem;', text: '• ' + w }));
+          });
+          warnBox.style.display = 'block';
+        } else {
+          warnBox.style.display = 'none';
+        }
+
+        updateApplySummaryText();
+      }
+
+      // [작업일보 적용] 버튼 동작
+      const btnApply = document.getElementById('btn-apply-import');
+      btnApply.onclick = async () => {
+        hideImportError();
+        document.getElementById('import-conflict-box').style.display = 'none';
+        document.getElementById('import-success-box').style.display = 'none';
+
+        const state = S.importState;
+        const dateStr = state.targetDate;
+        const todayStr = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+        if (dateStr > todayStr) {
+          showImportError('미래 날짜에는 적용할 수 없습니다.');
+          return;
+        }
+
+        const crewChecked = state.parsedData.crew.filter((_, i) => state.checkedIndices.crew.has(i));
+        const equipChecked = state.parsedData.equip.filter((_, i) => state.checkedIndices.equip.has(i));
+        const materialChecked = state.parsedData.material.filter((_, i) => state.checkedIndices.material.has(i));
+
+        const workGroups = state.parsedData.work || [];
+        let workCheckedCount = 0;
+        for (const g of workGroups) {
+          if (!g.checked) continue;
+          for (const it of (g.items || [])) {
+            if (it.checked && String(it.text || '').trim()) workCheckedCount++;
+          }
+        }
+
+        const totalChecked = crewChecked.length + equipChecked.length + materialChecked.length + workCheckedCount;
+        if (totalChecked === 0) {
+          alert('적용할 체크된 항목이 0건입니다. (체크된 항목이 없으면 데이터를 변경하지 않습니다)');
+          return;
+        }
+
+        const crewMode = state.applyModes.crew;
+        const equipMode = state.applyModes.equip;
+        const materialMode = state.applyModes.material;
+        const workMode = state.applyModes.work;
+
+        const confirmMsg = `${dateStr} 의\n` +
+          `- 인원: ${crewChecked.length}건 [${crewChecked.length > 0 ? (crewMode === 'replace' ? '교체' : '추가') : '적용 안 함'}]\n` +
+          `- 장비: ${equipChecked.length}건 [${equipChecked.length > 0 ? (equipMode === 'replace' ? '교체' : '추가') : '적용 안 함'}]\n` +
+          `- 자재: ${materialChecked.length}건 [${materialChecked.length > 0 ? (materialMode === 'replace' ? '교체' : '추가') : '적용 안 함'}]\n` +
+          `- 작업내용: ${workCheckedCount}건 [${workCheckedCount > 0 ? (workMode === 'replace' ? '교체' : '추가') : '적용 안 함'}]\n\n` +
+          `데이터를 적용하시겠습니까?\n(적용 직전 자동 백업이 수행됩니다.)`;
+
+        if (!confirm(confirmMsg)) return;
+
+        btnApply.disabled = true;
+        btnApply.textContent = '적용 중…';
+
+        try {
+          // 1. 자동 백업 POST /api/backup/now (실패 시 즉시 중단)
+          let backupFile = '';
+          try {
+            const bRes = await api('/api/backup/now', { method: 'POST' });
+            backupFile = (bRes && bRes.filename) || 'backup';
+          } catch (bErr) {
+            showImportError('백업 실패로 데이터 적용을 중단합니다: ' + bErr.message);
+            return;
+          }
+
+          // 2. 대상 날짜의 기본 데이터 및 미리보기 시점 rev (409 낙관적 락 감지)
+          const baseRev = state.curRev || 0;
+          const curDay = state.curDayData || {};
+
+          // 3. 병합 (Merge)
+          const newDay = { ...curDay };
+
+          // 인원(crew)
+          if (crewChecked.length > 0) {
+            const mapped = crewChecked.map(r => ({
+              id: genId(),
+              job: String(r.job || '').slice(0, 100),
+              count: String(r.count || '').slice(0, 100),
+              loc: String(r.loc || '').slice(0, 100)
+            }));
+            if (crewMode === 'replace') {
+              newDay.crew = mapped.slice(0, 200);
+            } else {
+              const existing = (curDay.crew || []).slice();
+              const existKeys = new Set(existing.map(x => window.PdfZones.cleanLabel(x.job || '')));
+              for (const item of mapped) {
+                const k = window.PdfZones.cleanLabel(item.job || '');
+                if (!existKeys.has(k)) {
+                  existing.push(item);
+                  existKeys.add(k);
+                }
+              }
+              newDay.crew = existing.slice(0, 200);
+            }
+          }
+
+          // 장비(equip)
+          if (equipChecked.length > 0) {
+            const mapped = equipChecked.map(r => ({
+              id: genId(),
+              name: String(r.name || '').slice(0, 100),
+              qty: String(r.qty || '').slice(0, 100),
+              spec: String(r.spec || '').slice(0, 100),
+              loc: String(r.loc || '').slice(0, 100)
+            }));
+            if (equipMode === 'replace') {
+              newDay.equip = mapped.slice(0, 200);
+            } else {
+              const existing = (curDay.equip || []).slice();
+              const existKeys = new Set(existing.map(x => `${window.PdfZones.cleanLabel(x.name || '')}|${window.PdfZones.cleanLabel(x.spec || '')}`));
+              for (const item of mapped) {
+                const k = `${window.PdfZones.cleanLabel(item.name || '')}|${window.PdfZones.cleanLabel(item.spec || '')}`;
+                if (!existKeys.has(k)) {
+                  existing.push(item);
+                  existKeys.add(k);
+                }
+              }
+              newDay.equip = existing.slice(0, 200);
+            }
+          }
+
+          // 자재(material)
+          if (materialChecked.length > 0) {
+            const mapped = materialChecked.map(r => ({
+              id: genId(),
+              kind: String(r.kind || '').slice(0, 100),
+              qty: String(r.qty || '').slice(0, 100),
+              spec: String(r.spec || '').slice(0, 100),
+              unit: String(r.unit || '').slice(0, 100),
+              use: String(r.use || '').slice(0, 100)
+            }));
+            if (materialMode === 'replace') {
+              newDay.material = mapped.slice(0, 200);
+            } else {
+              const existing = (curDay.material || []).slice();
+              const existKeys = new Set(existing.map(x => `${window.PdfZones.cleanLabel(x.kind || '')}|${window.PdfZones.cleanLabel(x.spec || '')}|${window.PdfZones.cleanLabel(x.unit || '')}`));
+              for (const item of mapped) {
+                const k = `${window.PdfZones.cleanLabel(item.kind || '')}|${window.PdfZones.cleanLabel(item.spec || '')}|${window.PdfZones.cleanLabel(item.unit || '')}`;
+                if (!existKeys.has(k)) {
+                  existing.push(item);
+                  existKeys.add(k);
+                }
+              }
+              newDay.material = existing.slice(0, 200);
+            }
+          }
+
+          // 작업내용(work) (WD-77)
+          if (workCheckedCount > 0) {
+            const createdNodes = [];
+            for (const g of workGroups) {
+              if (!g.checked) continue;
+              const validItems = (g.items || []).filter(it => it.checked && String(it.text || '').trim());
+              if (validItems.length === 0) continue;
+
+              const headerText = String(g.header || '').trim().slice(0, 100);
+              if (headerText) {
+                const children = validItems.map(it => ({
+                  id: genId(),
+                  t: String(it.text || '').trim().slice(0, 200),
+                  c: []
+                }));
+                createdNodes.push({
+                  id: genId(),
+                  t: headerText,
+                  c: children
+                });
+              } else {
+                for (const it of validItems) {
+                  createdNodes.push({
+                    id: genId(),
+                    t: String(it.text || '').trim().slice(0, 200),
+                    c: []
+                  });
+                }
+              }
+            }
+
+            if (workMode === 'replace') {
+              newDay.work = createdNodes.slice(0, 200);
+            } else {
+              const existingWork = (curDay.work || []).map(n => JSON.parse(JSON.stringify(n)));
+              for (const node of createdNodes) {
+                if (node.c && node.c.length > 0) {
+                  const matched = existingWork.find(ex => (ex.c && ex.c.length > 0) && (window.PdfZones.cleanLabel(ex.t || '') === window.PdfZones.cleanLabel(node.t || '')));
+                  if (matched) {
+                    matched.c = matched.c || [];
+                    const existChildKeys = new Set(matched.c.map(child => window.PdfZones.cleanLabel(child.t || '')));
+                    for (const child of node.c) {
+                      const k = window.PdfZones.cleanLabel(child.t || '');
+                      if (!existChildKeys.has(k)) {
+                        matched.c.push(child);
+                        existChildKeys.add(k);
+                      }
+                    }
+                  } else {
+                    existingWork.push(node);
+                  }
+                } else {
+                  const existRootKeys = new Set(existingWork.filter(ex => !ex.c || ex.c.length === 0).map(ex => window.PdfZones.cleanLabel(ex.t || '')));
+                  const k = window.PdfZones.cleanLabel(node.t || '');
+                  if (!existRootKeys.has(k)) {
+                    existingWork.push(node);
+                    existRootKeys.add(k);
+                  }
+                }
+              }
+              newDay.work = existingWork.slice(0, 200);
+            }
+          }
+
+          // 4. PUT /api/day/<dateStr> + X-Base-Rev
+          const putRes = await api(`/api/day/${dateStr}`, {
+            method: 'PUT',
+            headers: {
+              'X-Base-Rev': String(baseRev)
+            },
+            body: newDay
+          });
+
+          if (putRes && putRes.rev !== undefined) {
+            state.curRev = putRes.rev;
+            state.curDayData = newDay;
+          }
+
+          const successBox = document.getElementById('import-success-box');
+          successBox.replaceChildren();
+          successBox.append(
+            el('div', { style: 'font-weight:700; margin-bottom:0.3rem;', text: `✓ ${dateStr} 작업일보 데이터가 성공적으로 적용되었습니다.` }),
+            el('div', { style: 'font-size:0.84rem;', text: `적용 결과: 인원 ${crewChecked.length}건, 장비 ${equipChecked.length}건, 자재 ${materialChecked.length}건, 작업 ${workCheckedCount}건 (백업: ${backupFile})` }),
+            el('div', { style: 'margin-top:0.6rem;' },
+              el('a', { class: 'btn primary', href: withSitePrefix('/'), style: 'font-size:0.82rem; padding:0.25rem 0.7rem;', text: '메인 대시보드로 이동 →' })
+            )
+          );
+          successBox.style.display = 'block';
+
+        } catch (err) {
+          if (err && err.status === 409) {
+            document.getElementById('import-conflict-box').style.display = 'block';
+            showImportError('그 사이 다른 사용자가 데이터를 수정했습니다. (충돌 방지를 위해 자동 재시도하지 않습니다)');
+          } else {
+            showImportError('데이터 적용 중 오류가 발생했습니다: ' + err.message);
+          }
+        } finally {
+          btnApply.disabled = false;
+          btnApply.textContent = '💾 작업일보 적용';
+        }
+      };
+
+      document.getElementById('btn-reload-preview').onclick = () => {
+        btnRunExtract.click();
+      };
+
+      // 전역 디버그/테스트 바인딩
+      window.renderPdfPage = renderPdfPage;
+      window.renderCanvasAndZones = renderCanvasAndZones;
+      window.renderZoneChips = renderZoneChips;
+      window.renderZoneProperties = renderZoneProperties;
+      window.renderZonePreview = renderZonePreview;
+      window.renderImportPreview = renderImportPreview;
+      window.switchTab = switchTab;
+      window.openEditor = openEditor;
+      window.loadTemplateList = loadTemplateList;
+
+      // 10. 초기화
+      tabBar.style.display = 'flex';
+      initTargetDate();
+      renderPdfPage(1);
+
+      (async () => {
+        try {
+          const res = await api('/api/import-templates');
+          S.templates = (res && res.templates) || [];
+          const savedTab = sessionStorage.getItem(siteKey('import-active-tab'));
+          if (savedTab === 'templates') {
+            switchTab('templates');
+          } else if (savedTab === 'import' && S.templates.length > 0) {
+            switchTab('import');
+          } else if (S.templates.length > 0) {
+            switchTab('import');
+          } else {
+            switchTab('templates');
+          }
+        } catch {
+          switchTab('templates');
+        }
+      })();
+    })();
+  </script>
+</body>
+
+</html>

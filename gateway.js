@@ -1,5 +1,27 @@
 'use strict';
 // 작업현황 대시보드 멀티 현장 게이트웨이 (WD-55) — 외부 패키지 없이 Node.js만으로 동작
+
+// WD-64: 프로세스 방어 (uncaughtException / unhandledRejection)
+const unhandledErrorsIn60s = [];
+function handleUnhandledProcessError(err) {
+  const firstLine = err && (err.stack ? err.stack.split('\n')[0].trim() : (err.message || String(err)));
+  console.error('[게이트웨이] 처리되지 않은 오류:', firstLine);
+  if (err && err.code === 'EADDRINUSE') {
+    process.exit(1);
+  }
+  const now = Date.now();
+  unhandledErrorsIn60s.push(now);
+  while (unhandledErrorsIn60s.length > 0 && now - unhandledErrorsIn60s[0] > 60000) {
+    unhandledErrorsIn60s.shift();
+  }
+  if (unhandledErrorsIn60s.length > 10) {
+    console.error('[게이트웨이] 60초 내 미처리 오류 10회 초과 — 감시 프로세스 재기동을 위해 종료합니다.');
+    process.exit(1);
+  }
+}
+process.on('uncaughtException', handleUnhandledProcessError);
+process.on('unhandledRejection', handleUnhandledProcessError);
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -631,6 +653,53 @@ for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP', 'SIGBREAK']) {
   } catch { }
 }
 
+// WD-65: 개발 모드(IS_DEV) server.js / gateway.js 변경 감시 및 자식 재시작
+function setupDevWatcher() {
+  const watchFiles = new Set(['server.js', 'gateway.js', 'devkey.json']);
+  let devRestartTimer = null;
+
+  const onFileChanged = (filename) => {
+    if (!filename || !watchFiles.has(filename)) return;
+    clearTimeout(devRestartTimer);
+    devRestartTimer = setTimeout(async () => {
+      if (gatewayStopping) return;
+      if (filename === 'gateway.js') {
+        console.log('[게이트웨이/개발모드] gateway.js 변경 감지 — 게이트웨이 프로세스 재시작');
+        stopAllChildrenSync();
+        process.exit(0);
+        return;
+      }
+      console.log(`[게이트웨이/개발모드] ${filename} 변경 감지 — 현장 자식 서버 전체 재기동`);
+      const currentSites = Array.from(children.values()).map((c) => c.site);
+      for (const s of currentSites) {
+        try {
+          await stopSiteChild(s.id);
+        } catch (e) {
+          console.error(`[게이트웨이/개발모드] 자식(${s.id}) 중지 오류:`, e.message);
+        }
+      }
+      for (const s of currentSites) {
+        try {
+          startSiteChild(s);
+        } catch (e) {
+          console.error(`[게이트웨이/개발모드] 자식(${s.id}) 시작 오류:`, e.message);
+        }
+      }
+      console.log(`[게이트웨이/개발모드] 현장 자식 서버 재기동 완료 (${currentSites.length}개 현장)`);
+    }, 600);
+  };
+
+  try {
+    const watcher = fs.watch(__dirname, (eventType, filename) => {
+      onFileChanged(filename);
+    });
+    watcher.unref();
+    console.log('  [개발 모드] 소스 코드 감시(server.js, gateway.js, devkey.json) 활성화');
+  } catch (err) {
+    console.warn('[게이트웨이/개발모드] 디렉터리 감시 설정 실패:', err.message);
+  }
+}
+
 // ---------- HTTP 유틸리티 ----------
 function json(res, status, obj) {
   const body = JSON.stringify(obj);
@@ -741,6 +810,105 @@ async function handleGatewayApi(req, res, rawPathname, searchParams) {
     return json(res, 401, { error: '마스터 비밀번호가 올바르지 않습니다.' });
   }
   clearAuthFailure(ip);
+
+  // WD-67: POST /gw/sites/restore — 삭제된 현장 복원 및 삭제 폴더 목록 조회
+  if (rawPathname === '/gw/sites/restore') {
+    if (req.method !== 'POST') {
+      return json(res, 405, { error: 'method not allowed' });
+    }
+
+    // 1) folder 미지정 시: 삭제된 현장 폴더 목록 반환 (최신순)
+    if (!body.folder) {
+      const deletedDir = path.join(BASE_DATA_DIR, 'sites', '_deleted');
+      const list = [];
+      if (fs.existsSync(deletedDir)) {
+        try {
+          const entries = fs.readdirSync(deletedDir, { withFileTypes: true });
+          for (const ent of entries) {
+            if (!ent.isDirectory()) continue;
+            const folderName = ent.name;
+            const m = folderName.match(/^([a-z0-9-]{1,20})-(\d{10,})$/);
+            const id = m ? m[1] : folderName.replace(/-\d+$/, '');
+            let deletedAt = null;
+            let tsNum = 0;
+            if (m) {
+              tsNum = Number(m[2]);
+              const d = new Date(tsNum);
+              if (!isNaN(d.getTime())) deletedAt = d.toISOString();
+            }
+            const folderPath = path.join(deletedDir, folderName);
+            let hasData = false;
+            try {
+              hasData = fs.existsSync(path.join(folderPath, 'data.json')) ||
+                        fs.existsSync(path.join(folderPath, 'work.db')) ||
+                        fs.existsSync(path.join(folderPath, 'files'));
+            } catch {
+              hasData = false;
+            }
+            list.push({ folder: folderName, id, deletedAt, hasData, _ts: tsNum });
+          }
+        } catch (err) {
+          console.error('[게이트웨이] _deleted 디렉터리 목록 조회 실패:', err.message);
+        }
+      }
+      list.sort((a, b) => b._ts - a._ts);
+      const deleted = list.map(({ folder, id, deletedAt, hasData }) => ({
+        folder, id, deletedAt, hasData,
+      }));
+      return json(res, 200, { ok: true, deleted });
+    }
+
+    // 2) folder 지정 시: 현장 복원 수행
+    const folder = typeof body.folder === 'string' ? body.folder.trim() : '';
+    if (!/^[a-z0-9-]{1,20}-\d{10,}$/.test(folder)) {
+      return json(res, 400, { error: '유효하지 않은 복원 폴더 형식입니다.' });
+    }
+
+    const srcAbsDir = path.join(BASE_DATA_DIR, 'sites', '_deleted', folder);
+    if (!fs.existsSync(srcAbsDir) || !fs.statSync(srcAbsDir).isDirectory()) {
+      return json(res, 400, { error: '복원 대상 폴더가 존재하지 않습니다.' });
+    }
+
+    const id = folder.replace(/-\d+$/, '');
+    if (!SITE_ID_RE.test(id) || id === '_deleted') {
+      return json(res, 400, { error: '유효하지 않은 현장 ID입니다.' });
+    }
+    if (sitesData.sites.some((s) => s.id === id)) {
+      return json(res, 400, { error: '이미 존재하는 현장 ID입니다.' });
+    }
+
+    const destRelDir = `sites/${id}`;
+    const destAbsDir = path.join(BASE_DATA_DIR, 'sites', id);
+    if (fs.existsSync(destAbsDir)) {
+      return json(res, 400, { error: '이미 존재하는 현장 폴더입니다.' });
+    }
+    if (!isValidSiteDir(destRelDir, false)) {
+      return json(res, 400, { error: '유효하지 않은 현장 폴더 경로입니다.' });
+    }
+
+    const name = (typeof body.name === 'string' && body.name.trim().slice(0, 60)) || id;
+
+    try {
+      await moveDirWithRetry(srcAbsDir, destAbsDir);
+    } catch (err) {
+      console.error(`[게이트웨이 오류] 현장(${id}) 복원 이동 실패:`, err.message);
+      return json(res, 500, { error: '현장 데이터 폴더 복원 중 오류가 발생했습니다.' });
+    }
+
+    const newSite = { id, name, dir: destRelDir };
+    sitesData.sites.push(newSite);
+    saveSitesData();
+
+    const childState = startSiteChild(newSite);
+    await waitForChildReady(childState, 8000);
+
+    return json(res, 201, {
+      ok: true,
+      id,
+      name,
+      sites: getPublicSitesList(),
+    });
+  }
 
   // 1) POST /gw/sites — 현장 추가
   if (rawPathname === '/gw/sites' && req.method === 'POST') {
@@ -1122,7 +1290,10 @@ async function startGateway() {
     if (getCurrentRootMaster() === '0000') {
       console.log('  ※ 총괄 마스터 키가 초기값(0000)입니다. 현장 관리 화면 또는 config.json에서 변경하세요.');
     }
-    if (IS_DEV) console.log('  [개발 모드] 개발 모드(자동 새로고침) 활성화');
+    if (IS_DEV) {
+      console.log('  [개발 모드] 개발 모드(자동 새로고침) 활성화');
+      setupDevWatcher();
+    }
     console.log(`  이 PC     : http://localhost:${PUBLIC_PORT}`);
     console.log(`  TV 전용   : http://localhost:${PUBLIC_PORT}/tv`);
     for (const list of Object.values(os.networkInterfaces())) {

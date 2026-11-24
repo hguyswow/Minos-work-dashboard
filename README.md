@@ -24,7 +24,7 @@
 
 ## 0. Windows 설치 프로그램 (간편 설치본)
 
-Node.js를 별도로 설치하지 않고 바로 사용할 수 있는 원클릭 Windows 설치 패키지(`WorkDashboard-Setup-1.2.1.exe`)를 제공합니다.
+Node.js를 별도로 설치하지 않고 바로 사용할 수 있는 원클릭 Windows 설치 패키지(`WorkDashboard-Setup-1.4.0.exe`)를 제공합니다.
 
 - **설치 및 구동**: 설치 마법사를 실행하면 관리자 권한 없이 사용자 영역(`%LOCALAPPDATA%\Programs\WorkDashboard`)에 설치되며, 윈도우 시작 시 트레이 아이콘 백그라운드 자동 실행이 지원됩니다.
 - **데이터 보관 위치**: 작업 데이터 및 설정은 프로그램 업데이트 및 재설치 시에도 안전하게 보존되도록 사용자 로컬 앱데이터 폴더(`%LOCALAPPDATA%\WorkDashboard`)에 분리 저장됩니다 (`data.json`, `work.db`, `config.json`, `files/`, `backup/`).
@@ -167,18 +167,48 @@ Node.js를 별도로 설치하지 않고 바로 사용할 수 있는 원클릭 W
 
 ### 1) 파일 구성
 - **`data.json`**: 모든 작업 현황 데이터가 저장되는 핵심 데이터베이스 파일입니다.
-- **`backup/data-YYYY-MM-DD.json`**: 일일 자동 백업 파일입니다.
+- **`work.db`**: 일별 작업 이력이 영구 보존되는 내장 SQLite 데이터베이스 파일(WAL 모드)입니다.
+- **`backup/data-YYYY-MM-DD.json` & `backup/work-YYYY-MM-DD.db`**: 일일 자동 백업 파일입니다.
   - **생성 시점**: 서버 시작 시(`data.json`이 정상 로드된 경우) 및 그날 첫 저장 시 생성됩니다.
-  - 당일 백업 파일이 이미 존재하면 덮어쓰지 않으며, 날짜 형식 백업 파일은 최근 30개까지만 유지되고 오래된 파일은 자동 정리됩니다.
+  - 당일 백업 파일이 이미 존재하면 덮어쓰지 않으며(그날 첫 오전 상태 보존), 날짜 형식 백업 파일은 최근 30개까지만 유지되고 오래된 파일은 자동 정리됩니다.
+- **`backup/data-manual-YYYYMMDD-HHmmss.json` & `backup/work-manual-YYYYMMDD-HHmmss.db`**: 관리자 설정 화면에서 **[지금 백업]** 클릭 시 생성되는 즉시 수동 백업 파일입니다. (종류별 최근 10개 보관)
+- **멀티 현장 백업 경로**: 멀티 현장 환경의 경우 본사는 `backup/`, 추가 현장은 각 현장 폴더(`sites/<id>/backup/`)에 독립적으로 보관됩니다.
 - **`data.json.corrupt-<시각>`**: 서버 시작 시 파일 손상(빈 파일, JSON 문법 오류 등) 감지 시 기존 원본을 보호하기 위해 복사된 파일입니다.
 - **`data.json.premigrate-<시각>`**: 구형 버전 데이터를 v2 규격으로 변환하기 직전에 생성된 변환 전 원본 파일입니다.
 - ※ `corrupt` 및 `premigrate` 파일은 자동으로 삭제되지 않으므로, 확인 후 관리자가 직접 삭제하시면 됩니다.
+- ※ 자동 백업은 하루 1회(그날 최초 상태)만 보관되므로, 큰 작업 변경 전에는 설정 화면의 **[지금 백업]** 버튼을 눌러 수동 백업을 생성하는 것을 권장합니다.
 
 ### 2) 백업 데이터 복원 절차
+
+#### A. data.json 복원
 1. 실행 중인 콘솔 창을 닫아 서버를 완전히 종료합니다.
-2. `backup/` 폴더에서 복원하고자 하는 날짜의 백업 파일(예: `data-2026-10-20.json`)을 복사합니다.
-3. 프로젝트 루트 폴더에 붙여넣고 파일 이름을 **`data.json`**으로 변경(덮어쓰기)합니다.
+2. `backup/` 폴더에서 복원하고자 하는 날짜의 백업 파일(예: `data-2026-10-20.json` 또는 `data-manual-*.json`)을 복사합니다.
+3. 프로젝트 루트 폴더(또는 해당 현장 폴더)에 붙여넣고 파일 이름을 **`data.json`**으로 변경(덮어쓰기)합니다.
 4. `start.bat`을 실행하여 서버를 다시 시작합니다.
+
+#### B. work.db (과거 이력 DB) 복원
+1. 실행 중인 콘솔 창을 닫아 서버를 완전히 종료합니다.
+2. `backup/` 폴더에서 복원할 날짜의 DB 백업 파일(예: `work-2026-10-20.db` 또는 `work-manual-*.db`)을 복사합니다.
+3. 프로젝트 루트 폴더(또는 해당 현장 폴더)에 붙여넣고 파일 이름을 **`work.db`**로 변경(덮어쓰기)합니다.
+4. 기존에 생성되어 있던 임시 WAL 저널 파일인 **`work.db-wal`** 및 **`work.db-shm`** 파일을 완전히 삭제합니다.
+5. `start.bat`을 실행하여 서버를 다시 시작합니다.
+
+### 3) 삭제된 현장 복원 및 PC 간 현장 이관
+
+- **삭제된 현장 복원**: 삭제한 현장은 데이터가 지워지지 않고 `sites/_deleted/<현장코드>-<타임스탬프>`로 안전하게 보관됩니다. `POST /gw/sites/restore` API(총괄 마스터 키 필요)를 통해 삭제 목록을 조회하고 원하는 현장을 즉시 복원할 수 있습니다.
+  - 삭제 목록 조회:
+    ```bash
+    curl -X POST http://localhost:3000/gw/sites/restore -H "Content-Type: application/json" -H "X-Requested-With: XMLHttpRequest" -d "{\"masterPassword\":\"0000\"}"
+    ```
+  - 특정 현장 복원 실행 (`name` 생략 시 기존 현장코드 사용):
+    ```bash
+    curl -X POST http://localhost:3000/gw/sites/restore -H "Content-Type: application/json" -H "X-Requested-With: XMLHttpRequest" -d "{\"masterPassword\":\"0000\",\"folder\":\"s2-1793400000000\",\"name\":\"새 현장 이름\"}"
+    ```
+- **PC 간 현장 이관 (다른 PC로 이동)**:
+  1. 원본 서버 PC를 종료하거나 수동 백업을 생성합니다. (복사 중 쓰기 방지 권고)
+  2. 원본 PC의 `sites/<현장코드>` 폴더를 통째로(`work.db`, `data.json`, `files/` 등 하위 파일 포함) 복사합니다.
+  3. 대상 PC의 데이터 폴더 내 `sites/_deleted/<현장코드>-<13자리숫자>`(예: `sites/_deleted/site1-1793400000000`) 위치에 폴더를 붙여넣습니다.
+  4. 대상 PC의 서버를 실행하고 위의 복원 API(`POST /gw/sites/restore`)를 호출하면 즉시 새 현장으로 복원·마운트되어 서비스가 시작됩니다.
 
 ---
 

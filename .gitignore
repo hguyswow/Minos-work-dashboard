@@ -15,3 +15,6 @@ node_modules/
 
 installer/Output/
 installer/runtime/
+
+# 개발자 전용 키(공개 금지)
+devkey.json

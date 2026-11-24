@@ -31,6 +31,7 @@
   --sub: #475569;         /* 슬레이트 600: 흰색(#ffffff) 대비 7.0:1 */
   --line: #e2e8f0;        /* 부드러운 구분선 */
   --strong: #94a3b8;      /* 기둥 및 주요 구역 구분선 */
+  --primary: #2563eb;     /* 주요 브랜드 / 테마 대표 색 */
   --accent: #2563eb;      /* 절제된 모던 로열 블루 */
   --accent-hover: #1d4ed8;
   --accent-faint: #eff6ff;
@@ -77,6 +78,7 @@
   --sub: #94a3b8;         /* 슬레이트 400 (명도비 5.3:1) */
   --line: #263345;        /* 다크 구분선 */
   --strong: #3b4d66;      /* 다크 강한 구분선 */
+  --primary: #38bdf8;     /* 다크 브랜드 / 테마 대표 색 */
   --accent: #38bdf8;      /* 다크에서 선명한 스카이 블루 (명도비 6.1:1) */
   --accent-hover: #60a5fa;
   --accent-faint: #17283c;
@@ -178,6 +180,8 @@ header{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align
 .w-head{grid-area:head;display:flex;align-items:center;gap:.3rem;font-size:.6rem;line-height:1.1}
 .w-head .w-place{font-weight:700;color:var(--ink)}
 .w-head .w-tag{color:var(--sub);font-size:.58rem}
+.w-head .w-stale-tag{color:#d97706;font-weight:700}
+:root[data-theme="dark"] .w-head .w-stale-tag{color:#fbbf24}
 .w-head .w-guide{color:var(--accent);font-size:.58rem;cursor:pointer}
 .w-summary{grid-area:summary;font-size:.6rem;color:var(--danger);font-weight:700;line-height:1.1;margin:0;text-align:right}
 .w-bar{grid-area:bar;display:flex;gap:.2rem;align-items:stretch}
@@ -241,6 +245,36 @@ button{font:inherit;cursor:pointer}
 .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 .btn.faint{opacity:.85}.btn.faint:hover{opacity:1}
 .btn.active{font-weight:700;color:var(--accent);border-color:var(--accent);background:var(--accent-faint);opacity:1}
+/* WD-80: 관리자 모니터 화면 버튼 강조 (은은한 글로우/펄스 테두리 애니메이션) */
+.btn.btn-monitor-hl{
+  font-weight:600;
+  color:var(--primary,var(--accent,#2563eb));
+  border-color:var(--primary,var(--accent,#2563eb));
+  background:var(--accent-faint,rgba(37,99,235,.08));
+  box-shadow:0 0 0 1px var(--primary,var(--accent,#2563eb)),0 0 8px rgba(37,99,235,.35);
+  animation:pulse-monitor-glow 2s ease-in-out infinite;
+  opacity:1;
+}
+:root[data-theme="dark"] .btn.btn-monitor-hl{
+  box-shadow:0 0 0 1px var(--primary,var(--accent,#38bdf8)),0 0 10px rgba(56,189,248,.45);
+}
+@keyframes pulse-monitor-glow{
+  0%,100%{
+    box-shadow:0 0 0 1px var(--primary,var(--accent,#2563eb)),0 0 4px rgba(37,99,235,.2);
+    border-color:var(--primary,var(--accent,#2563eb));
+  }
+  50%{
+    box-shadow:0 0 0 2px var(--primary,var(--accent,#2563eb)),0 0 12px rgba(37,99,235,.5);
+    border-color:var(--accent-hover,#1d4ed8);
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .btn.btn-monitor-hl{
+    animation:none !important;
+    border-width:2px;
+    box-shadow:0 0 0 1px var(--primary,var(--accent,#2563eb));
+  }
+}
 .nav-group{display:inline-flex;gap:.35rem;align-items:center}
 
 /* WD-10: 모니터용(/tv) 우상단 컨트롤 바 (전체화면 + 테마 전환 버튼) */
@@ -609,8 +643,8 @@ body:not(.admin) .col > .sec:last-child{border-bottom:none}
 .sec-group{display:contents}
 
 @media(min-width:801px){
-  /* WD-10: 모니터용(/tv) 데스크톱 고정 레이아웃 */
-  body.tv:not(.admin){height:100vh;height:100dvh;overflow:hidden;padding-bottom:0;display:flex;flex-direction:column}
+  /* WD-10 / WD-80: 모니터용(/tv) 데스크톱 고정 레이아웃 */
+  body.tv:not(.admin){height:100vh;height:100dvh;overflow:hidden;padding-bottom:1.6rem;display:flex;flex-direction:column}
   body.tv:not(.admin) header{flex:none}
   body.tv:not(.admin) #banner{flex:none}
   body.tv:not(.admin) main{flex:1;min-height:0;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
@@ -883,7 +917,7 @@ body:not(.admin) .col > .sec:last-child{border-bottom:none}
     .cols-inner-2 .grid-equip-v,
     .cols-inner-3 .grid-equip-v,
     .sec-group.cols-3 .grid-equip-v {
-      grid-template-columns: 2.2rem 1.2fr 0.6fr 0.9fr 1.6fr !important;
+      grid-template-columns: 2.2rem 1.1fr 0.6fr 0.5fr 2.1fr !important;
       grid-template-rows: auto !important;
       gap: .15rem .35rem !important;
     }
@@ -905,7 +939,7 @@ body:not(.admin) .col > .sec:last-child{border-bottom:none}
     .cols-inner-2 .tbl-h.grid-equip-v,
     .cols-inner-3 .tbl-h.grid-equip-v,
     .sec-group.cols-3 .tbl-h.grid-equip-v {
-      grid-template-columns: 2.2rem 1.2fr 0.6fr 0.9fr 1.6fr !important;
+      grid-template-columns: 2.2rem 1.1fr 0.6fr 0.5fr 2.1fr !important;
       grid-template-rows: auto !important;
       gap: .15rem .35rem !important;
     }
@@ -1074,16 +1108,22 @@ body:not(.admin) .col > .sec:last-child{border-bottom:none}
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: .5rem;
+  gap: .4rem;
+  white-space: nowrap;
+}
+.cal-nav > * {
+  flex-shrink: 0;
 }
 .cal-nav .btn-nav {
   background: var(--btn-bg);
   color: var(--ink);
   border: 1px solid var(--line);
   border-radius: .35rem;
-  padding: .2rem .6rem;
+  padding: .2rem .5rem;
   cursor: pointer;
   font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .cal-nav .btn-nav:hover {
   background: var(--btn-hover);
@@ -1092,6 +1132,9 @@ body:not(.admin) .col > .sec:last-child{border-bottom:none}
 .cal-nav-title {
   font-size: 1.05rem;
   font-weight: 700;
+  white-space: nowrap;
+  text-align: center;
+  min-width: 0;
 }
 .cal-grid {
   display: grid;
@@ -1182,7 +1225,8 @@ body:not(.admin) .col > .sec:last-child{border-bottom:none}
 }
 .history-layout {
   display: grid;
-  grid-template-columns: 290px 1fr;
+  grid-template-columns: max(290px, 16.5rem) 1fr;
+  grid-template-rows: minmax(0, 1fr);
   gap: 1.1rem;
   min-height: 25rem;
   max-height: calc(90vh - 8rem);
@@ -1191,6 +1235,7 @@ body:not(.admin) .col > .sec:last-child{border-bottom:none}
 @media (max-width: 820px) {
   .history-layout {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
     max-height: none;
     overflow-y: auto;
   }
@@ -1201,6 +1246,9 @@ body:not(.admin) .col > .sec:last-child{border-bottom:none}
   display: flex;
   flex-direction: column;
   gap: .85rem;
+}
+.history-content > * {
+  flex-shrink: 0;
 }
 .history-sec {
   border: 1px solid var(--line);
@@ -1513,8 +1561,11 @@ body:not(.admin) .col > .sec:last-child{border-bottom:none}
 #toast{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);background:var(--draft-bar-bg);color:var(--draft-bar-ink);border:1px solid var(--line);padding:.5rem 1rem;border-radius:.5rem;opacity:0;transition:opacity .25s;pointer-events:none;z-index:60}
 #toast.on{opacity:.92}
 
-#conn-info{position:fixed;left:.8rem;bottom:.5rem;font-size:.82rem;color:var(--sub);z-index:40;background:var(--conn-bg);padding:.2rem .6rem;border-radius:.35rem;border:1px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,.08);font-variant-numeric:tabular-nums;pointer-events:none}
+#conn-info{position:fixed;left:.8rem;bottom:.5rem;font-size:.82rem;color:var(--sub);z-index:40;background:var(--conn-bg);padding:.2rem .6rem;border-radius:.35rem;border:1px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,.08);font-variant-numeric:tabular-nums;pointer-events:none;max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #conn-info.err{color:var(--danger)}
+/* WD-80: /tv 에서도 접속 주소를 작고 은은하게 표시, 구역과 겹침 방지 */
+body.tv #conn-info{font-size:clamp(.68rem,.75vw,.78rem);opacity:.8;padding:.15rem .5rem;bottom:.3rem;left:.8rem}
+body.tv #brand-footer{bottom:.3rem;right:.8rem}
 
 /* WD-27, WD-33: 화면 우측 하단 프로그램 이름 및 문의처, 가이드 아이콘 */
 #brand-footer{position:fixed;right:.8rem;bottom:.5rem;width:max-content;font-size:.78rem;color:var(--sub);z-index:40;background:var(--conn-bg);padding:.2rem .55rem;border-radius:.35rem;border:1px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,.08);pointer-events:none;text-align:right;line-height:1.35;user-select:none;display:flex;align-items:center;gap:.45rem}
@@ -1679,6 +1730,7 @@ const S = {
   today: null,
   prev: null,
   days: {},
+  rev: {}, // WD-69: 동시 편집 충돌 감지용 날짜별 rev (sha1 12자)
   settings: { siteName: '', place: null, windLimit: 10, rainLimit: 1, equipCols: 1 },
   weather: null,
   suggest: {},
@@ -1740,14 +1792,14 @@ function createThemeToggleBtn(isTv = false) {
   const update = () => {
     const mode = getThemeMode();
     if (mode === 'light') {
-      btn.textContent = '☀ 라이트';
-      btn.title = '테마: 라이트 (클릭 시 다크 모드로 전환)';
+      btn.textContent = '🎨 테마: 라이트';
+      btn.title = '화면 색상 테마 전환: 라이트 → 다크 (현재 라이트)';
     } else if (mode === 'dark') {
-      btn.textContent = '🌙 다크';
-      btn.title = '테마: 다크 (클릭 시 자동 모드로 전환)';
+      btn.textContent = '🎨 테마: 다크';
+      btn.title = '화면 색상 테마 전환: 다크 → 자동 (현재 다크)';
     } else {
-      btn.textContent = '💻 자동';
-      btn.title = '테마: 자동(시스템 설정 따름, 클릭 시 라이트 모드로 전환)';
+      btn.textContent = '🎨 테마: 자동';
+      btn.title = '화면 색상 테마 전환: 자동 → 라이트 (현재 자동: 시스템 설정 따름)';
     }
   };
   btn.onclick = () => {
@@ -1758,30 +1810,59 @@ function createThemeToggleBtn(isTv = false) {
   return btn;
 }
 
-// ---------- WD-19: 보기 모드 관리 (어제 / 오늘 / 어제+오늘) ----------
+// ---------- WD-19 / WD-79: 보기 모드 관리 (어제 / 어제+오늘 / 오늘 / 오늘+내일 / 내일) ----------
 const VIEW_MODES = [
   { key: 'yesterday', label: '어제' },
   { key: 'both', label: '어제+오늘' },
   { key: 'today', label: '오늘' },
+  { key: 'todayTomorrow', label: '오늘+내일' },
+  { key: 'tomorrow', label: '내일' },
 ];
 
 function getViewMode() {
   const params = new URLSearchParams(window.location.search);
   const urlView = params.get('view');
-  if (urlView === 'today' || urlView === 'yesterday' || urlView === 'both') return urlView;
+  const validViews = ['yesterday', 'both', 'today', 'todayTomorrow', 'tomorrow'];
+  if (validViews.includes(urlView)) return urlView;
   try {
     const stored = localStorage.getItem(siteKey('view_mode'));
-    if (stored === 'today' || stored === 'yesterday' || stored === 'both') return stored;
+    if (validViews.includes(stored)) return stored;
   } catch (e) {}
   return 'both';
 }
 
 function setViewMode(mode) {
-  if (mode !== 'today' && mode !== 'yesterday' && mode !== 'both') return;
+  const validViews = ['yesterday', 'both', 'today', 'todayTomorrow', 'tomorrow'];
+  if (!validViews.includes(mode)) return;
   try {
     localStorage.setItem(siteKey('view_mode'), mode);
   } catch (e) {}
+  if (window.location.search.includes('view=')) {
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.set('view', mode);
+      window.history.replaceState({}, '', u.pathname + u.search + u.hash);
+    } catch (e) {}
+  }
   updateViewModeControls();
+  render();
+}
+
+// WD-79: 관리자 화면 오늘/내일 작성 토글 상태 관리
+function getAdminDayToggle() {
+  try {
+    const k = 'admin_day_toggle_' + (SITE_ID || 'default');
+    const v = localStorage.getItem(k);
+    if (v === 'todayTomorrow' || v === 'yesterdayToday') return v;
+  } catch (e) {}
+  return 'yesterdayToday';
+}
+
+function setAdminDayToggle(mode) {
+  try {
+    const k = 'admin_day_toggle_' + (SITE_ID || 'default');
+    localStorage.setItem(k, mode);
+  } catch (e) {}
   render();
 }
 
@@ -1792,7 +1873,10 @@ function updateViewModeControls() {
 }
 
 function createViewModeControl(isTv = false) {
-  const ctl = el('div', { class: 'view-mode-control' + (isTv ? ' tv' : '') });
+  const ctl = el('div', {
+    class: 'view-mode-control' + (isTv ? ' tv' : ''),
+    title: isTv ? '보기 모드 (키보드 ← / → 키로 전환)' : '보기 모드'
+  });
   const buttons = {};
 
   VIEW_MODES.forEach((m) => {
@@ -2009,20 +2093,28 @@ const emptyDay = () => ({
   notes: [],
 });
 
-const normDay = (d) => ({
-  work: Array.isArray(d && d.work) ? d.work : [],
-  equip: Array.isArray(d && d.equip) ? d.equip : [],
-  crew: Array.isArray(d && d.crew) ? d.crew : [],
-  material: Array.isArray(d && d.material) ? d.material : [],
-  notes: Array.isArray(d && d.notes) ? d.notes : [],
-});
+const normDay = (d) => {
+  const res = {
+    work: Array.isArray(d && d.work) ? d.work : [],
+    equip: Array.isArray(d && d.equip) ? d.equip : [],
+    crew: Array.isArray(d && d.crew) ? d.crew : [],
+    material: Array.isArray(d && d.material) ? d.material : [],
+    notes: Array.isArray(d && d.notes) ? d.notes : [],
+  };
+  if (d && d.mealAdj !== undefined && d.mealAdj !== null) {
+    const adj = Math.trunc(Number(d.mealAdj));
+    if (!isNaN(adj) && adj !== 0) res.mealAdj = Math.max(-99, Math.min(99, adj));
+  }
+  return res;
+};
 
 const hasContent = (d) => !!(d && (
   (d.work && d.work.length) ||
   (d.equip && d.equip.length) ||
   (d.crew && d.crew.length) ||
   (d.material && d.material.length) ||
-  (d.notes && d.notes.length)
+  (d.notes && d.notes.length) ||
+  (d.mealAdj && d.mealAdj !== 0)
 ));
 
 const fmt = (d) => {
@@ -2048,7 +2140,7 @@ function onAuthExpired() {
 }
 
 async function api(url, opt = {}) {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = { 'Content-Type': 'application/json', ...(opt.headers || {}) };
   if (!TV_MODE && S.token) headers.Authorization = 'Bearer ' + S.token;
   const r = await fetch(url, { ...opt, headers });
   if (r.status === 401 && !TV_MODE && S.token && url !== '/api/login') {
@@ -2063,9 +2155,25 @@ async function load() {
   const s = await api('/api/state');
   S.today = s.today;
   S.prev = s.prev;
-  S.days = {};
-  if (s.prev) S.days[s.prev] = normDay(s.prevData);
-  S.days[s.today] = normDay(s.todayData);
+  S.tomorrow = s.tomorrow;
+  if (!S.days) S.days = {};
+  if (!S.rev) S.rev = {};
+  if (s.prev) {
+    if (!dirty[s.prev]) {
+      S.days[s.prev] = normDay(s.prevData);
+      if (s.prevRev) S.rev[s.prev] = s.prevRev;
+    }
+  }
+  if (!dirty[s.today]) {
+    S.days[s.today] = normDay(s.todayData);
+    if (s.todayRev) S.rev[s.today] = s.todayRev;
+  }
+  if (s.tomorrow) {
+    if (!dirty[s.tomorrow]) {
+      S.days[s.tomorrow] = normDay(s.tomorrowData);
+      if (s.tomorrowRev) S.rev[s.tomorrow] = s.tomorrowRev;
+    }
+  }
   S.settings = s.settings || { siteName: '' };
   S.suggest = s.suggest || {};
   renderDataLists();
@@ -2126,6 +2234,10 @@ function renderWeatherBar() {
     const d = new Date(w.updated);
     const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     meta.append(el('span', { class: 'w-tag', text: `갱신 ${timeStr}` }));
+    if (w.stale) {
+      const hoursAgo = Math.max(1, Math.floor((w.ageMin || 0) / 60));
+      meta.append(el('span', { class: 'w-tag w-stale-tag', text: `⚠ 갱신 지연 · ${hoursAgo}시간 전 수신` }));
+    }
   }
   container.append(meta);
 
@@ -2246,7 +2358,72 @@ function touch(dk) {
   timers[dk] = setTimeout(() => saveDay(dk), 500);
 }
 
+let activeConflictDk = null;
+
+function showConflictModal(dk, conflictData) {
+  if (activeConflictDk === dk) return;
+  activeConflictDk = dk;
+  S.modalOpen = true;
+
+  const serverDay = (conflictData && conflictData.day) || emptyDay();
+  const serverRev = (conflictData && conflictData.rev) || '';
+
+  const ov = el('div', { id: 'conflict-modal', class: 'ov' });
+  const close = () => {
+    activeConflictDk = null;
+    S.modalOpen = false;
+    ov.remove();
+  };
+
+  const body = el('div', { class: 'conflict-body' },
+    el('p', { class: 'conflict-msg', text: '다른 사용자가 먼저 이 날짜를 수정했습니다.' }),
+    el('p', { class: 'conflict-sub', text: '내 미저장 변경을 폐기하고 최신 내용을 불러오거나, 현재 내용으로 서버의 내용을 덮어쓸 수 있습니다.' })
+  );
+
+  const btnLoad = el('button', {
+    type: 'button',
+    class: 'btn primary',
+    id: 'btn-conflict-reload',
+    text: '최신 내용 불러오기',
+    onclick: () => {
+      close();
+      delete dirty[dk];
+      clearTimeout(timers[dk]);
+      clearTimeout(retryTimers[dk]);
+      S.days[dk] = normDay(serverDay);
+      if (!S.rev) S.rev = {};
+      S.rev[dk] = serverRev;
+      lastSavedHash[dk] = JSON.stringify(S.days[dk]);
+      setStatus('최신 내용을 불러왔습니다');
+      render();
+    }
+  });
+
+  const btnOverwrite = el('button', {
+    type: 'button',
+    class: 'btn danger',
+    id: 'btn-conflict-overwrite',
+    text: '내 내용으로 덮어쓰기',
+    onclick: async () => {
+      close();
+      if (!S.rev) S.rev = {};
+      S.rev[dk] = serverRev;
+      await saveDay(dk);
+    }
+  });
+
+  const md = el('div', { class: 'md' },
+    el('h2', { text: '동시 편집 충돌 감지' }),
+    body,
+    el('div', { class: 'btns' }, btnLoad, btnOverwrite)
+  );
+
+  ov.append(md);
+  document.body.append(ov);
+}
+
 async function saveDay(dk) {
+  if (activeConflictDk === dk) return false;
   if (!S.token) {
     if (S.authExpired) setStatus('로그인이 만료되었습니다. 이 화면을 새로고침하지 말고 다시 로그인하세요.', true);
     return false;
@@ -2260,8 +2437,14 @@ async function saveDay(dk) {
   setStatus('저장 중…');
   clearTimeout(retryTimers[dk]);
   try {
-    await api('/api/day/' + dk, { method: 'PUT', body: payload });
+    const headers = {};
+    if (S.rev && S.rev[dk]) headers['X-Base-Rev'] = S.rev[dk];
+    const res = await api('/api/day/' + dk, { method: 'PUT', headers, body: payload });
     if (seq === saveSeq[dk]) {
+      if (res && res.rev) {
+        if (!S.rev) S.rev = {};
+        S.rev[dk] = res.rev;
+      }
       lastSavedHash[dk] = payload;
       delete dirty[dk];
       setStatus('저장됨 ✓ ' + new Date().toLocaleTimeString('ko-KR'));
@@ -2269,6 +2452,12 @@ async function saveDay(dk) {
     return true;
   } catch (e) {
     if (e.message === 'auth') return false;
+    if (e.status === 409) {
+      clearTimeout(retryTimers[dk]);
+      setStatus('충돌 — 확인 필요', true);
+      showConflictModal(dk, e.body);
+      return false;
+    }
     if (seq === saveSeq[dk]) {
       setStatus('저장 실패 ✗ (3초 후 재시도)', true);
       clearTimeout(retryTimers[dk]);
@@ -2459,10 +2648,13 @@ function render() {
     if (banner) banner.style.display = 'none';
   } else {
     // 3-1: 헤더 메뉴 링크 영역 (대시보드 · 파일박스 · 모니터 화면 · 현장 전환)
+    // WD-80: 관리자일 때만 '모니터 화면' 버튼에 글로우 강조 클래스 및 아이콘 접두
+    const tvBtnClass = S.admin ? 'btn faint btn-monitor-hl' : 'btn faint';
+    const tvBtnText = S.admin ? '📺 모니터 화면' : '모니터 화면';
     const navGroup = el('div', { class: 'nav-group' },
       el('a', { href: '/', class: 'btn faint' + (SITE_PATH === '/' ? ' active' : ''), text: '대시보드' }),
       el('a', { href: '/files', class: 'btn faint', text: '파일박스' }),
-      el('a', { href: '/tv', target: '_blank', class: 'btn faint', text: '모니터 화면' }),
+      el('a', { href: '/tv', target: '_blank', class: tvBtnClass, text: tvBtnText, title: '모니터 화면 새 창으로 열기' }),
       ...(S.sitesCount >= 2 ? [el('a', { href: '/sites.html?pick=1', class: 'btn faint', text: '현장 전환' })] : [])
     );
     const themeBtn = createThemeToggleBtn();
@@ -2478,12 +2670,21 @@ function render() {
         el('button', { class: 'btn primary', text: '다시 로그인', onclick: openLogin })
       );
     } else if (S.admin) {
+      const isTomorrowMode = getAdminDayToggle() === 'todayTomorrow';
       r.append(
         el('span', { id: 'status', text: '' }),
         navGroup,
         themeBtn,
+        el('button', {
+          id: 'btn-admin-day-toggle',
+          class: 'btn primary',
+          text: isTomorrowMode ? '◀ 어제·오늘' : '내일 작성 ▶',
+          onclick: () => setAdminDayToggle(isTomorrowMode ? 'yesterdayToday' : 'todayTomorrow'),
+        }),
         el('button', { class: 'btn faint', text: '지난 날짜', onclick: openHistoryModal }),
-        el('button', { class: 'btn', text: '어제 내용 → 오늘 복사', onclick: copyPrev }),
+        isTomorrowMode
+          ? el('button', { class: 'btn', text: '오늘 내용 → 내일 복사', onclick: copyTodayToTomorrow })
+          : el('button', { class: 'btn', text: '어제 내용 → 오늘 복사', onclick: copyPrev }),
         el('button', { class: 'btn', text: '출력', title: '일일 보고용 인쇄 / PDF 저장', onclick: printReport }),
         el('button', { class: 'btn', text: '월별계획', onclick: openPlansModal }),
         el('button', { class: 'btn', text: '설정', onclick: openSettingsModal }),
@@ -2496,16 +2697,27 @@ function render() {
   fitHeaderTitle();
 
   const viewMode = getViewMode();
-  const showSingle = !S.admin && (viewMode === 'yesterday' || viewMode === 'today');
+  const isTomorrowMode = S.admin && getAdminDayToggle() === 'todayTomorrow';
+  const showSingle = !S.admin && (viewMode === 'yesterday' || viewMode === 'today' || viewMode === 'tomorrow');
   const mainEl = $('#main');
   mainEl.classList.toggle('view-single', showSingle);
 
-  if (S.admin || viewMode === 'both') {
+  if (S.admin) {
+    if (isTomorrowMode) {
+      mainEl.replaceChildren(col('오늘', S.today), col('내일 (예정)', S.tomorrow));
+    } else {
+      mainEl.replaceChildren(col('어제', S.prev), col('오늘', S.today));
+    }
+  } else if (viewMode === 'both') {
     mainEl.replaceChildren(col('어제', S.prev), col('오늘', S.today));
   } else if (viewMode === 'yesterday') {
     mainEl.replaceChildren(col('어제', S.prev));
   } else if (viewMode === 'today') {
     mainEl.replaceChildren(col('오늘', S.today));
+  } else if (viewMode === 'todayTomorrow') {
+    mainEl.replaceChildren(col('오늘', S.today), col('내일 (예정)', S.tomorrow));
+  } else if (viewMode === 'tomorrow') {
+    mainEl.replaceChildren(col('내일 (예정)', S.tomorrow));
   }
 
   if (!S.admin && window.innerWidth > 800) {
@@ -2554,10 +2766,13 @@ function col(label, dk) {
     el('div', { class: 'colhead' }, label, el('small', { text: dk ? fmt(dk) : '' }))
   );
   if (!dk) {
-    w.append(el('div', { class: 'empty', text: '이전 기록이 없습니다' }));
+    w.append(el('div', { class: 'empty', text: label.includes('내일') ? '작성된 내일 작업이 없습니다' : '이전 기록이 없습니다' }));
     return w;
   }
   const day = S.days[dk] || emptyDay();
+  if (!S.admin && dk === S.tomorrow && !hasContent(day)) {
+    w.append(el('div', { class: 'empty tomorrow-empty', style: 'padding:1.5rem;text-align:center;color:var(--text-muted,#888);font-size:1rem;', text: '작성된 내일 작업이 없습니다' }));
+  }
 
   const secRenderers = {
     work: () => renderWorkSec(day, dk),
@@ -3205,27 +3420,133 @@ function mealBreakdown(crewList, equipList) {
   return rows;
 }
 
-function openMealDetail(day) {
+function openMealDetail(day, dk = S.today, sec = null) {
   const rows = mealBreakdown(day.crew, day.equip);
-  const total = rows.reduce((s, r) => s + r[1], 0);
+  const autoTotal = rows.reduce((s, r) => s + r[1], 0);
   const tbl = el('table', { class: 'meal-detail' },
     ...rows.map((r) => el('tr', {}, el('td', { text: r[0] }), el('td', { text: `${r[1]}명` }))),
-    el('tr', { class: 'total' }, el('td', { text: '식수 합계' }), el('td', { text: `${total}명` }))
+    el('tr', { class: 'total' }, el('td', { text: S.admin ? '자동 계산 소계' : '식수 합계' }), el('td', { text: `${autoTotal}명` }))
   );
-  modal('식수 인원 상세', el('div', {},
+
+  const wrap = el('div', { class: 'meal-detail-wrap' },
     el('div', { class: 'hint', text: '직원 + 직영 인원 + 직영 장비 기사(수량 미기재 시 1명)' }),
     rows.length ? tbl : el('div', { class: 'empty', text: '식수 대상이 없습니다.' })
-  ), []);
+  );
+
+  // 관리자일 때만 수동 조정 행 노출 (TV/조회 전용에는 노출 안 함)
+  if (S.admin) {
+    let curAdj = (day && typeof day.mealAdj === 'number') ? day.mealAdj : (parseInt(day && day.mealAdj, 10) || 0);
+    const adjInput = el('input', {
+      type: 'text',
+      class: 'meal-adj-input',
+      value: curAdj > 0 ? `+${curAdj}` : String(curAdj),
+      style: 'width:56px; height:34px; text-align:center; font-weight:700; font-size:0.95rem; border:1px solid var(--line); border-radius:0.3rem; background:var(--bg); color:var(--ink);'
+    });
+
+    const finalValEl = el('span', {
+      class: 'meal-final-val',
+      style: 'color:var(--accent); font-size:1.1rem; font-weight:700;',
+      text: `${Math.max(0, autoTotal + curAdj)}명`
+    });
+
+    const btnReset = el('button', {
+      type: 'button',
+      class: 'btn faint btn-meal-adj-reset',
+      style: `min-height:34px; padding:0 0.6rem; font-size:0.8rem; display:${curAdj !== 0 ? 'inline-block' : 'none'};`,
+      text: '초기화',
+      onclick: () => updateAdj(0)
+    });
+
+    function updateAdj(val) {
+      let adj = Math.trunc(Number(val));
+      if (isNaN(adj)) adj = 0;
+      if (adj < -99) adj = -99;
+      if (adj > 99) adj = 99;
+
+      if (adj !== 0) {
+        day.mealAdj = adj;
+      } else {
+        delete day.mealAdj;
+      }
+
+      curAdj = adj;
+      adjInput.value = adj > 0 ? `+${adj}` : String(adj);
+      btnReset.style.display = adj !== 0 ? 'inline-block' : 'none';
+      const finalVal = Math.max(0, autoTotal + adj);
+      finalValEl.textContent = `${finalVal}명`;
+
+      // 저장 흐름 (touch)
+      touch(dk);
+
+      // 배경의 배지 즉시 갱신 (전달받은 sec 우선 사용)
+      const crewSec = sec || (typeof document !== 'undefined' ? document.querySelector('.sec-crew') : null);
+      if (crewSec) {
+        updateCrewBadge(day, crewSec, dk);
+      }
+    }
+
+    const btnMinus = el('button', {
+      type: 'button',
+      class: 'btn faint btn-meal-adj-minus',
+      style: 'min-width:34px; min-height:34px; padding:0; font-size:1.15rem; font-weight:700;',
+      text: '−',
+      onclick: () => {
+        if (curAdj > -99) updateAdj(curAdj - 1);
+      }
+    });
+
+    const btnPlus = el('button', {
+      type: 'button',
+      class: 'btn faint btn-meal-adj-plus',
+      style: 'min-width:34px; min-height:34px; padding:0; font-size:1.15rem; font-weight:700;',
+      text: '+',
+      onclick: () => {
+        if (curAdj < 99) updateAdj(curAdj + 1);
+      }
+    });
+
+    adjInput.onchange = () => {
+      updateAdj(adjInput.value.trim());
+    };
+    adjInput.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        adjInput.blur();
+      }
+    };
+
+    const adjRow = el('div', { class: 'meal-adj-control-row', style: 'display:flex; align-items:center; justify-content:space-between; margin-top:0.8rem; padding-top:0.6rem; border-top:1px dashed var(--line); flex-wrap:wrap; gap:0.4rem;' },
+      el('span', { style: 'font-weight:600; font-size:0.9rem;', text: '수동 조정 (±)' }),
+      el('div', { style: 'display:flex; align-items:center; gap:0.35rem;' },
+        btnMinus,
+        adjInput,
+        btnPlus,
+        btnReset
+      )
+    );
+
+    const finalRow = el('div', { class: 'meal-final-summary-row', style: 'display:flex; align-items:center; justify-content:space-between; margin-top:0.6rem; padding:0.5rem 0.7rem; background:var(--card-sub); border:1px solid var(--line); border-radius:0.3rem; font-weight:700;' },
+      el('span', { text: '식수 최종 합계' }),
+      finalValEl
+    );
+
+    wrap.append(adjRow, finalRow);
+  }
+
+  modal('식수 인원 상세', wrap, []);
 }
 
-function updateCrewBadge(day, sec) {
+function updateCrewBadge(day, sec, dk = S.today) {
   let total = 0;
   for (const c of (day.crew || [])) {
     const val = parseInt(String(c.count || '').trim(), 10);
     if (!isNaN(val) && val > 0) total += val;
   }
   const hasDirect = (day.crew || []).some((c) => c.direct);
-  const mealCount = calcMealCount(day.crew, day.equip);
+  const autoMeal = calcMealCount(day.crew, day.equip);
+  const mealAdj = (day && typeof day.mealAdj === 'number') ? day.mealAdj : (parseInt(day && day.mealAdj, 10) || 0);
+  const finalMeal = Math.max(0, autoMeal + mealAdj);
+  const showMealBadge = autoMeal > 0 || mealAdj !== 0;
+
   const titleSpan = sec.querySelector('.sec-h > span');
   if (!titleSpan) return;
 
@@ -3251,11 +3572,22 @@ function updateCrewBadge(day, sec) {
 
   const secH = sec.querySelector('.sec-h');
   let mealEl = secH ? secH.querySelector('.badge.meal-badge') : null;
-  if (mealCount > 0) {
+  const mealBadgeTitle = mealAdj !== 0
+    ? `자동 ${autoMeal}명 ${mealAdj > 0 ? '+' : ''}${mealAdj} 조정 (클릭하면 계산 내역을 봅니다)`
+    : '클릭하면 계산 내역을 봅니다';
+
+  if (showMealBadge) {
     if (mealEl) {
-      mealEl.textContent = `식수 ${mealCount}명`;
+      mealEl.textContent = `식수 ${finalMeal}명`;
+      mealEl.title = mealBadgeTitle;
+      mealEl.onclick = (e) => openMealDetail(day, dk, e.currentTarget ? e.currentTarget.closest('.sec-crew') : sec);
     } else {
-      const newMeal = el('span', { class: 'badge meal-badge clickable', text: `식수 ${mealCount}명`, title: '클릭하면 계산 내역을 봅니다', onclick: () => openMealDetail(day) });
+      const newMeal = el('span', {
+        class: 'badge meal-badge clickable',
+        text: `식수 ${finalMeal}명`,
+        title: mealBadgeTitle,
+        onclick: (e) => openMealDetail(day, dk, e.currentTarget ? e.currentTarget.closest('.sec-crew') : sec)
+      });
       const toolsEl = secH.querySelector('.tools');
       if (toolsEl) {
         toolsEl.prepend(newMeal);
@@ -3274,9 +3606,21 @@ function renderCrewSec(day, dk) {
     const val = parseInt(String(c.count || '').trim(), 10);
     if (!isNaN(val) && val > 0) totalCrew += val;
   }
-  const mealCount = calcMealCount(day.crew, day.equip);
+  const autoMeal = calcMealCount(day.crew, day.equip);
+  const mealAdj = (day && typeof day.mealAdj === 'number') ? day.mealAdj : (parseInt(day && day.mealAdj, 10) || 0);
+  const finalMeal = Math.max(0, autoMeal + mealAdj);
   const hasDirect = (day.crew || []).some((c) => c.direct);
-  const mealBadge = mealCount > 0 ? el('span', { class: 'badge meal-badge clickable', text: `식수 ${mealCount}명`, title: '클릭하면 계산 내역을 봅니다', onclick: () => openMealDetail(day) }) : null;
+  const showMealBadge = autoMeal > 0 || mealAdj !== 0;
+  const mealBadgeTitle = mealAdj !== 0
+    ? `자동 ${autoMeal}명 ${mealAdj > 0 ? '+' : ''}${mealAdj} 조정 (클릭하면 계산 내역을 봅니다)`
+    : '클릭하면 계산 내역을 봅니다';
+
+  const mealBadge = showMealBadge ? el('span', {
+    class: 'badge meal-badge clickable',
+    text: `식수 ${finalMeal}명`,
+    title: mealBadgeTitle,
+    onclick: (e) => openMealDetail(day, dk, e.currentTarget ? e.currentTarget.closest('.sec-crew') : null)
+  }) : null;
 
   const h = el('div', { class: 'sec-h' },
     el('span', {},
@@ -4169,14 +4513,18 @@ async function commitInlineEdit(shouldSave) {
   try {
     const stateRes = await api('/api/state');
     let freshDay = null;
+    let freshRev = null;
     if (cur.dk === stateRes.today) {
       freshDay = normDay(stateRes.todayData);
+      freshRev = stateRes.todayRev;
     } else if (cur.dk === stateRes.prev) {
       freshDay = normDay(stateRes.prevData);
+      freshRev = stateRes.prevRev;
     } else {
       try {
         const hist = await api('/api/history/day/' + cur.dk);
         freshDay = normDay(hist && hist.day);
+        freshRev = hist && hist.rev;
       } catch {}
     }
 
@@ -4200,13 +4548,23 @@ async function commitInlineEdit(shouldSave) {
 
     targetItem[cur.field] = newVal;
 
-    await api('/api/day/' + cur.dk, {
+    const headers = {};
+    const baseRev = freshRev || (S.rev && S.rev[cur.dk]);
+    if (baseRev) headers['X-Base-Rev'] = baseRev;
+
+    const putRes = await api('/api/day/' + cur.dk, {
       method: 'PUT',
+      headers,
       body: JSON.stringify(freshDay),
     });
 
+    if (putRes && putRes.rev) {
+      if (!S.rev) S.rev = {};
+      S.rev[cur.dk] = putRes.rev;
+    }
     S.days[cur.dk] = freshDay;
     lastSavedHash[cur.dk] = JSON.stringify(freshDay);
+    delete dirty[cur.dk];
     activeInlineEdit = null;
     pendingRenderAfterInline = false;
     render();
@@ -4214,6 +4572,14 @@ async function commitInlineEdit(shouldSave) {
   } catch (err) {
     cur.committed = false;
     cur.inputEl.disabled = false;
+    if (err.status === 409) {
+      cur.committed = true;
+      cur.cell.replaceChildren(...cur.prevChildren);
+      activeInlineEdit = null;
+      setStatus('충돌 — 확인 필요', true);
+      showConflictModal(cur.dk, err.body);
+      return;
+    }
     if (err.message === 'auth') {
       openInlineAuthModal(() => {
         commitInlineEdit(true);
@@ -4302,6 +4668,40 @@ function copyPrev() {
       for (const k of picked) dst[k] = src[k];
       S.days[S.today] = dst;
       touch(S.today);
+      close();
+    },
+  })]);
+}
+
+// WD-79: 오늘 내용 → 내일 복사 편의 기능
+function copyTodayToTomorrow() {
+  if (!S.tomorrow) return toast('내일 날짜 정보가 없습니다');
+  const cats = [['work', '작업현황'], ['equip', '장비'], ['crew', '인원'], ['material', '자재'], ['notes', '특이사항']];
+  const boxes = cats.map(([k, label]) => {
+    const cb = el('input', { type: 'checkbox' });
+    cb.checked = true;
+    return { k, label, cb };
+  });
+  const list = el('div', { class: 'copy-prev-list' },
+    ...boxes.map((b) => el('label', {}, b.cb, document.createTextNode(b.label)))
+  );
+  const close = modal('오늘 내용 → 내일 복사', el('div', {},
+    el('div', { class: 'hint', text: '복사할 항목을 고르세요. 선택한 항목의 내일 내용은 오늘 내용으로 바뀝니다.' }),
+    list
+  ), [el('button', {
+    class: 'btn primary',
+    text: '복사',
+    onclick: () => {
+      const picked = boxes.filter((b) => b.cb.checked).map((b) => b.k);
+      if (!picked.length) return toast('복사할 항목을 선택하세요');
+      const tomorrow = S.days[S.tomorrow];
+      const overwrite = picked.some((k) => tomorrow && Array.isArray(tomorrow[k]) && tomorrow[k].length > 0);
+      if (overwrite && !confirm('선택한 항목의 내일 기존 내용이 사라집니다. 계속할까요?')) return;
+      const src = cloneDay(S.days[S.today]);
+      const dst = tomorrow || emptyDay();
+      for (const k of picked) dst[k] = src[k];
+      S.days[S.tomorrow] = dst;
+      touch(S.tomorrow);
       close();
     },
   })]);
@@ -5385,6 +5785,21 @@ async function openSettingsModal() {
     )
   ));
 
+  // 작업일보 가져오기 (WD-73: PDF 양식 관리)
+  formWrap.append(el('div', { id: 'sec-import-manage', class: 'form-row' },
+    el('label', { text: '작업일보 가져오기' }),
+    el('div', { style: 'display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap' },
+      el('div', { class: 'hint', style: 'margin:0;flex:1;min-width:180px', text: 'PDF 작업일보에서 데이터를 자동으로 추출하기 위한 구역 양식을 관리합니다.' }),
+      el('button', {
+        id: 'btn-manage-import-templates',
+        type: 'button',
+        class: 'btn',
+        text: '양식 관리',
+        onclick: () => { location.href = withSitePrefix('/import.html'); },
+      })
+    )
+  ));
+
   // ② 날씨 위치
   let selectedPlace = curPlace ? { ...curPlace } : null;
   const placeLabel = el('div', { style: 'font-weight:700;color:var(--ink);margin-bottom:.2rem', text: selectedPlace ? `${selectedPlace.name} (위도: ${selectedPlace.lat}, 경도: ${selectedPlace.lon})` : '지정된 위치 없음' });
@@ -5547,9 +5962,56 @@ async function openSettingsModal() {
   }
   manualTable.append(tBody);
 
+  const autoNoticeEl = el('span', { id: 'manual-weather-auto-msg', class: 'hint', style: 'color:var(--sub);margin-left:.5rem;' });
+  const btnLoadAuto = el('button', {
+    type: 'button',
+    id: 'btn-load-auto-weather',
+    class: 'btn faint',
+    style: 'font-size:.78rem;padding:.2rem .5rem;',
+    text: '자동 수신값 불러오기',
+    onclick: async () => {
+      autoNoticeEl.textContent = '불러오는 중…';
+      try {
+        const res = await fetch('/api/weather/auto');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (!data || !data.slots || data.slots.length === 0) {
+          autoNoticeEl.textContent = '수신된 자동 날씨가 없습니다';
+          return;
+        }
+        let filledCount = 0;
+        for (const slot of data.slots) {
+          const target = manualInputs.find((item) => item.h === slot.h);
+          if (target) {
+            if (slot.text && weatherOptions.includes(slot.text)) {
+              target.selectW.value = slot.text;
+            }
+            if (slot.temp !== undefined && slot.temp !== null) {
+              target.tempIn.value = String(slot.temp);
+            }
+            if (slot.wind !== undefined && slot.wind !== null) {
+              target.windIn.value = String(slot.wind);
+            }
+            filledCount++;
+          }
+        }
+        manualTouched = true;
+        autoNoticeEl.textContent = `자동 수신값 ${filledCount}개 반영됨 (저장을 눌러 완료하세요)`;
+      } catch (err) {
+        autoNoticeEl.textContent = '자동 수신값을 불러오지 못했습니다';
+      }
+    }
+  });
+
+  const manualHeaderBar = el('div', { style: 'display:flex;align-items:center;gap:.5rem;margin:.3rem 0;' },
+    btnLoadAuto,
+    autoNoticeEl
+  );
+
   formWrap.append(el('div', { class: 'form-row' },
     el('label', { text: '④ 오늘 수동 날씨 (8칸)' }),
     el('div', { class: 'hint', text: 'Open-Meteo 인터넷 연결이 안 되거나 현장 체감 날씨를 직접 적용할 때 사용합니다.' }),
+    manualHeaderBar,
     manualTable
   ));
 
@@ -5754,6 +6216,132 @@ async function openSettingsModal() {
     btnChangePwd
   );
 
+  // ---------- WD-66: 백업 점검 및 수동 백업 섹션 ----------
+  const backupWrap = el('div', { id: 'sec-backup-manage', class: 'form-row', style: 'padding:.8rem;background:var(--th-bg);border:1px solid var(--line);border-radius:.4rem;margin-top:.8rem' });
+  const backupTitle = el('div', { style: 'font-weight:700;color:var(--ink);margin-bottom:.3rem;font-size:1rem', text: '백업 점검 및 수동 백업' });
+  const backupSummary = el('div', { style: 'font-size:.9rem;color:var(--ink);line-height:1.45;margin-bottom:.4rem', text: '백업 상태를 확인하는 중…' });
+  const backupFileList = el('div', { style: 'display:flex;flex-direction:column;gap:.25rem;max-height:120px;overflow-y:auto;padding:.4rem;background:var(--bg);border:1px solid var(--line);border-radius:.3rem;margin-bottom:.5rem;font-size:.82rem' });
+  const backupMsg = el('div', { class: 'msg', style: 'min-height:0;margin-bottom:.3rem' });
+
+  const btnBackupNow = el('button', {
+    id: 'btn-backup-now',
+    type: 'button',
+    class: 'btn primary',
+    style: 'padding:.3rem .8rem;font-size:.88rem',
+    text: '지금 백업',
+  });
+
+  const btnToggleFileList = el('button', {
+    type: 'button',
+    class: 'btn faint',
+    style: 'padding:.2rem .5rem;font-size:.8rem;margin-left:.5rem',
+    text: '목록 접기',
+    onclick: () => {
+      if (backupFileList.style.display === 'none') {
+        backupFileList.style.display = 'flex';
+        btnToggleFileList.textContent = '목록 접기';
+      } else {
+        backupFileList.style.display = 'none';
+        btnToggleFileList.textContent = '목록 보기';
+      }
+    }
+  });
+
+  const backupActionRow = el('div', { style: 'display:flex;align-items:center;gap:.4rem;margin-bottom:.5rem;flex-wrap:wrap' },
+    btnBackupNow,
+    btnToggleFileList
+  );
+
+  const restoreGuideBox = el('div', { style: 'padding:.5rem .7rem;background:var(--bg);border-left:3px solid var(--sub);border-radius:.25rem;font-size:.82rem;color:var(--sub);line-height:1.45' },
+    el('div', { style: 'font-weight:700;color:var(--ink);margin-bottom:.15rem', text: '※ 백업 복원 안내' }),
+    el('div', { text: '복원은 서버를 종료한 뒤 backup 폴더의 파일을 data.json 또는 work.db로 복사(덮어쓰기)하는 방식입니다.' }),
+    el('div', { text: 'work.db 복원 시에는 work.db-wal 및 work.db-shm 파일도 함께 삭제해 주세요.' }),
+    el('div', { text: '자세한 절차는 README 6절 및 가이드를 참고하십시오.' })
+  );
+
+  const formatFileSize = (b) => {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  const loadBackupStatus = async () => {
+    try {
+      const res = await api('/api/backup/status');
+      const todayStr = S.today || new Date().toISOString().slice(0, 10);
+      const dataToday = res.data && res.data.latest === todayStr ? '오늘' : '오늘 없음';
+      const dbToday = res.db && res.db.latest === todayStr ? '오늘' : '오늘 없음';
+
+      const summaryText = `최근 자동 백업: data ${res.data.latest || '없음'}(${dataToday}) · 보관 ${res.data.count}개 / DB ${res.db.latest || '없음'}(${dbToday}) · 보관 ${res.db.count}개 / 수동 백업: ${res.manual.count}개`;
+      backupSummary.textContent = summaryText;
+
+      backupFileList.replaceChildren();
+      const extractDateKey = (f) => {
+        const mm = /(?:data|work)-manual-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})/.exec(f.name);
+        if (mm) return `${mm[1]}-${mm[2]}-${mm[3]} ${mm[4]}:${mm[5]}:${mm[6]}_1_manual`;
+        const ma = /(?:data|work)-(\d{4}-\d{2}-\d{2})/.exec(f.name);
+        const isDb = f.name.startsWith('work-') ? '2_db' : '3_data';
+        if (ma) return `${ma[1]} 00:00:00_${isDb}`;
+        return f.name;
+      };
+
+      const allFiles = [
+        ...(res.manual.files || []),
+        ...(res.db.files || []),
+        ...(res.data.files || [])
+      ].sort((a, b) => extractDateKey(b).localeCompare(extractDateKey(a))).slice(0, 5);
+
+      if (allFiles.length === 0) {
+        backupFileList.append(el('div', { style: 'color:var(--sub)', text: '보관된 백업 파일이 없습니다.' }));
+      } else {
+        for (const f of allFiles) {
+          backupFileList.append(
+            el('div', { style: 'display:flex;justify-content:space-between;align-items:center;padding:.15rem 0' },
+              el('span', { style: 'font-family:monospace;color:var(--ink)', text: f.name }),
+              el('span', { style: 'color:var(--sub);margin-left:.5rem', text: `${formatFileSize(f.bytes)} (${f.date})` })
+            )
+          );
+        }
+      }
+    } catch (e) {
+      backupSummary.textContent = '백업 상태를 불러오지 못했습니다.';
+    }
+  };
+
+  btnBackupNow.onclick = async () => {
+    btnBackupNow.disabled = true;
+    backupMsg.textContent = '수동 백업을 생성하고 있습니다…';
+    backupMsg.className = 'msg';
+    try {
+      const res = await api('/api/backup/now', { method: 'POST' });
+      if (res.ok) {
+        backupMsg.textContent = `백업 완료: ${res.files ? res.files.join(', ') : '성공'}`;
+        backupMsg.className = 'msg ok';
+        await loadBackupStatus();
+      } else {
+        backupMsg.textContent = (res.error) || '백업 생성 실패';
+        backupMsg.className = 'msg err';
+      }
+    } catch (err) {
+      backupMsg.textContent = (err.body && err.body.error) || '백업 요청 중 오류가 발생했습니다.';
+      backupMsg.className = 'msg err';
+    } finally {
+      btnBackupNow.disabled = false;
+    }
+  };
+
+  backupWrap.append(
+    backupTitle,
+    backupSummary,
+    backupActionRow,
+    backupFileList,
+    backupMsg,
+    restoreGuideBox
+  );
+
+  loadBackupStatus();
+
+  formWrap.append(backupWrap);
   formWrap.append(pwdWrap);
   formWrap.append(errBox);
 
@@ -5856,10 +6444,12 @@ function flushAllKeepalive() {
     clearTimeout(timers[dk]);
     clearTimeout(retryTimers[dk]);
     const payload = JSON.stringify(S.days[dk] || emptyDay());
+    const headers = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + S.token };
+    if (S.rev && S.rev[dk]) headers['X-Base-Rev'] = S.rev[dk];
     try {
       fetch('/api/day/' + dk, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + S.token },
+        headers,
         body: payload,
         keepalive: true,
       }).catch(() => {});
@@ -5985,6 +6575,26 @@ es.addEventListener('update', async () => {
       S.settings = s.settings || { siteName: '', equipCols: 1 };
       updateHeaderTitle();
       updateWeather();
+      // WD-69: 내 미저장 변경이 없는 날짜만 서버 최신 rev와 day 동기화
+      if (!isEditingOrBusy()) {
+        let changed = false;
+        if (!dirty[s.today]) {
+          S.days[s.today] = normDay(s.todayData);
+          if (s.todayRev) S.rev[s.today] = s.todayRev;
+          changed = true;
+        }
+        if (s.prev && !dirty[s.prev]) {
+          S.days[s.prev] = normDay(s.prevData);
+          if (s.prevRev) S.rev[s.prev] = s.prevRev;
+          changed = true;
+        }
+        if (s.tomorrow && !dirty[s.tomorrow]) {
+          S.days[s.tomorrow] = normDay(s.tomorrowData);
+          if (s.tomorrowRev) S.rev[s.tomorrow] = s.tomorrowRev;
+          changed = true;
+        }
+        if (changed && !S.modalOpen) render();
+      }
       const newLayoutStr = JSON.stringify(S.settings ? S.settings.layout : null);
       if (prevLayoutStr !== newLayoutStr && !S.modalOpen) {
         render();
@@ -7022,6 +7632,41 @@ function initTvControls() {
 
   document.addEventListener('mousemove', showControls, { passive: true });
   document.addEventListener('touchstart', showControls, { passive: true });
+
+  // WD-81: 모니터 화면(/tv)에서 좌/우 방향키(←, →)로 보기 모드 한 칸씩 전환
+  document.addEventListener('keydown', (e) => {
+    if (!TV_MODE) return;
+    if (e.defaultPrevented) return;
+    if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+    if (S.modalOpen || S.admin) return;
+
+    const active = document.activeElement;
+    if (active) {
+      const tag = active.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || active.isContentEditable) {
+        return;
+      }
+    }
+
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+
+    const currentMode = getViewMode();
+    const curIdx = VIEW_MODES.findIndex((m) => m.key === currentMode);
+    if (curIdx === -1) return;
+
+    let targetIdx = curIdx;
+    if (e.key === 'ArrowLeft') {
+      if (curIdx <= 0) return; // '어제'에서 멈춤 (순환 없음)
+      targetIdx = curIdx - 1;
+    } else if (e.key === 'ArrowRight') {
+      if (curIdx >= VIEW_MODES.length - 1) return; // '내일'에서 멈춤 (순환 없음)
+      targetIdx = curIdx + 1;
+    }
+
+    e.preventDefault();
+    setViewMode(VIEW_MODES[targetIdx].key);
+    showControls();
+  });
 
   wrap.append(statusEl, viewControl, themeBtn, editBtn, fsBtn);
   document.body.appendChild(wrap);

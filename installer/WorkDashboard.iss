@@ -1,9 +1,9 @@
 ; Minos Work Dashboard - Inno Setup Script
-; 버전: 1.2.1
+; 버전: 1.4.0
 ; 특징: 관리자 권한 불필요(PrivilegesRequired=lowest), Node 24 내장 동봉, 데이터는 %LOCALAPPDATA%\WorkDashboard에 영구 보존
 
 #define MyAppName "Minos Work Dashboard"
-#define MyAppVersion "1.2.1"
+#define MyAppVersion "1.4.0"
 #define MyAppPublisher "Minos"
 #define MyAppURL "https://github.com/minos"
 #define MyAppExeName "run-launcher.vbs"
@@ -42,6 +42,7 @@ Name: "desktopicon"; Description: "바탕화면에 바로가기 만들기"; Grou
 Source: "runtime\node.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\server.js"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\gateway.js"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\devkey.json"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "launcher.ps1"; DestDir: "{app}"; Flags: ignoreversion

@@ -409,7 +409,7 @@
         </a>
         <div class="header-titles">
           <h1>Minos work dashboard</h1>
-          <div class="sub-title">작업현황 대시보드 사용 설명서 · 문서 갱신: 2026-10-26</div>
+          <div class="sub-title">작업현황 대시보드 사용 설명서 · 문서 갱신: 2026-11-24</div>
         </div>
       </div>
       <div>
@@ -464,7 +464,7 @@
           <li><strong>사용자용 화면 (사무실 PC / 스마트폰 조회 및 관리, <span class="badge">/</span>)</strong>: 일반 웹 문서 흐름으로 세로 스크롤되며 작업현황, 장비, 인원, 자재, 특이사항을 한눈에 조회합니다. 헤더에서 <span class="badge">[어제 | 어제+오늘 | 오늘]</span> 보기 선택, 날짜 이동, 캘린더, <span class="badge">출력</span>, 관리자 로그인, <span class="badge">파일박스</span> 및 <span class="badge">모니터 화면</span> 링크가 제공됩니다. 헤더 타이틀은 중앙에 정돈되며 긴 현장명(최대 40자 이상)도 화면 폭에 맞게 자동 최적화됩니다. 또한 조회 화면의 셀을 <strong>더블클릭</strong>하면 제자리에서 즉시 인라인 편집할 수 있습니다.</li>
           <li><strong>현장 TV 전용 화면 (모니터링 전용 상황판, <span class="badge">/tv</span>)</strong>: 현장 사무실 대형 디스플레이 표출에 최적화된 고정 레이아웃 화면입니다. 세로 스크롤바가 전혀 생기지 않으며, 내용이 긴 구역은 10초마다 자동으로 페이지가 순환 표출됩니다.
             <ul style="margin-top: 0.3rem;">
-              <li>우상단 호버 컨트롤 바: <strong>⛶ 전체 화면</strong>, <strong>☀/🌙 테마 전환</strong>, <strong>✎ 편집</strong> 버튼(누르면 관리자 로그인 창 오픈), <strong>상태 라벨</strong>(서버 시작 시각 및 오늘 백업 상태 표출).</li>
+              <li>우상단 호버 컨트롤 바: <strong>⛶ 전체 화면</strong>, <strong>🎨 테마</strong>(자동/라이트/다크 전환), <strong>✎ 편집</strong> 버튼(누르면 관리자 로그인 창 오픈), <strong>상태 라벨</strong>(서버 시작 시각 및 오늘 백업 상태 표출).</li>
               <li><strong>5분 무조작 자동 복귀</strong>: TV의 ✎ 편집 버튼으로 관리자 로그인한 경우, 작업 후 자리를 비워도 5분간 조작이 없으면 자동으로 로그아웃되고 원래의 TV 모니터링 화면으로 안전하게 복귀합니다.</li>
             </ul>
           </li>
@@ -490,7 +490,7 @@
       <div class="section-content">
         <p>현장의 작업 현황을 명확하고 체계적으로 표출하며, 종이 인쇄 및 PDF 저장을 지원합니다.</p>
         <ul>
-          <li><strong>어제 / 오늘 보기 모드</strong>: 헤더의 <span class="badge">[어제 | 어제+오늘 | 오늘]</span> 버튼으로 원하는 칸을 100% 전체 폭으로 확대하여 집중 조회하거나 전일 대비 당일 작업을 비교 조회할 수 있습니다.</li>
+          <li><strong>어제 / 오늘 보기 모드</strong>: 헤더의 <span class="badge">[어제 | 어제+오늘 | 오늘 | 오늘+내일 | 내일]</span> 버튼으로 원하는 칸을 100% 전체 폭으로 확대하여 집중 조회하거나 전일 대비 당일 작업, 내일 예정 작업을 비교 조회할 수 있습니다. <strong>모니터 화면(<span class="badge">/tv</span>)에서는 키보드 <span class="badge">←</span> / <span class="badge">→</span> 키</strong>로 보기 모드를 한 칸씩 바꿀 수 있으며(양 끝에서는 멈춤, 입력창 사용 중에는 동작 안 함) 키를 누르면 상단 보기 버튼이 잠시 나타나 현재 모드를 보여 줍니다.</li>
           <li><strong>5대 구역 표출 및 테마 컬러</strong>: 작업현황(트리 구조 번호 <span class="badge">1</span>, <span class="badge">①</span>, <span class="badge">㉮</span> 계층 유지), 장비 투입(이름, 수량, 규격, 위치), 인원 투입(직종, 인원수, 위치), 자재 반입/사용(종류, 규격, 수량, 단위, 사용처), 특이사항 구역으로 구성되며, 각 섹션 머리글에 고유 테마 컬러 바가 적용되어 시각적으로 직관적입니다.</li>
           <li><strong>밑줄 표시 = 직영</strong>: 장비, 인원, 자재 중 '직영'으로 지정된 항목은 텍스트 밑줄(<span style="text-decoration: underline; font-weight: 600;">직영 항목</span>)로 표출되어 도급(외주) 업체 작업과 즉시 구분됩니다.</li>
           <li><strong>장비 수량 표출</strong>: 장비 투입 구역의 열이 "수량"으로 표출되며, 수량이 미입력된 항목은 흐린 텍스트로 안내됩니다.</li>
@@ -500,6 +500,9 @@
               <span style="font-size: 0.85rem; color: var(--text-secondary);">※ 도급(외주) 업체는 자체 식사를 원칙으로 하므로, 직종이 '직원'이거나 토글이 '직영'으로 켜진 인원, 그리고 '직영'으로 지정된 건설장비의 운전기사(대수만큼, 수량 미기재 시 1명)만 식수 인원에 자동 합산됩니다.</span>
             </div>
             인원투입 머리글에 표출된 식수 배지(<span class="badge">식수 N명</span>)를 클릭하면 <strong>"식수 인원 상세"</strong> 모달 창이 열려 산출 근거를 투명하게 확인할 수 있습니다. 모달에는 <strong>직종별 인원수(직원 및 직영)</strong>와 <strong>직영 건설장비 기사 수량(대수, 미기재 시 1명)</strong>이 행별로 상세히 나열되며, 마지막 행에 <strong>식수 합계 N명</strong>이 표출됩니다.
+            <div class="callout callout-info">
+              <strong>식수 인원 수동 가감(±)</strong>: 개인 사정으로 식수에서 빠지거나 더해지는 사람이 있으면 관리자 화면에서 식수 배지를 눌러 상세 창의 <strong>수동 조정 (±)</strong> 줄에서 <span class="badge">−</span> / <span class="badge">+</span> 버튼(또는 숫자 직접 입력)으로 인원을 가감합니다. 조정값은 <strong>그 날짜에만</strong> 저장되고 즉시 배지에 반영되며(자동 계산 + 조정, 0명 미만 불가), <span class="badge">초기화</span>로 되돌릴 수 있습니다. <span class="badge">어제 내용 → 오늘 복사</span>를 해도 조정값은 복사되지 않습니다.
+            </div>
           </li>
           <li><strong>화면에서 바로 편집 (더블클릭 제자리 편집)</strong>:
             조회 화면(<span class="badge">/</span>)에서 각 구역의 셀을 <strong>더블클릭</strong>하면 관리자 비밀번호를 확인한 후 해당 칸만 즉시 인라인으로 편집하여 저장할 수 있습니다. 편집 가능한 칸은 <strong>작업현황</strong>(내용), <strong>장비</strong>(장비명, 수량, 규격, 위치), <strong>인원</strong>(직종, 인원수, 위치), <strong>자재</strong>(종류, 규격, 수량, 단위, 사용처), <strong>특이사항</strong>(내용)입니다.
@@ -530,6 +533,16 @@
         <ul>
           <li><strong>관리자 로그인</strong>: 화면 우측 상단의 옅은 <span class="badge">관리자</span> 글씨(또는 TV 화면의 ✎ 편집 버튼)를 누르고 관리자 비밀번호(최초 기본값: <span class="badge">0000</span>)를 입력합니다. 초기 비밀번호 상태(기본값/마스터 초기화 0000)로 로그인하면 화면 상단에 안내 배너와 <span class="badge">비밀번호 변경</span> 버튼이 표시되며, 비밀번호를 바꿀 때까지 계속 보입니다(설정 창이 저절로 열리지는 않습니다).</li>
           <li><strong>어제 내용 → 오늘 복사 (항목별 선택 복사)</strong>: 상단의 <span class="badge">어제 내용 → 오늘 복사</span> 버튼을 누르면 모달 창이 열려 작업현황, 장비, 인원, 자재, 특이사항 중 원하는 항목만 체크박스로 골라 복사할 수 있습니다. 오늘 칸에 이미 작성된 내용이 있을 경우 덮어쓰기 전 확인 창이 제공됩니다.</li>
+          <li><strong>내일 작업사항 미리 작성</strong>: 관리자 화면 상단의 <span class="badge">내일 작성 ▶</span> 버튼을 누르면 <strong>오늘 | 내일(예정)</strong> 두 칸으로 바뀌어 내일 작업·장비·인원·자재·특이사항을 미리 입력할 수 있습니다(<span class="badge">◀ 어제·오늘</span>로 되돌림, 선택은 기억됩니다). <span class="badge">오늘 내용 → 내일 복사</span>로 항목별 복사도 가능합니다. 내일 내용은 <strong>날짜가 바뀌면 그대로 오늘 칸</strong>이 되며, 이때는 어제 내용 이월 복사가 적용되지 않습니다. 내일 칸을 모두 비우면 미작성 상태로 돌아가 평소처럼 어제 내용이 이월됩니다. 조회·TV 화면의 보기 버튼에서 <span class="badge">오늘+내일</span>, <span class="badge">내일</span>을 고르면 내일 예정을 볼 수 있습니다(내일까지만 입력 가능).</li>
+          <li><strong>작업일보 PDF 가져오기 (양식 기반 자동 입력)</strong>:
+            <ol style="margin-top: 0.4rem;">
+              <li><span class="badge">설정</span> → <span class="badge">양식 관리</span>(작업일보 양식 관리 화면)로 들어가 <strong>양식 관리</strong> 탭에서 회사의 작업일보 PDF(엑셀에서 PDF로 내보낸 것) 한 부를 열고, 읽을 칸을 <strong>사각형으로 그려</strong> 어떤 항목(날씨·기온·인원·장비·자재·특이사항·작업 내용)에 넣을지 지정해 <strong>양식을 저장</strong>합니다. 구역은 드래그로 이동·8방향 크기 조절·숫자 입력이 되고, 표는 열 경계선을 드래그해 나눕니다(더블클릭 삭제). 확대/축소와 폭 맞춤을 지원합니다. 작업 내용 구역은 상위 제목(공종명 등)이 본문과 떨어져 있어도 <strong>상위제목(헤더)</strong>을 직접 입력할 수 있습니다.</li>
+              <li>양식은 페이지 수와 위치가 고정된 서식에 맞춰 만들며, 같은 서식의 PDF는 이후 계속 재사용합니다(회사마다 양식을 따로 저장).</li>
+              <li>매일 <strong>작업일보 가져오기</strong> 탭에서 양식·PDF·적용 날짜를 고르고 <span class="badge">작업일보 읽기</span>를 누르면 <strong>미리보기</strong>가 나옵니다. 금일 값이 있는 행만 읽히며 행별 체크로 제외할 수 있고, <strong>교체</strong>(전체 대체) 또는 <strong>추가</strong>(기존 유지+덧붙임)를 항목별로 선택합니다. 적용 전에 자동으로 백업이 만들어지며, 합계가 PDF의 '계'와 다르면 경고가 표시됩니다.</li>
+              <li>PDF 파일은 <strong>브라우저 안에서만 처리</strong>되고 서버로 업로드되지 않습니다. 양식 저장·변경은 관리자만 가능합니다. 읽는 사이 다른 사람이 같은 날짜를 수정하면 충돌 안내가 뜨며 자동으로 덮어쓰지 않으니, 다시 읽어 적용하세요.</li>
+            </ol>
+          </li>
+          <li><strong>동시 편집 충돌 안내</strong>: 두 사람이 같은 날짜를 동시에 수정하면 나중에 저장하는 쪽에 충돌 안내가 표시되고 상대의 변경이 조용히 덮어쓰이지 않습니다. 안내에 따라 최신 내용을 불러온 뒤 다시 수정하세요.</li>
           <li><strong>장비 수량 입력</strong>: 장비 등록 시 대수를 "수량" 칸에 숫자로 입력합니다. 수량이 비어있으면 붉은 테두리로 안내되며, 직영 장비의 수량만큼 식수 인원에 실시간으로 자동 합산됩니다.</li>
           <li><strong>직영 ON/OFF 토글</strong>: 장비, 인원, 자재의 행마다 위치한 [직영] 버튼을 원클릭으로 켜고 끌 수 있으며, 켜진 항목은 밑줄 처리 및 식수 인원 집계에 실시간 반영됩니다.</li>
           <li><strong>항목 추가/삭제 및 빠른 입력</strong>: 표의 마지막 입력칸에서 <span class="badge">Enter</span> 키를 누르면 다음 행이 자동 생성됩니다. 자재 입력 시 12종 표준 단위 자동완성이 지원되며, 최근 180일간의 입력 이력이 드롭다운 추천으로 표시됩니다.</li>
@@ -619,20 +632,27 @@
               <li><span class="badge">work.db</span>: SQLite 내장 DB (WAL 모드, 과거 모든 일별 이력 무제한 누적 보존).</li>
               <li><span class="badge">files/</span>: 파일박스에 업로드된 현장 파일 보관 폴더 (최대 5GB 관리).</li>
               <li><span class="badge">config.json</span>: 포트 번호, 시스템 설정 및 비밀번호 해시.</li>
+              <li><span class="badge">import-templates.json</span>: 현장별 작업일보 PDF 가져오기 양식(최대 20개). 현장 데이터와 함께 이관·백업하세요.</li>
             </ul>
           </li>
-          <li><strong>일일 자동 백업 (<span class="badge">backup/</span>)</strong>: 서버 시작 시 및 그날 첫 저장 시 <span class="badge">backup/data-YYYY-MM-DD.json</span> 및 <span class="badge">backup/work-YYYY-MM-DD.db</span> 스냅샷이 자동 생성되며 최근 30개 분량이 안전하게 유지됩니다.</li>
+          <li><strong>일일 자동 및 수동 백업 (<span class="badge">backup/</span>)</strong>: 서버 시작 시 및 그날 첫 저장 시 <span class="badge">backup/data-YYYY-MM-DD.json</span> 및 <span class="badge">backup/work-YYYY-MM-DD.db</span> 스냅샷이 자동 생성(최근 30개 보관)되며, 설정 창에서 <strong>[지금 백업]</strong>을 눌러 즉시 수동 백업을 생성할 수도 있습니다.</li>
           <li><strong>백업 복원 절차</strong>:
             <ol style="margin-top: 0.4rem;">
               <li>실행 중인 서버 콘솔 창을 닫아 서버를 완전히 종료합니다.</li>
-              <li><span class="badge">backup/</span> 폴더에서 복원할 날짜의 백업 파일을 복사합니다.</li>
-              <li>프로젝트 루트(또는 데이터 폴더)에 붙여넣고 이름을 <span class="badge">data.json</span> (DB의 경우 <span class="badge">work.db</span>)으로 변경합니다.</li>
+              <li><span class="badge">backup/</span> 폴더에서 복원할 날짜의 백업 파일(또는 수동 백업 파일)을 복사합니다.</li>
+              <li>프로젝트 루트(또는 데이터 폴더)에 붙여넣고 이름을 <span class="badge">data.json</span> (DB 복원 시에는 <span class="badge">work.db</span>로 변경하고 <span class="badge">work.db-wal</span> 및 <span class="badge">work.db-shm</span> 파일 삭제)으로 변경합니다.</li>
               <li>서버를 다시 시작합니다.</li>
             </ol>
           </li>
+          <li><strong>현장 복원 및 PC 간 이관</strong>:
+            <ul style="margin-top: 0.3rem;">
+              <li>삭제된 현장은 <span class="badge">POST /gw/sites/restore</span> API를 통해 삭제 목록 조회 및 즉시 복원이 가능합니다 (총괄 마스터 키 필요).</li>
+              <li>다른 PC로 현장을 이동하려면 원본 <span class="badge">sites/현장코드/</span> 폴더를 새 PC의 <span class="badge">sites/_deleted/현장코드-타임스탬프</span>로 복사한 뒤 restore API를 호출하면 새 현장으로 안전하게 등록됩니다.</li>
+            </ul>
+          </li>
           <li><strong>설치 프로그램 및 트레이 런처</strong>:
             <ul style="margin-top: 0.3rem;">
-              <li>윈도우 전용 설치본(<span class="badge">WorkDashboard-Setup-1.2.1.exe</span>)으로 설치 시, PC 부팅 시 백그라운드로 자동 실행되는 시스템 트레이 런처가 함께 설치됩니다.</li>
+              <li>윈도우 전용 설치본(<span class="badge">WorkDashboard-Setup-1.4.0.exe</span>)으로 설치 시, PC 부팅 시 백그라운드로 자동 실행되는 시스템 트레이 런처가 함께 설치됩니다.</li>
               <li>설치본의 기본 데이터 폴더는 <span class="badge">%LOCALAPPDATA%\WorkDashboard</span>에 안전하게 격리 보관되며, 필요 시 환경변수 <span class="badge">WD_DATA_DIR</span>을 통해 원하는 드라이브나 폴더로 지정할 수 있습니다.</li>
             </ul>
           </li>
@@ -659,7 +679,7 @@
           <li><strong>부팅 시 자동 실행 설정</strong>:
             <br><span class="badge">Win + R</span> → <span class="badge">shell:startup</span>(시작프로그램 폴더)에 바로가기를 넣고 대상 경로 끝에 <span class="badge">--kiosk http://localhost:3000/tv</span>를 추가하면 PC 부팅 즉시 전체화면으로 자동 시작됩니다. (또는 <span class="badge">install_autostart.bat</span> 실행)
           </li>
-          <li><strong>디스플레이 번인 방지 (다크 모드 권장)</strong>: TV 화면을 24시간 켜둘 경우 우측 상단 호버 시 나타나는 <span class="badge">☀/🌙 테마</span> 버튼으로 다크 모드를 적용하면 패널 번인(잔상) 예방과 전력 절감에 효과적입니다.</li>
+          <li><strong>디스플레이 번인 방지 (다크 모드 권장)</strong>: TV 화면을 24시간 켜둘 경우 우측 상단 호버 시 나타나는 <span class="badge">🎨 테마</span> 버튼으로 다크 모드를 적용하면 패널 번인(잔상) 예방과 전력 절감에 효과적입니다.</li>
           <li><strong>서버 재시작 시 자동 복구</strong>: 서버 PC가 재시작되어 일시적으로 연결이 끊기더라도 브라우저가 SSE(Server-Sent Events)를 통해 몇 초 내로 자동 재연결하여 화면을 복구합니다.</li>
           <li><strong>자주 묻는 질문 (FAQ)</strong>:
             <div class="table-responsive">
@@ -673,7 +693,7 @@
                 <tbody>
                   <tr>
                     <td><strong>다른 PC/TV에서 접속 불가</strong></td>
-                    <td>① 동일 공유기(LAN/Wi-Fi) 연결 확인 ② 서버 PC의 Windows Defender 방화벽 포트 3000(인바운드 허용) 규칙 등록 확인 ③ 서버 좌하단 표시 IP 변경 여부 확인</td>
+                    <td>① 동일 공유기(LAN/Wi-Fi) 연결 확인 ② 서버 PC의 Windows Defender 방화벽 포트 3000(인바운드 허용) 규칙 등록 확인 ③ 서버 좌하단(모니터 화면 포함) 표시 IP 변경 여부 확인</td>
                   </tr>
                   <tr>
                     <td><strong>TV 화면에서 데이터를 수정하고 싶을 때</strong></td>
