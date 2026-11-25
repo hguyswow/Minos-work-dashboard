@@ -409,7 +409,7 @@
         </a>
         <div class="header-titles">
           <h1>Minos work dashboard</h1>
-          <div class="sub-title">작업현황 대시보드 사용 설명서 · 문서 갱신: 2026-11-24</div>
+          <div class="sub-title">작업현황 대시보드 사용 설명서 · 문서 갱신: 2026-11-25</div>
         </div>
       </div>
       <div>
@@ -508,8 +508,10 @@
             조회 화면(<span class="badge">/</span>)에서 각 구역의 셀을 <strong>더블클릭</strong>하면 관리자 비밀번호를 확인한 후 해당 칸만 즉시 인라인으로 편집하여 저장할 수 있습니다. 편집 가능한 칸은 <strong>작업현황</strong>(내용), <strong>장비</strong>(장비명, 수량, 규격, 위치), <strong>인원</strong>(직종, 인원수, 위치), <strong>자재</strong>(종류, 규격, 수량, 단위, 사용처), <strong>특이사항</strong>(내용)입니다.
           </li>
           <li><strong>일일 보고서 출력 및 PDF 저장 (인쇄 최적화)</strong>:
-            상단 헤더의 <span class="badge">출력</span> 버튼(또는 키보드 <span class="badge">Ctrl + P</span>)을 누르면 불필요한 컨트롤이 모두 숨겨진 A4 인쇄 서식으로 전환됩니다.
+            상단 헤더의 <span class="badge">출력</span> 버튼을 누르면 <strong>출력 설정</strong> 창이 열리고, <span class="badge">인쇄</span>를 누르면 불필요한 컨트롤이 모두 숨겨진 A4 인쇄 서식으로 전환됩니다(키보드 <span class="badge">Ctrl + P</span>는 설정 창 없이 자동 설정으로 바로 인쇄합니다).
             <ul style="margin-top: 0.3rem;">
+              <li><strong>출력 설정 창</strong>: <strong>출력 범위</strong>(어제+오늘 / 오늘만 / 어제만 / 오늘+내일 / 내일만), <strong>날짜 배치</strong>(좌우 나란히 / 위아래로 쌓기), <strong>구역 단수</strong>(자동 / 1단 전폭 / 2단), <strong>글자 크기</strong>(자동 / 작게 / 보통 / 크게), <strong>용지 방향</strong>(세로 / 가로), <strong>포함 구역</strong>(작업현황·장비·인원·자재·특이사항)을 고를 수 있습니다. 기본은 모두 <strong>자동</strong>이며 안 맞을 때만 바꾸면 되고, 선택은 현장별로 기억됩니다. 내일 범위를 골라도 서버에 저장되지 않는 읽기 전용 출력입니다.</li>
+              <li><strong>글자 겹침·잘림 방지 + 자동 맞춤</strong>: 인쇄 때는 칸을 고정 폭 표로 정리해 긴 직종명·위치도 겹치지 않고 줄바꿈됩니다. 내용이 A4 한 장을 넘으면 글자를 단계적으로(약 8~22%) 줄여 한 장에 맞추고, 그래도 넘치면 행 단위로 다음 쪽으로 넘깁니다. 내용이 많을 때는 <span class="badge">1단</span> 또는 <span class="badge">위아래</span> 배치, <span class="badge">가로</span> 용지를 고르면 더 읽기 편합니다.</li>
               <li><strong>외곽선 및 구분선</strong>: 전체 외곽 실선(1px) 및 어제/오늘 사이 가운데 세로 구분선(1px)이 선명하게 복원되며, 내부 2열/3열 사이에도 세로선이 표시됩니다.</li>
               <li><strong>좌우 높이 일치</strong>: 어제와 오늘의 내용량 차이가 커도 양쪽 칸 높이가 자동으로 맞춰집니다.</li>
               <li><strong>글자 잘림 방지 (자동 줄바꿈)</strong>: 긴 작업명이나 위치명도 칸 오른쪽에서 잘리지 않고 다음 줄로 자동 줄바꿈되어 모든 내용이 온전히 출력됩니다.</li>
@@ -536,10 +538,18 @@
           <li><strong>내일 작업사항 미리 작성</strong>: 관리자 화면 상단의 <span class="badge">내일 작성 ▶</span> 버튼을 누르면 <strong>오늘 | 내일(예정)</strong> 두 칸으로 바뀌어 내일 작업·장비·인원·자재·특이사항을 미리 입력할 수 있습니다(<span class="badge">◀ 어제·오늘</span>로 되돌림, 선택은 기억됩니다). <span class="badge">오늘 내용 → 내일 복사</span>로 항목별 복사도 가능합니다. 내일 내용은 <strong>날짜가 바뀌면 그대로 오늘 칸</strong>이 되며, 이때는 어제 내용 이월 복사가 적용되지 않습니다. 내일 칸을 모두 비우면 미작성 상태로 돌아가 평소처럼 어제 내용이 이월됩니다. 조회·TV 화면의 보기 버튼에서 <span class="badge">오늘+내일</span>, <span class="badge">내일</span>을 고르면 내일 예정을 볼 수 있습니다(내일까지만 입력 가능).</li>
           <li><strong>작업일보 PDF 가져오기 (양식 기반 자동 입력)</strong>:
             <ol style="margin-top: 0.4rem;">
-              <li><span class="badge">설정</span> → <span class="badge">양식 관리</span>(작업일보 양식 관리 화면)로 들어가 <strong>양식 관리</strong> 탭에서 회사의 작업일보 PDF(엑셀에서 PDF로 내보낸 것) 한 부를 열고, 읽을 칸을 <strong>사각형으로 그려</strong> 어떤 항목(날씨·기온·인원·장비·자재·특이사항·작업 내용)에 넣을지 지정해 <strong>양식을 저장</strong>합니다. 구역은 드래그로 이동·8방향 크기 조절·숫자 입력이 되고, 표는 열 경계선을 드래그해 나눕니다(더블클릭 삭제). 확대/축소와 폭 맞춤을 지원합니다. 작업 내용 구역은 상위 제목(공종명 등)이 본문과 떨어져 있어도 <strong>상위제목(헤더)</strong>을 직접 입력할 수 있습니다.</li>
+              <li>관리자 화면 상단의 <span class="badge">📥 작업일보 가져오기</span> 버튼(또는 <span class="badge">설정</span> → <span class="badge">작업일보 가져오기 / 양식 관리</span>)으로 작업일보 가져오기 화면에 들어가 <strong>양식 관리</strong> 탭에서 회사의 작업일보 PDF(엑셀에서 PDF로 내보낸 것) 한 부를 열고, 읽을 칸을 <strong>사각형으로 그려</strong> 어떤 항목(날씨·기온·인원·장비·자재·특이사항·작업 내용)에 넣을지 지정해 <strong>양식을 저장</strong>합니다. 구역은 드래그로 이동·8방향 크기 조절·숫자 입력이 되고, 표는 열 경계선을 드래그해 나눕니다(더블클릭 삭제). 확대/축소와 폭 맞춤을 지원합니다. 작업 내용 구역은 상위 제목(공종명 등)이 본문과 떨어져 있어도 <strong>상위제목(헤더)</strong>을 직접 입력할 수 있습니다.</li>
               <li>양식은 페이지 수와 위치가 고정된 서식에 맞춰 만들며, 같은 서식의 PDF는 이후 계속 재사용합니다(회사마다 양식을 따로 저장).</li>
               <li>매일 <strong>작업일보 가져오기</strong> 탭에서 양식·PDF·적용 날짜를 고르고 <span class="badge">작업일보 읽기</span>를 누르면 <strong>미리보기</strong>가 나옵니다. 금일 값이 있는 행만 읽히며 행별 체크로 제외할 수 있고, <strong>교체</strong>(전체 대체) 또는 <strong>추가</strong>(기존 유지+덧붙임)를 항목별로 선택합니다. 적용 전에 자동으로 백업이 만들어지며, 합계가 PDF의 '계'와 다르면 경고가 표시됩니다.</li>
               <li>PDF 파일은 <strong>브라우저 안에서만 처리</strong>되고 서버로 업로드되지 않습니다. 양식 저장·변경은 관리자만 가능합니다. 읽는 사이 다른 사람이 같은 날짜를 수정하면 충돌 안내가 뜨며 자동으로 덮어쓰지 않으니, 다시 읽어 적용하세요.</li>
+            </ol>
+          </li>
+          <li><strong>AI로 작업일보 가져오기 (텍스트·이미지 붙여넣기)</strong>:
+            <ol style="margin-top: 0.4rem;">
+              <li>작업일보 가져오기 화면의 <span class="badge">🤖 AI로 가져오기</span> 탭에서 먼저 <strong>AI 설정</strong>을 저장합니다. 서비스는 <strong>Gemini · DeepSeek · LM Studio(이 PC 로컬) · OpenCode Go · 직접 입력</strong>(OpenAI 호환 주소)에서 고르며, 고르면 주소·모델이 자동으로 채워집니다(수정 가능). API 키는 <strong>서버에만 저장</strong>되고 화면에는 다시 표시되지 않으며(마지막 4자리만), 관리자만 설정·사용할 수 있습니다. <span class="badge">연결 테스트</span>로 확인하세요. 키 없이 쓰는 LM Studio는 키를 비워 둡니다.</li>
+              <li>작업일보 <strong>텍스트를 붙여넣거나 이미지를 붙여넣기(Ctrl+V)·드래그·파일 선택</strong>하고 <span class="badge">분석하기</span>를 누르면 AI가 <strong>금일(오늘)·명일(내일)</strong> 내용을 작업현황·인원·장비·자재·특이사항으로 나눠 <strong>미리보기</strong>를 보여줍니다. 이미지를 쓰려면 이미지 지원 모델(예: Gemini)이어야 하고, DeepSeek 등 텍스트 전용은 텍스트만 가능합니다.</li>
+              <li>미리보기에서 행 체크·글자 수정·삭제를 한 뒤, 오늘/내일 카드마다 적용 날짜를 고르고 <span class="badge">➕ 기존 내용에 추가</span> 또는 <span class="badge">♻ 기존 삭제 후 덮어쓰기</span>를 선택합니다(구역별로도 조정 가능, 결과 건수가 옆에 표시됩니다). 체크한 행이 없는 구역은 덮어쓰기여도 기존 내용이 지워지지 않습니다. 적용 전 자동 백업이 만들어지고, 다른 사람이 먼저 수정했다면 충돌 안내 후 중단됩니다. AI가 확신하지 못한 항목은 노란 안내로 표시되니 <strong>반드시 내용을 확인한 뒤 적용</strong>하세요.</li>
+              <li><strong>개인정보 주의</strong>: Gemini 등 외부 서비스로 보낸 내용은 해당 회사 서버로 전송되며, 무료 티어는 입력이 서비스 개선에 쓰일 수 있습니다. 이름·연락처·업체명은 가급적 제외하고 붙여넣으세요(처음 사용 시 확인창이 뜹니다). 이 PC 안에서만 처리하려면 LM Studio를 쓰세요. 분당 6회까지, 한 번에 한 건만 분석됩니다.</li>
             </ol>
           </li>
           <li><strong>동시 편집 충돌 안내</strong>: 두 사람이 같은 날짜를 동시에 수정하면 나중에 저장하는 쪽에 충돌 안내가 표시되고 상대의 변경이 조용히 덮어쓰이지 않습니다. 안내에 따라 최신 내용을 불러온 뒤 다시 수정하세요.</li>
@@ -633,6 +643,7 @@
               <li><span class="badge">files/</span>: 파일박스에 업로드된 현장 파일 보관 폴더 (최대 5GB 관리).</li>
               <li><span class="badge">config.json</span>: 포트 번호, 시스템 설정 및 비밀번호 해시.</li>
               <li><span class="badge">import-templates.json</span>: 현장별 작업일보 PDF 가져오기 양식(최대 20개). 현장 데이터와 함께 이관·백업하세요.</li>
+              <li><span class="badge">ai-config.json</span>: AI 가져오기 설정(서비스·주소·모델·<strong>API 키</strong>). 키가 들어 있으니 외부에 공유·공개하지 마세요.</li>
             </ul>
           </li>
           <li><strong>일일 자동 및 수동 백업 (<span class="badge">backup/</span>)</strong>: 서버 시작 시 및 그날 첫 저장 시 <span class="badge">backup/data-YYYY-MM-DD.json</span> 및 <span class="badge">backup/work-YYYY-MM-DD.db</span> 스냅샷이 자동 생성(최근 30개 보관)되며, 설정 창에서 <strong>[지금 백업]</strong>을 눌러 즉시 수동 백업을 생성할 수도 있습니다.</li>
@@ -652,7 +663,7 @@
           </li>
           <li><strong>설치 프로그램 및 트레이 런처</strong>:
             <ul style="margin-top: 0.3rem;">
-              <li>윈도우 전용 설치본(<span class="badge">WorkDashboard-Setup-1.4.0.exe</span>)으로 설치 시, PC 부팅 시 백그라운드로 자동 실행되는 시스템 트레이 런처가 함께 설치됩니다.</li>
+              <li>윈도우 전용 설치본(<span class="badge">WorkDashboard-Setup-1.6.0.exe</span>)으로 설치 시, PC 부팅 시 백그라운드로 자동 실행되는 시스템 트레이 런처가 함께 설치됩니다.</li>
               <li>설치본의 기본 데이터 폴더는 <span class="badge">%LOCALAPPDATA%\WorkDashboard</span>에 안전하게 격리 보관되며, 필요 시 환경변수 <span class="badge">WD_DATA_DIR</span>을 통해 원하는 드라이브나 폴더로 지정할 수 있습니다.</li>
             </ul>
           </li>

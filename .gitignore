@@ -18,3 +18,7 @@ installer/runtime/
 
 # 개발자 전용 키(공개 금지)
 devkey.json
+
+# AI 가져오기 설정(API 키 포함) — 공개 금지
+ai-config.json
+import-templates.json

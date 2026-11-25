@@ -276,6 +276,13 @@ button{font:inherit;cursor:pointer}
   }
 }
 .nav-group{display:inline-flex;gap:.35rem;align-items:center}
+/* WD-84: 관리자 헤더 작업일보 가져오기 버튼 반응형 라벨 축소 */
+.btn-header-import{display:inline-flex;align-items:center}
+.btn-header-import .import-label-short{display:none}
+@media (max-width:1200px){
+  .btn-header-import .import-label-full{display:none}
+  .btn-header-import .import-label-short{display:inline}
+}
 
 /* WD-10: 모니터용(/tv) 우상단 컨트롤 바 (전체화면 + 테마 전환 버튼) */
 #tv-controls{position:fixed;top:.65rem;right:.85rem;z-index:9999;display:flex;gap:.4rem;align-items:center;opacity:0;pointer-events:none;transition:opacity .25s ease-in-out;user-select:none}
@@ -293,18 +300,41 @@ button{font:inherit;cursor:pointer}
 .copy-prev-list{display:flex;flex-direction:column;gap:.45rem;margin:.4rem 0}
 .copy-prev-list label{display:flex;gap:.5rem;align-items:center;cursor:pointer}
 .print-val{display:none !important}
+body.printing .print-val{display:inline-block !important}
+body.printing main input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
+body.printing main select,
+body.printing main textarea{display:none !important}
+body.printing .fld-l{display:none !important}
+body.printing, body.printing.tv{
+  font-size:calc(13px * var(--print-scale, 1)) !important;
+}
+body.printing main,
+body.printing .col,
+body.printing .sec,
+body.printing .sec-body{
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  overflow:visible !important;
+}
 @page{size:A4;margin:10mm}
 @media print{
   :root,:root[data-theme="dark"],:root[data-theme="light"]{
     --theme:light;--bg:#fff;--card:#fff;--card-sub:#f1f5f9;--ink:#000;--sub:#334155;
     --line:#ccc;--strong:#64748b;--accent:#1d4ed8;--accent-faint:#eff6ff;--head:#f1f5f9;
     --th-bg:#f8fafc;--row-line:#cbd5e1;--sec-work:#000;--sec-equip:#000;--sec-crew:#000;--sec-material:#000;--sec-notes:#000;
+    --print-scale:1;
   }
-  body, body.tv{display:block !important;height:auto !important;min-height:0 !important;padding-bottom:0 !important;overflow:visible !important;background:#fff !important;color:#000 !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+  body, body.tv{
+    display:block !important;height:auto !important;min-height:0 !important;padding-bottom:0 !important;
+    overflow:visible !important;background:#fff !important;color:#000 !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+    font-size:calc(13px * var(--print-scale, 1)) !important;
+  }
   header{background:#fff !important;color:#000 !important;border-bottom:1px solid #111 !important;display:grid !important;grid-template-columns:1fr auto 1fr !important;align-items:center !important;break-inside:avoid !important;break-after:avoid !important}
   header::after{content:"" !important;display:block !important}
   #clock #time,#clock #date,#header-title,#header-title .site-name{color:#000 !important}
-  #header-title{max-width:none !important;overflow:visible !important;text-overflow:clip !important;white-space:normal !important;font-size:1.5rem !important;text-align:center !important}
+  #header-title{max-width:none !important;overflow:visible !important;text-overflow:clip !important;white-space:normal !important;font-size:calc(1.5rem * var(--print-scale, 1)) !important;text-align:center !important}
   #right,#banner,#weather,#tv-controls,#conn-info,#brand-footer,#layout-draft-bar,#height-draft-bar,#toast,.page-badge,.work-page-badge,.tools,.toast,.ov,.btn,button,#datalists,.acts,.sec-resize-handle{display:none !important}
   main .sec-page.is-hidden,main .work-page.is-hidden,main .sec-col-page.is-hidden{display:block !important}
   main .sec-col-page + .sec-col-page > .tbl-h-clone{display:none !important}
@@ -314,35 +344,165 @@ button{font:inherit;cursor:pointer}
   .col{height:auto !important;min-height:0 !important;background:#fff !important;box-sizing:border-box !important;border:none !important;overflow:visible !important;break-inside:auto !important;-webkit-box-decoration-break:clone !important;box-decoration-break:clone !important}
   .col + .col{border-left:1px solid #111 !important}
   main.view-single .col{border-left:none !important}
-  .colhead{background:#fff !important;color:#000 !important;border-bottom:2px solid #111 !important;break-inside:avoid !important;break-after:avoid !important}
+  .colhead{background:#fff !important;color:#000 !important;border-bottom:2px solid #111 !important;break-inside:avoid !important;break-after:avoid !important;padding:calc(.4rem * var(--print-scale, 1)) !important}
   .colhead small{color:#333 !important}
   .sec,.sec-body,.tree-block{break-inside:auto !important;overflow:visible !important;height:auto !important;max-height:none !important}
   .sec{border-bottom:1px solid #999 !important;background:#fff !important}
   .col > .sec:last-child{border-bottom:none !important}
-  main .sec-inner-col + .sec-inner-col{border-left:1px solid #999 !important;padding-left:.3rem !important}
-  .sec-h{background:#f1f5f9 !important;border-bottom:1px solid #ccc !important;border-left:none !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;font-weight:700 !important;color:#000 !important;break-inside:avoid !important;break-after:avoid !important}
+  main .sec-inner-col + .sec-inner-col{border-left:1px solid #999 !important;padding-left:calc(.3rem * var(--print-scale, 1)) !important}
+  .sec-h{background:#f1f5f9 !important;border-bottom:1px solid #ccc !important;border-left:none !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;font-weight:700 !important;color:#000 !important;break-inside:avoid !important;break-after:avoid !important;padding:calc(.35rem * var(--print-scale, 1)) calc(.5rem * var(--print-scale, 1)) !important}
   .sec-h > span:first-child,.sec-h .badge,.legend-direct{color:#000 !important}
   .sec-body{background:#fff !important}
-  .tbl-h{background:#f8fafc !important;color:#111 !important;border-bottom:1px solid #ccc !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;break-inside:avoid !important;break-after:avoid !important}
-  .tbl-row,.empty,.none{background:#fff !important;color:#000 !important;border-bottom:1px solid #e2e8f0 !important;break-inside:avoid !important;page-break-inside:avoid !important}
+
+  /* [WD-86] 인쇄 전용 표: 머리글 표시 보장 & 인라인 필드 라벨(.fld-l) 인쇄 시 숨김 (글자 겹침 원천 제거) */
+  .fld-l{display:none !important}
+  main .tbl-h,
+  main .is-narrow .tbl-h,
+  main .cols-inner-2 .tbl-h,
+  main .cols-inner-3 .tbl-h,
+  main .sec-group.cols-3 .tbl-h,
+  main .cols-inner-2 .tbl-h.grid-equip-e,
+  main .cols-inner-3 .tbl-h.grid-equip-e,
+  main .cols-inner-2 .tbl-h.grid-crew-e,
+  main .cols-inner-3 .tbl-h.grid-crew-e,
+  main .cols-inner-2 .tbl-h.grid-material-e,
+  main .cols-inner-3 .tbl-h.grid-material-e,
+  main .cols-inner-2 .tbl-h.grid-notes-e,
+  main .cols-inner-3 .tbl-h.grid-notes-e,
+  main .is-narrow .tbl-h.grid-crew-e,
+  main .is-narrow .tbl-h.grid-equip-e,
+  main .is-narrow .tbl-h.grid-material-e,
+  main .is-narrow .tbl-h.grid-notes-e{
+    display:grid !important;background:#f8fafc !important;color:#111 !important;
+    border-bottom:1px solid #ccc !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+    break-inside:avoid !important;break-after:avoid !important;
+    padding:calc(.25rem * var(--print-scale, 1)) 0 !important;
+    font-size:calc(.85rem * var(--print-scale, 1)) !important;
+  }
+
+  .tbl-row,.empty,.none{background:#fff !important;color:#000 !important;border-bottom:1px solid #e2e8f0 !important;break-inside:avoid !important;page-break-inside:avoid !important;padding:calc(.25rem * var(--print-scale, 1)) 0 !important}
   .tbl-row .num,.tbl-row .cell,.br,.work-val{color:#000 !important}
   .work-val{display:inline !important}
   main input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),main select,main textarea{display:none !important}
   input,select,textarea{border:none !important;background:transparent !important;box-shadow:none !important;outline:none !important;outline-width:0 !important;-webkit-appearance:none !important;appearance:none !important;padding:0 !important;font:inherit !important;color:#000 !important}
   ::placeholder{color:transparent !important}
   input[style*="outline"],input.qty{outline:none !important;outline-width:0 !important}
-  .print-val{display:inline-block !important;white-space:normal !important;overflow:visible !important;text-overflow:clip !important;overflow-wrap:anywhere !important;word-break:keep-all !important;color:#000 !important;font:inherit !important;line-height:1.25 !important}
-  main .cols-inner-2 .grid-crew-v > .cell,main .cols-inner-3 .grid-crew-v > .cell,main .cols-inner-2 .grid-equip-v > .cell,main .cols-inner-3 .grid-equip-v > .cell,main .cols-inner-2 .grid-material-v > .cell,main .cols-inner-3 .grid-material-v > .cell,main .cols-inner-2 .grid-notes-v > .cell,main .cols-inner-3 .grid-notes-v > .cell,main .cols-inner-2 .grid-work-v > .cell,main .cols-inner-3 .grid-work-v > .cell,main .sec-group .grid-crew-v > .cell,main .sec-group .grid-equip-v > .cell,main .tbl-row > .cell,main .tbl-row > div,.cell,.work-val,.work-tree{white-space:normal !important;overflow:visible !important;text-overflow:clip !important;overflow-wrap:anywhere !important;word-break:keep-all !important}
+
+  .print-val{display:inline-block !important;white-space:normal !important;overflow:visible !important;text-overflow:clip !important;overflow-wrap:anywhere !important;word-break:keep-all !important;color:#000 !important;font:inherit !important;line-height:1.35 !important}
+  main .cols-inner-2 .grid-crew-v > .cell,main .cols-inner-3 .grid-crew-v > .cell,main .cols-inner-2 .grid-equip-v > .cell,main .cols-inner-3 .grid-equip-v > .cell,main .cols-inner-2 .grid-material-v > .cell,main .cols-inner-3 .grid-material-v > .cell,main .cols-inner-2 .grid-notes-v > .cell,main .cols-inner-3 .grid-notes-v > .cell,main .cols-inner-2 .grid-work-v > .cell,main .cols-inner-3 .grid-work-v > .cell,main .sec-group .grid-crew-v > .cell,main .sec-group .grid-equip-v > .cell,main .tbl-row > .cell,main .tbl-row > div,.cell,.work-val,.work-tree{white-space:normal !important;overflow:visible !important;text-overflow:clip !important;overflow-wrap:anywhere !important;word-break:keep-all !important;line-height:1.35 !important;min-width:0 !important}
   .cols-inner-3 .print-val,.cols-inner-3 .cell,.cols-inner-3 .tbl-row > div{font-size:.9em !important}
-  .tbl-h.grid-work-e > div:last-child,.tbl-h.grid-equip-e > div:last-child,.tbl-h.grid-crew-e > div:last-child,.tbl-h.grid-material-e > div:last-child,.tbl-h.grid-notes-e > div:last-child{display:none !important}
-  .grid-work-e{grid-template-columns:3.2rem 1fr !important}
-  .grid-equip-e{grid-template-columns:2.5rem 1.4fr 4.5rem 1.2fr 1.4fr !important}
-  .grid-crew-e{grid-template-columns:2.5rem 1.5fr 1fr 1.3fr !important}
-  .grid-material-e{grid-template-columns:2.5rem 1.4fr 1.3fr 0.9fr 0.7fr 1.5fr !important}
-  .grid-notes-e{grid-template-columns:2.5rem 1fr !important}
+
+  /* [WD-86] 화면용 2행 그리드 배치(grid-row, grid-column, grid-template-rows) 인쇄 때 완전 초기화 */
+  main .tbl-row > *,
+  main .tbl-h > * {
+    grid-row: auto !important;
+    grid-column: auto !important;
+    padding: 0 calc(.2rem * var(--print-scale, 1)) !important;
+  }
+  .grid-work-e, .grid-work-v,
+  .grid-equip-e, .grid-equip-v,
+  .grid-crew-e, .grid-crew-v,
+  .grid-material-e, .grid-material-v,
+  .grid-notes-e, .grid-notes-v {
+    grid-template-rows: auto !important;
+    gap: 0 !important;
+  }
+
+  /* [WD-86] 인쇄 전용 고정 열 폭 표 레이아웃 (긴 칸에 더 많은 가중치, 번호/수량은 최소 폭) */
+  .tbl-h.grid-work-e > div:last-child, .tbl-h.grid-work-v > div:last-child,
+  .tbl-h.grid-equip-e > div:last-child, .tbl-h.grid-equip-v > div:last-child,
+  .tbl-h.grid-crew-e > div:last-child, .tbl-h.grid-crew-v > div:last-child,
+  .tbl-h.grid-material-e > div:last-child, .tbl-h.grid-material-v > div:last-child,
+  .tbl-h.grid-notes-e > div:last-child, .tbl-h.grid-notes-v > div:last-child {
+    display: none !important;
+  }
+  .grid-work-e, .grid-work-v {
+    grid-template-columns: 2.5rem minmax(0, 1fr) !important;
+  }
+  .grid-equip-e, .grid-equip-v {
+    grid-template-columns: 2.2rem minmax(0, 1.6fr) minmax(0, 0.9fr) minmax(0, 1.3fr) minmax(0, 1.6fr) !important;
+  }
+  .grid-crew-e, .grid-crew-v {
+    grid-template-columns: 2.2rem minmax(0, 1.8fr) minmax(0, 1fr) minmax(0, 2fr) !important;
+  }
+  .grid-material-e, .grid-material-v {
+    grid-template-columns: 2.2rem minmax(0, 1.4fr) minmax(0, 1.3fr) minmax(0, 0.8fr) minmax(0, 0.7fr) minmax(0, 1.5fr) !important;
+  }
+  .grid-notes-e, .grid-notes-v {
+    grid-template-columns: 2.2rem minmax(0, 1fr) !important;
+  }
+
+  /* [WD-86] 어제+오늘 2열 출력 시 가용 폭이 좁으므로 내부 2단/3단을 1단으로 접어 칸 폭 확보 */
+  body.printing-1col .sec-inner-grid.cols-inner-2,
+  body.printing-1col .sec-inner-grid.cols-inner-3,
+  body.printing-1col .sec-edit-grid.cols-inner-2,
+  body.printing-1col .sec-edit-grid.cols-inner-3,
+  main:not(.view-single) .sec-inner-grid.cols-inner-2,
+  main:not(.view-single) .sec-inner-grid.cols-inner-3,
+  main:not(.view-single) .sec-edit-grid.cols-inner-2,
+  main:not(.view-single) .sec-edit-grid.cols-inner-3 {
+    grid-template-columns: 1fr !important;
+  }
+  body.printing-1col .sec-inner-col + .sec-inner-col,
+  main:not(.view-single) .sec-inner-col + .sec-inner-col {
+    border-left: none !important;
+    border-top: 1px dashed #cbd5e1 !important;
+    padding-left: 0 !important;
+    margin-top: .4rem !important;
+    padding-top: .4rem !important;
+  }
+
   .btn-direct:not(.on){display:none !important}
   .btn-direct.on{display:inline !important;border:none !important;background:transparent !important;color:#000 !important;text-decoration:underline !important;padding:0 !important;font:inherit !important;font-size:inherit !important}
   .badge.meal-badge{border:1px solid #999 !important;background:transparent !important;color:#000 !important;text-decoration:none !important}
+
+  /* [WD-87] 출력 옵션 스타일: 위아래(세로) 배치 */
+  body.print-layout-stack main {
+    grid-template-columns: 1fr !important;
+  }
+  body.print-layout-stack .col + .col {
+    border-left: none !important;
+    border-top: 2px solid #111 !important;
+  }
+
+  /* [WD-87] 구역 단수 강제: 1단 */
+  body.print-sec-cols-1 .sec-inner-grid,
+  body.print-sec-cols-1 .sec-edit-grid,
+  body.print-sec-cols-1 .cols-inner-2,
+  body.print-sec-cols-1 .cols-inner-3 {
+    grid-template-columns: 1fr !important;
+  }
+  body.print-sec-cols-1 .sec-inner-col + .sec-inner-col {
+    border-left: none !important;
+    border-top: 1px dashed #cbd5e1 !important;
+    padding-left: 0 !important;
+    margin-top: .4rem !important;
+    padding-top: .4rem !important;
+  }
+
+  /* [WD-87] 구역 단수 강제: 2단 */
+  body.print-sec-cols-2 .sec-inner-grid.cols-inner-2,
+  body.print-sec-cols-2 .sec-edit-grid.cols-inner-2,
+  body.print-sec-cols-2 .sec-inner-grid.cols-inner-3,
+  body.print-sec-cols-2 .sec-edit-grid.cols-inner-3 {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  body.print-sec-cols-2 .sec-inner-col + .sec-inner-col {
+    border-left: 1px solid #999 !important;
+    border-top: none !important;
+    padding-left: calc(.3rem * var(--print-scale, 1)) !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  /* [WD-87] 포함 구역 체크 숨김 */
+  body.print-hide-work .sec[data-key="work"],
+  body.print-hide-equip .sec[data-key="equip"],
+  body.print-hide-crew .sec[data-key="crew"],
+  body.print-hide-material .sec[data-key="material"],
+  body.print-hide-notes .sec[data-key="notes"] {
+    display: none !important;
+  }
 }
 
 
@@ -1079,6 +1239,48 @@ body:not(.admin) .col > .sec:last-child{border-bottom:none}
 .md .table-manual input,.md .table-manual select{width:100%;font:inherit;padding:.2rem .3rem;background:var(--input-bg);color:var(--input-text);border:1px solid var(--input-border)}
 .md .btns{display:flex;gap:.4rem;justify-content:flex-end;margin-top:.4rem}
 .msg{color:var(--danger);font-size:.88rem;min-height:1.1em}
+
+/* [WD-87] 인쇄 옵션 모달 스타일 */
+.print-opt-modal {
+  width: min(32rem, 94vw);
+}
+.print-opt-sec {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: .6rem;
+  margin-bottom: .6rem;
+}
+.print-opt-sec:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.print-opt-title {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: .35rem;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+.print-opt-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem .8rem;
+}
+.print-opt-label {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: .83rem;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+}
+.print-opt-label input[type="radio"],
+.print-opt-label input[type="checkbox"] {
+  cursor: pointer;
+}
 
 /* WD-22: 월별 계획 및 공고 스타일 */
 .md.wide-plans {
@@ -2630,6 +2832,7 @@ function renderBanner() {
 }
 
 function render() {
+  if (document.body.classList.contains('printing')) return;
   if (S.modalOpen || activeInlineEdit) {
     if (activeInlineEdit) pendingRenderAfterInline = true;
     return;
@@ -2655,6 +2858,19 @@ function render() {
       el('a', { href: '/', class: 'btn faint' + (SITE_PATH === '/' ? ' active' : ''), text: '대시보드' }),
       el('a', { href: '/files', class: 'btn faint', text: '파일박스' }),
       el('a', { href: '/tv', target: '_blank', class: tvBtnClass, text: tvBtnText, title: '모니터 화면 새 창으로 열기' }),
+      ...(S.admin ? [
+        el('a', {
+          id: 'btn-header-import',
+          href: withSitePrefix('/import.html'),
+          class: 'btn faint btn-header-import',
+          title: '작업일보 가져오기',
+          onclick: (e) => { e.preventDefault(); location.href = withSitePrefix('/import.html'); }
+        },
+          el('span', { class: 'import-icon', text: '📥 ' }),
+          el('span', { class: 'import-label-full', text: '작업일보 가져오기' }),
+          el('span', { class: 'import-label-short', text: '가져오기' })
+        )
+      ] : []),
       ...(S.sitesCount >= 2 ? [el('a', { href: '/sites.html?pick=1', class: 'btn faint', text: '현장 전환' })] : [])
     );
     const themeBtn = createThemeToggleBtn();
@@ -2770,8 +2986,12 @@ function col(label, dk) {
     return w;
   }
   const day = S.days[dk] || emptyDay();
-  if (!S.admin && dk === S.tomorrow && !hasContent(day)) {
+  const isPrinting = document.body.classList.contains('printing') || Boolean(window.__activePrintOptions);
+  if ((!S.admin || isPrinting) && dk === S.tomorrow && !hasContent(day)) {
     w.append(el('div', { class: 'empty tomorrow-empty', style: 'padding:1.5rem;text-align:center;color:var(--text-muted,#888);font-size:1rem;', text: '작성된 내일 작업이 없습니다' }));
+    if (isPrinting) {
+      return w;
+    }
   }
 
   const secRenderers = {
@@ -4114,7 +4334,7 @@ function editNotesRow(n, list, i, num, dk) {
 }
 
 // ---------- 모달 공통 ----------
-function modal(title, body, buttons, isWide = false, onBeforeClose = null) {
+function modal(title, body, buttons, isWide = false, onBeforeClose = null, closeText = '닫기') {
   S.modalOpen = true;
   const requestClose = () => {
     if (typeof onBeforeClose === 'function' && !onBeforeClose()) return;
@@ -4132,7 +4352,7 @@ function modal(title, body, buttons, isWide = false, onBeforeClose = null) {
   ov.append(el('div', { class: 'md' + (isWide ? ' wide' : '') },
     el('h2', { text: title }),
     body,
-    el('div', { class: 'btns' }, ...buttons, el('button', { class: 'btn', text: '닫기', onclick: requestClose }))
+    el('div', { class: 'btns' }, ...buttons, el('button', { id: 'btn-modal-close', class: 'btn', text: closeText, onclick: requestClose }))
   ));
   document.body.append(ov);
   return close;
@@ -4769,16 +4989,385 @@ function cleanupPrintValues() {
   document.querySelectorAll('.print-val').forEach((el) => el.remove());
 }
 
-function printReport() {
+const PRINT_SCALES = [1.0, 0.92, 0.85, 0.78];
+// A4 세로 297mm - 여백 20mm = 277mm (96DPI 환산 약 1046px)
+const A4_MAX_PRINT_H = 1045;
+
+function loadPrintOptions() {
+  const currentView = getViewMode();
+  const defaultRange = (currentView === 'yesterday' || currentView === 'prev') ? 'prev'
+    : (currentView === 'today') ? 'today'
+    : (currentView === 'tomorrow') ? 'tomorrow'
+    : (S.admin && getAdminDayToggle() === 'todayTomorrow') ? 'both_next'
+    : 'both';
+
+  const defaultOpts = {
+    range: defaultRange,
+    layout: 'side',
+    sectionCols: 'auto',
+    fontSize: 'auto',
+    orientation: 'portrait',
+    sections: ['work', 'equip', 'crew', 'material', 'notes']
+  };
+
+  try {
+    const raw = localStorage.getItem(siteKey('print_options'));
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        return {
+          range: parsed.range || defaultOpts.range,
+          layout: parsed.layout || defaultOpts.layout,
+          sectionCols: parsed.sectionCols || defaultOpts.sectionCols,
+          fontSize: parsed.fontSize || defaultOpts.fontSize,
+          orientation: parsed.orientation || defaultOpts.orientation,
+          sections: Array.isArray(parsed.sections) ? parsed.sections : defaultOpts.sections
+        };
+      }
+    }
+  } catch (e) {}
+  return defaultOpts;
+}
+
+function savePrintOptions(opts) {
+  try {
+    localStorage.setItem(siteKey('print_options'), JSON.stringify(opts));
+  } catch (e) {}
+}
+
+function calculateAutoPrintScale() {
+  const root = document.documentElement;
+  let bestScale = PRINT_SCALES[0];
+  root.style.setProperty('--print-scale', String(bestScale));
+
+  const mainEl = document.getElementById('main');
+  const headerEl = document.querySelector('header');
+  function measureHeight() {
+    const hH = headerEl ? headerEl.offsetHeight : 0;
+    let colMaxH = 0;
+    const cols = mainEl ? mainEl.querySelectorAll('.col') : [];
+    if (cols.length > 0) {
+      cols.forEach((c) => {
+        const ch = Math.max(c.offsetHeight || 0, c.scrollHeight || 0);
+        if (ch > colMaxH) colMaxH = ch;
+      });
+    } else if (mainEl) {
+      colMaxH = Math.max(mainEl.offsetHeight || 0, mainEl.scrollHeight || 0);
+    }
+    return hH + colMaxH;
+  }
+
+  let totalH = measureHeight();
+  if (totalH > A4_MAX_PRINT_H) {
+    for (let i = 1; i < PRINT_SCALES.length; i++) {
+      bestScale = PRINT_SCALES[i];
+      root.style.setProperty('--print-scale', String(bestScale));
+      totalH = measureHeight();
+      if (totalH <= A4_MAX_PRINT_H) {
+        break;
+      }
+    }
+  }
+}
+
+function preparePrint(opts) {
+  if (!opts) opts = loadPrintOptions();
+  window.__activePrintOptions = opts;
+
+  const mainEl = document.getElementById('main');
+  if (!mainEl) return;
+
+  if (!window.__originalMainChildren) {
+    window.__originalMainChildren = Array.from(mainEl.children);
+    window.__originalMainClass = mainEl.className;
+  }
+
+  cleanupPrintValues();
+
+  let colsToRender = [];
+  let isSingleView = false;
+  const range = opts.range || 'both';
+
+  if (range === 'today') {
+    colsToRender = [col('오늘', S.today)];
+    isSingleView = true;
+  } else if (range === 'prev' || range === 'yesterday') {
+    colsToRender = [col('어제', S.prev)];
+    isSingleView = true;
+  } else if (range === 'tomorrow') {
+    colsToRender = [col('내일 (예정)', S.tomorrow)];
+    isSingleView = true;
+  } else if (range === 'both_next') {
+    colsToRender = [col('오늘', S.today), col('내일 (예정)', S.tomorrow)];
+    isSingleView = false;
+  } else {
+    colsToRender = [col('어제', S.prev), col('오늘', S.today)];
+    isSingleView = false;
+  }
+
+  document.body.classList.add('printing');
+  mainEl.replaceChildren(...colsToRender);
+  mainEl.classList.toggle('view-single', isSingleView);
+
+  if (opts.layout === 'stack' && !isSingleView) {
+    document.body.classList.add('print-layout-stack');
+  }
+
+  if (opts.sectionCols === '1') {
+    document.body.classList.add('print-sec-cols-1');
+  } else if (opts.sectionCols === '2') {
+    document.body.classList.add('print-sec-cols-2');
+  } else if (!isSingleView && opts.layout !== 'stack') {
+    document.body.classList.add('printing-1col');
+  }
+
+  if (opts.orientation === 'landscape') {
+    let pageStyle = document.getElementById('print-page-style');
+    if (!pageStyle) {
+      pageStyle = document.createElement('style');
+      pageStyle.id = 'print-page-style';
+      document.head.appendChild(pageStyle);
+    }
+    pageStyle.textContent = '@page { size: A4 landscape; margin: 10mm; }';
+  }
+
+  const allSecs = ['work', 'equip', 'crew', 'material', 'notes'];
+  const included = Array.isArray(opts.sections) ? opts.sections : allSecs;
+  allSecs.forEach((s) => {
+    if (!included.includes(s)) {
+      document.body.classList.add('print-hide-' + s);
+    }
+  });
+
+  preparePrintValues();
+
+  const root = document.documentElement;
+  if (opts.fontSize === 'small') {
+    root.style.setProperty('--print-scale', '0.85');
+  } else if (opts.fontSize === 'normal') {
+    root.style.setProperty('--print-scale', '1.0');
+  } else if (opts.fontSize === 'large') {
+    root.style.setProperty('--print-scale', '1.15');
+  } else {
+    calculateAutoPrintScale();
+  }
+}
+
+function applyAutoPrintScale() {
+  if (window.__activePrintOptions) {
+    calculateAutoPrintScale();
+    return;
+  }
+  cleanupPrintValues();
   preparePrintValues();
   document.body.classList.add('printing');
-  window.print();
+
+  const mainEl = document.getElementById('main');
+  const isSingle = mainEl && mainEl.classList.contains('view-single');
+  if (!isSingle) {
+    document.body.classList.add('printing-1col');
+  }
+
+  calculateAutoPrintScale();
 }
-window.addEventListener('beforeprint', preparePrintValues);
-window.addEventListener('afterprint', () => {
+
+function restorePrintState() {
   cleanupPrintValues();
-  document.body.classList.remove('printing');
+  document.body.classList.remove(
+    'printing',
+    'printing-1col',
+    'print-layout-stack',
+    'print-sec-cols-1',
+    'print-sec-cols-2',
+    'print-hide-work',
+    'print-hide-equip',
+    'print-hide-crew',
+    'print-hide-material',
+    'print-hide-notes'
+  );
+  document.documentElement.style.removeProperty('--print-scale');
+
+  const pageStyle = document.getElementById('print-page-style');
+  if (pageStyle) pageStyle.remove();
+
+  if (window.__originalMainChildren) {
+    const mainEl = document.getElementById('main');
+    if (mainEl) {
+      mainEl.replaceChildren(...window.__originalMainChildren);
+      mainEl.className = window.__originalMainClass || '';
+    }
+    window.__originalMainChildren = null;
+    window.__originalMainClass = null;
+  }
+  window.__activePrintOptions = null;
+}
+
+function openPrintOptionsModal() {
+  if (TV_MODE) return;
+  const saved = loadPrintOptions();
+
+  const wrap = el('div', { class: 'body-scroll', id: 'print-options-body' });
+
+  wrap.append(el('div', {
+    class: 'hint print-opt-hint',
+    style: 'background:var(--th-bg);padding:.4rem .6rem;border-radius:.35rem;font-size:.8rem;line-height:1.4;',
+    text: '💡 자동이 기본이며, 안 맞을 때만 바꾸세요.'
+  }));
+
+  const secRange = el('div', { class: 'print-opt-sec' },
+    el('div', { class: 'print-opt-title', text: '📅 출력 범위' })
+  );
+  const rangeGrid = el('div', { class: 'print-opt-grid' });
+  const rangeOpts = [
+    { val: 'both', label: '어제 + 오늘' },
+    { val: 'today', label: '오늘만' },
+    { val: 'prev', label: '어제만' },
+    { val: 'both_next', label: '오늘 + 내일' },
+    { val: 'tomorrow', label: '내일만' },
+  ];
+  rangeOpts.forEach((opt) => {
+    const radio = el('input', { type: 'radio', name: 'print-range', value: opt.val });
+    if (saved.range === opt.val) radio.checked = true;
+    rangeGrid.append(el('label', { class: 'print-opt-label' }, radio, document.createTextNode(' ' + opt.label)));
+  });
+  secRange.append(rangeGrid);
+  wrap.append(secRange);
+
+  const secLayout = el('div', { class: 'print-opt-sec' },
+    el('div', { class: 'print-opt-title', text: '📐 날짜 배치' })
+  );
+  const layoutGrid = el('div', { class: 'print-opt-grid' });
+  const layoutOpts = [
+    { val: 'side', label: '좌우 (기본)' },
+    { val: 'stack', label: '위아래 (세로로 쌓기)' },
+  ];
+  layoutOpts.forEach((opt) => {
+    const radio = el('input', { type: 'radio', name: 'print-layout', value: opt.val });
+    if (saved.layout === opt.val) radio.checked = true;
+    layoutGrid.append(el('label', { class: 'print-opt-label' }, radio, document.createTextNode(' ' + opt.label)));
+  });
+  secLayout.append(layoutGrid);
+  wrap.append(secLayout);
+
+  const secCols = el('div', { class: 'print-opt-sec' },
+    el('div', { class: 'print-opt-title', text: '📊 구역 단수' })
+  );
+  const colsGrid = el('div', { class: 'print-opt-grid' });
+  const colsOpts = [
+    { val: 'auto', label: '자동 (기본)' },
+    { val: '1', label: '1단 (전폭)' },
+    { val: '2', label: '2단' },
+  ];
+  colsOpts.forEach((opt) => {
+    const radio = el('input', { type: 'radio', name: 'print-section-cols', value: opt.val });
+    if (saved.sectionCols === opt.val) radio.checked = true;
+    colsGrid.append(el('label', { class: 'print-opt-label' }, radio, document.createTextNode(' ' + opt.label)));
+  });
+  secCols.append(colsGrid);
+  wrap.append(secCols);
+
+  const secFont = el('div', { class: 'print-opt-sec' },
+    el('div', { class: 'print-opt-title', text: '🔤 글자 크기' })
+  );
+  const fontGrid = el('div', { class: 'print-opt-grid' });
+  const fontOpts = [
+    { val: 'auto', label: '자동 (기본)' },
+    { val: 'small', label: '작게 (.85)' },
+    { val: 'normal', label: '보통 (1.0)' },
+    { val: 'large', label: '크게 (1.15)' },
+  ];
+  fontOpts.forEach((opt) => {
+    const radio = el('input', { type: 'radio', name: 'print-font-size', value: opt.val });
+    if (saved.fontSize === opt.val) radio.checked = true;
+    fontGrid.append(el('label', { class: 'print-opt-label' }, radio, document.createTextNode(' ' + opt.label)));
+  });
+  secFont.append(fontGrid);
+  wrap.append(secFont);
+
+  const secOrient = el('div', { class: 'print-opt-sec' },
+    el('div', { class: 'print-opt-title', text: '📄 용지 방향' })
+  );
+  const orientGrid = el('div', { class: 'print-opt-grid' });
+  const orientOpts = [
+    { val: 'portrait', label: '세로 (기본)' },
+    { val: 'landscape', label: '가로' },
+  ];
+  orientOpts.forEach((opt) => {
+    const radio = el('input', { type: 'radio', name: 'print-orientation', value: opt.val });
+    if (saved.orientation === opt.val) radio.checked = true;
+    orientGrid.append(el('label', { class: 'print-opt-label' }, radio, document.createTextNode(' ' + opt.label)));
+  });
+  secOrient.append(orientGrid);
+  wrap.append(secOrient);
+
+  const secSecs = el('div', { class: 'print-opt-sec' },
+    el('div', { class: 'print-opt-title', text: '☑ 포함 구역' })
+  );
+  const secsGrid = el('div', { class: 'print-opt-grid' });
+  const secDefs = [
+    { key: 'work', label: '작업현황' },
+    { key: 'equip', label: '장비' },
+    { key: 'crew', label: '인원' },
+    { key: 'material', label: '자재' },
+    { key: 'notes', label: '특이사항' },
+  ];
+  const savedSecs = Array.isArray(saved.sections) ? saved.sections : ['work', 'equip', 'crew', 'material', 'notes'];
+  secDefs.forEach((sd) => {
+    const chk = el('input', { type: 'checkbox', id: `chk-print-sec-${sd.key}`, value: sd.key });
+    if (savedSecs.includes(sd.key)) chk.checked = true;
+    secsGrid.append(el('label', { class: 'print-opt-label' }, chk, document.createTextNode(' ' + sd.label)));
+  });
+  secSecs.append(secsGrid);
+  wrap.append(secSecs);
+
+  function collectOptions() {
+    const getVal = (name, def) => {
+      const sel = wrap.querySelector(`input[name="${name}"]:checked`);
+      return sel ? sel.value : def;
+    };
+    const sections = [];
+    secDefs.forEach((sd) => {
+      const chk = wrap.querySelector(`#chk-print-sec-${sd.key}`);
+      if (chk && chk.checked) sections.push(sd.key);
+    });
+    return {
+      range: getVal('print-range', 'both'),
+      layout: getVal('print-layout', 'side'),
+      sectionCols: getVal('print-section-cols', 'auto'),
+      fontSize: getVal('print-font-size', 'auto'),
+      orientation: getVal('print-orientation', 'portrait'),
+      sections: sections
+    };
+  }
+
+  const btnPrint = el('button', {
+    id: 'btn-print-confirm',
+    class: 'btn primary',
+    text: '인쇄',
+    onclick: () => {
+      const opts = collectOptions();
+      savePrintOptions(opts);
+      close();
+      preparePrint(opts);
+      window.print();
+    }
+  });
+
+  const close = modal('출력 설정', wrap, [btnPrint], false, null, '취소');
+  const mdEl = document.querySelector('.ov:last-child .md');
+  if (mdEl) mdEl.classList.add('print-opt-modal');
+  btnPrint.focus();
+}
+
+function printReport() {
+  openPrintOptionsModal();
+}
+window.addEventListener('beforeprint', () => {
+  if (!window.__activePrintOptions) {
+    applyAutoPrintScale();
+  }
 });
+window.addEventListener('afterprint', restorePrintState);
 
 // ---------- WD-22: /tv 공고 오버레이 ----------
 let activeAnnounceItems = [];
@@ -5785,16 +6374,16 @@ async function openSettingsModal() {
     )
   ));
 
-  // 작업일보 가져오기 (WD-73: PDF 양식 관리)
+  // 작업일보 가져오기 (WD-73, WD-84: PDF 양식 관리 및 가져오기)
   formWrap.append(el('div', { id: 'sec-import-manage', class: 'form-row' },
     el('label', { text: '작업일보 가져오기' }),
     el('div', { style: 'display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap' },
-      el('div', { class: 'hint', style: 'margin:0;flex:1;min-width:180px', text: 'PDF 작업일보에서 데이터를 자동으로 추출하기 위한 구역 양식을 관리합니다.' }),
+      el('div', { class: 'hint', style: 'margin:0;flex:1;min-width:180px', text: 'PDF·텍스트·이미지(AI)로 작업일보를 가져오고 PDF 구역 양식을 관리합니다.' }),
       el('button', {
         id: 'btn-manage-import-templates',
         type: 'button',
         class: 'btn',
-        text: '양식 관리',
+        text: '작업일보 가져오기 / 양식 관리',
         onclick: () => { location.href = withSitePrefix('/import.html'); },
       })
     )

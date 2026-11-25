@@ -652,6 +652,251 @@
       cursor: pointer;
       font-weight: normal;
     }
+
+    /* WD-83: AI 작업일보 분석 탭 스타일 */
+    .ai-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+      padding: 1.2rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.2rem;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .ai-accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: 0.2rem 0;
+      user-select: none;
+    }
+    .ai-accordion-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .ai-dropzone {
+      border: 2px dashed var(--line);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      background: var(--card-sub);
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+    .ai-dropzone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .ai-results-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.2rem;
+      min-width: 0;
+      max-width: 100%;
+    }
+    @media (min-width: 900px) {
+      .ai-results-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    .ai-date-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: var(--shadow-sm);
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .ai-date-card.empty {
+      opacity: 0.7;
+    }
+    .ai-date-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--line);
+    }
+    .ai-item-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.2rem;
+      border-bottom: 1px solid var(--line);
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .ai-item-row:last-child {
+      border-bottom: none;
+    }
+    .ai-item-row input[type="text"] {
+      padding: 0.25rem 0.4rem;
+      font-size: 0.82rem;
+      border: 1px solid var(--line);
+      border-radius: 0.25rem;
+      background: var(--card);
+      color: var(--ink);
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    .ai-item-tree {
+      margin-left: 1.2rem;
+      border-left: 2px solid var(--line);
+      padding-left: 0.5rem;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    /* WD-85: AI 가져오기 일괄 모드 선택 바 및 계산 문구 */
+    .ai-batch-mode-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding: 0.45rem 0.65rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 0.4rem;
+      margin-bottom: 0.8rem;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .ai-batch-btn {
+      padding: 0.32rem 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: 0.35rem;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      transition: all 0.15s ease;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .ai-batch-btn:hover {
+      background: var(--card-sub);
+    }
+    .ai-batch-btn.active-append {
+      background: var(--primary, #2563eb);
+      color: #fff;
+      border-color: var(--primary, #2563eb);
+    }
+    .ai-batch-btn.active-replace {
+      background: var(--danger, #ef4444);
+      color: #fff;
+      border-color: var(--danger, #ef4444);
+    }
+    .ai-batch-mode-bar.is-disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .ai-calc-hint {
+      font-size: 0.75rem;
+      line-height: 1.2;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    /* WD-85: 모바일 반응형 및 구역 카드 스타일 */
+    .ai-sec-card {
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
+    .ai-sec-card .import-preview-table {
+      width: 100%;
+      table-layout: fixed;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    .ai-sec-card .import-preview-table td {
+      overflow: hidden;
+    }
+    .ai-sec-card .import-preview-table td input[type="text"] {
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .ai-sec-card[data-section="work"] .ai-item-row {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.25rem;
+    }
+    .ai-sec-card[data-section="work"] .ai-item-row > div:first-child {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      width: 100%;
+      min-width: 0;
+    }
+    .ai-sec-card[data-section="work"] input.input-work-t {
+      min-width: 0;
+      flex: 1;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 0.5rem;
+      }
+      .ai-card {
+        padding: 0.75rem;
+      }
+      .ai-date-card {
+        padding: 0.65rem;
+      }
+      .ai-date-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .ai-batch-mode-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .ai-batch-btn {
+        width: 100%;
+        text-align: center;
+      }
+      .ai-batch-status-label {
+        margin-left: 0 !important;
+        text-align: center;
+      }
+      .ai-sec-card > div:first-child {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+      }
+      .ai-calc-hint {
+        white-space: normal;
+        word-break: break-all;
+      }
+      .ai-item-tree {
+        margin-left: 0.5rem;
+        padding-left: 0.35rem;
+      }
+      #btn-apply-ai-data {
+        width: 100%;
+        text-align: center;
+        white-space: normal;
+        box-sizing: border-box;
+      }
+    }
   </style>
   <script src="/vendor/pdfjs/pdf.min.js"></script>
   <script src="/pdfzones.js"></script>
@@ -673,6 +918,7 @@
     <div id="import-tab-bar" class="tab-bar" style="display:none;">
       <button id="tab-import" type="button" class="tab-btn active">작업일보 가져오기</button>
       <button id="tab-templates" type="button" class="tab-btn">양식 관리</button>
+      <button id="tab-ai" type="button" class="tab-btn">🤖 AI로 가져오기</button>
     </div>
 
     <!-- 0. 작업일보 가져오기 화면 (WD-74) -->
@@ -857,6 +1103,161 @@
         <div class="import-actions-bar" style="margin-top:1.5rem; display:flex; justify-content:flex-end; gap:1rem; align-items:center; flex-wrap:wrap;">
           <span id="import-apply-summary-text" style="color:var(--sub); font-size:0.85rem;"></span>
           <button id="btn-apply-import" type="button" class="btn primary" style="padding:0.6rem 1.4rem; font-size:1rem; font-weight:700;">💾 작업일보 적용</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- WD-83: AI로 가져오기 화면 -->
+    <div id="view-ai" style="display:none;">
+      <!-- A. AI 설정 패널 (접이식) -->
+      <div id="ai-settings-card" class="ai-card">
+        <div id="ai-settings-toggle" class="ai-accordion-header">
+          <div class="ai-accordion-title">
+            <span>⚙ AI 서비스 설정</span>
+            <span id="ai-settings-badge" class="badge-pill">확인 중…</span>
+          </div>
+          <button id="btn-toggle-ai-settings" type="button" class="btn faint" style="padding:0.2rem 0.6rem; font-size:0.75rem;">설정 접기 ▲</button>
+        </div>
+        <div id="ai-settings-body" style="margin-top:1rem;">
+          <div class="import-controls-grid" style="margin-bottom:0.8rem;">
+            <div class="form-group" style="flex:1; min-width:180px;">
+              <label for="ai-select-provider">서비스 종류</label>
+              <select id="ai-select-provider" style="width:100%;">
+                <option value="gemini">Google Gemini (무료 티어 유리)</option>
+                <option value="deepseek">DeepSeek (가성비)</option>
+                <option value="lmstudio">LM Studio (로컬 PC)</option>
+                <option value="opencode">OpenCode Go</option>
+                <option value="custom">직접 입력 (Custom)</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:2; min-width:240px;">
+              <label for="ai-input-base-url">API 기본 주소 (OpenAI 호환 .../v1)</label>
+              <input type="text" id="ai-input-base-url" style="width:100%;" placeholder="https://generativelanguage.googleapis.com/v1beta/openai">
+            </div>
+            <div class="form-group" style="flex:1; min-width:160px;">
+              <label for="ai-input-model">모델명</label>
+              <input type="text" id="ai-input-model" style="width:100%;" placeholder="gemini-2.5-flash">
+            </div>
+          </div>
+          <div class="import-controls-grid" style="margin-bottom:0.8rem;">
+            <div class="form-group" style="flex:2; min-width:260px;">
+              <label for="ai-input-api-key">API 키</label>
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <input type="password" id="ai-input-api-key" style="flex:1;" placeholder="저장된 키 유지 (변경 시에만 입력)">
+                <span id="ai-key-hint-display" class="badge-pill" style="display:none;"></span>
+                <button id="btn-ai-delete-key" type="button" class="btn danger" style="display:none; padding:0.3rem 0.6rem; font-size:0.75rem;">키 삭제</button>
+              </div>
+            </div>
+            <div class="form-group" style="display:flex; align-items:center; gap:0.5rem; padding-top:1.5rem;">
+              <label style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+                <input type="checkbox" id="ai-chk-vision"> 이미지 분석 지원 (Vision)
+              </label>
+            </div>
+          </div>
+          <div style="font-size:0.8rem; color:var(--sub); line-height:1.4; background:var(--card-sub); padding:0.6rem 0.8rem; border-radius:0.3rem; margin-bottom:0.8rem;">
+            ℹ Gemini 무료 티어는 입력 내용이 서비스 개선에 사용될 수 있습니다. 작업일보의 인명·연락처 등 개인정보는 가급적 제외하고 붙여넣으세요. LM Studio는 사용자 PC 안에서만 안전하게 동작합니다.
+          </div>
+          <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+            <button id="btn-ai-save-cfg" type="button" class="btn primary">💾 설정 저장</button>
+            <button id="btn-ai-test-conn" type="button" class="btn faint">⚡ 연결 테스트</button>
+            <span id="ai-test-result-msg" style="font-size:0.82rem; font-weight:600;"></span>
+          </div>
+          <div id="ai-cfg-msg-banner" class="msg-banner" style="display:none; margin-top:0.6rem;"></div>
+        </div>
+      </div>
+
+      <!-- B. 작업일보 입력 패널 -->
+      <div class="ai-card">
+        <h2 style="font-size:1.05rem; font-weight:700; margin-top:0; margin-bottom:0.8rem;">📝 작업일보 입력 (텍스트 / 이미지)</h2>
+        <div style="display:grid; grid-template-columns:1fr; gap:1rem;">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
+              <label for="ai-text-input" style="font-weight:600; font-size:0.85rem;">텍스트 붙여넣기</label>
+              <span id="ai-char-counter" class="hint" style="font-size:0.75rem;">0 / 30,000자</span>
+            </div>
+            <textarea id="ai-text-input" style="width:100%; height:160px; font-family:inherit; font-size:0.85rem; padding:0.6rem; border:1px solid var(--line); border-radius:0.4rem; background:var(--bg); color:var(--ink); resize:vertical;" placeholder="카카오톡·메모장·한글 등에서 복사한 작업일보 텍스트를 여기에 붙여넣으세요.&#10;예) [금일작업] 1구역 기초 타설 120m3 (콘크리트공 4명, 펌프카 1대)&#10;    [명일작업] 2구역 거푸집 해체 (형틀공 6명)"></textarea>
+          </div>
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
+              <span style="font-weight:600; font-size:0.85rem;">사진 / 캡처 이미지 첨부 (클립보드 Ctrl+V / 드래그 / 파일)</span>
+              <span id="ai-vision-warn" class="badge-pill warn" style="display:none;">⚠ 현재 설정은 이미지 미지원</span>
+            </div>
+            <div id="ai-img-dropzone" class="ai-dropzone">
+              <input type="file" id="ai-img-file-input" accept="image/png,image/jpeg,image/webp" style="display:none;">
+              <div id="ai-img-placeholder">
+                <div style="font-size:1.5rem; margin-bottom:0.3rem;">📷</div>
+                <div style="font-weight:600; font-size:0.88rem; color:var(--ink);">작업일보 사진을 여기로 드래그하거나 클릭하여 선택하세요</div>
+                <div style="font-size:0.78rem; color:var(--sub); margin-top:0.2rem;">화면 캡처 후 이 창에서 바로 Ctrl+V 로 붙여넣을 수도 있습니다 (PNG, JPG, WebP)</div>
+              </div>
+              <div id="ai-img-preview-box" style="display:none; align-items:center; justify-content:center; gap:1rem;">
+                <img id="ai-img-thumb" style="max-height:120px; max-width:200px; border-radius:0.3rem; border:1px solid var(--line); object-fit:contain;" alt="미리보기">
+                <div>
+                  <div id="ai-img-info" style="font-size:0.82rem; font-weight:600; color:var(--ink); margin-bottom:0.4rem;"></div>
+                  <button id="btn-ai-remove-img" type="button" class="btn danger" style="padding:0.25rem 0.6rem; font-size:0.75rem;">🗑 이미지 제거</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:1.2rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+          <button id="btn-run-ai-parse" type="button" class="btn primary" style="font-size:0.95rem; font-weight:700; padding:0.6rem 1.4rem;">🤖 작업일보 AI 분석하기</button>
+          <span id="ai-parse-spinner" style="display:none; font-size:0.85rem; font-weight:600; color:var(--accent);">⏳ AI 분석 중입니다... 잠시만 기다려주세요 (최대 90초)</span>
+        </div>
+        <div id="ai-parse-msg-banner" class="msg-banner err" style="display:none; margin-top:0.8rem;"></div>
+      </div>
+
+      <!-- C. 분석 결과 미리보기 및 적용 패널 -->
+      <div id="ai-preview-area" class="ai-card" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.8rem; padding-bottom:0.6rem; border-bottom:1px solid var(--line);">
+          <h2 style="font-size:1.1rem; font-weight:700; margin:0;">📊 AI 분석 결과 검토 및 대시보드 적용</h2>
+          <div id="ai-result-meta" style="font-size:0.82rem; color:var(--sub);"></div>
+        </div>
+
+        <div id="ai-warnings-box" class="msg-banner warn" style="display:none; margin-bottom:1rem;">
+          <div style="font-weight:700; margin-bottom:0.3rem;">⚠ AI 분석 주의사항 / 확인 필요 항목:</div>
+          <ul id="ai-warnings-list" style="margin:0; padding-left:1.2rem;"></ul>
+        </div>
+
+        <div id="ai-date-conflict-box" class="msg-banner err" style="display:none; margin-bottom:1rem;">
+          ⚠ 오늘(금일)과 내일(명일) 카드의 적용 대상 날짜가 동일합니다. 서로 다른 날짜를 선택하거나 하나를 '적용 안 함'으로 설정하세요.
+        </div>
+
+        <!-- 오늘 / 내일 결과 카드 그리드 -->
+        <div class="ai-results-grid">
+          <!-- 오늘 카드 -->
+          <div id="ai-card-today" class="ai-date-card">
+            <div class="ai-date-card-header">
+              <div style="font-size:1rem; font-weight:700; color:var(--ink);">📅 금일 (오늘) 데이터</div>
+              <div style="display:flex; align-items:center; gap:0.4rem;">
+                <label for="ai-target-date-today" style="font-size:0.8rem; font-weight:600;">적용 대상:</label>
+                <select id="ai-target-date-today" class="ai-target-date-select"></select>
+              </div>
+            </div>
+            <div id="ai-today-existing-status" class="hint" style="margin-bottom:0.6rem; font-size:0.78rem;"></div>
+            <div id="ai-today-batch-bar" class="ai-batch-mode-bar"></div>
+            <div id="ai-today-sections-container"></div>
+          </div>
+
+          <!-- 내일 카드 -->
+          <div id="ai-card-tomorrow" class="ai-date-card">
+            <div class="ai-date-card-header">
+              <div style="font-size:1rem; font-weight:700; color:var(--ink);">📅 명일 (내일) 데이터</div>
+              <div style="display:flex; align-items:center; gap:0.4rem;">
+                <label for="ai-target-date-tomorrow" style="font-size:0.8rem; font-weight:600;">적용 대상:</label>
+                <select id="ai-target-date-tomorrow" class="ai-target-date-select"></select>
+              </div>
+            </div>
+            <div id="ai-tomorrow-existing-status" class="hint" style="margin-bottom:0.6rem; font-size:0.78rem;"></div>
+            <div id="ai-tomorrow-batch-bar" class="ai-batch-mode-bar"></div>
+            <div id="ai-tomorrow-sections-container"></div>
+          </div>
+        </div>
+
+        <!-- 적용 버튼 및 결과 영역 -->
+        <div style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--line); display:flex; flex-direction:column; gap:0.8rem; align-items:flex-end;">
+          <button id="btn-apply-ai-data" type="button" class="btn primary" style="font-size:1rem; font-weight:700; padding:0.65rem 1.8rem;">🚀 선택한 데이터 대시보드에 적용하기</button>
+          <div id="ai-apply-msg-banner" class="msg-banner" style="display:none; width:100%;"></div>
         </div>
       </div>
     </div>
@@ -1181,9 +1582,11 @@
       const viewImport = document.getElementById('view-import');
       const viewList = document.getElementById('view-list');
       const viewEditor = document.getElementById('view-editor');
+      const viewAi = document.getElementById('view-ai');
       const tabBar = document.getElementById('import-tab-bar');
       const tabImport = document.getElementById('tab-import');
       const tabTemplates = document.getElementById('tab-templates');
+      const tabAi = document.getElementById('tab-ai');
       const tplCards = document.getElementById('tpl-cards-container');
       const tplCountBadge = document.getElementById('tpl-count-badge');
       const saveMsgBanner = document.getElementById('save-msg-banner');
@@ -1201,24 +1604,33 @@
       function switchTab(mode) {
         try { sessionStorage.setItem(siteKey('import-active-tab'), mode); } catch (_) {}
         hideImportError();
+        tabImport.classList.remove('active');
+        tabTemplates.classList.remove('active');
+        if (tabAi) tabAi.classList.remove('active');
+
+        viewImport.style.display = 'none';
+        viewList.style.display = 'none';
+        viewEditor.style.display = 'none';
+        if (viewAi) viewAi.style.display = 'none';
+
         if (mode === 'import') {
           tabImport.classList.add('active');
-          tabTemplates.classList.remove('active');
           viewImport.style.display = 'block';
-          viewList.style.display = 'none';
-          viewEditor.style.display = 'none';
           updateImportTemplateOptions();
+        } else if (mode === 'ai') {
+          if (tabAi) tabAi.classList.add('active');
+          if (viewAi) viewAi.style.display = 'block';
+          loadAiSettings();
+          initAiDates();
         } else {
           tabTemplates.classList.add('active');
-          tabImport.classList.remove('active');
-          viewImport.style.display = 'none';
           viewList.style.display = 'block';
-          viewEditor.style.display = 'none';
           loadTemplateList();
         }
       }
       tabImport.onclick = () => switchTab('import');
       tabTemplates.onclick = () => switchTab('templates');
+      if (tabAi) tabAi.onclick = () => switchTab('ai');
 
       // 2. 양식 목록 로드 및 렌더링
       async function loadTemplateList() {
@@ -3288,6 +3700,1278 @@
       window.openEditor = openEditor;
       window.loadTemplateList = loadTemplateList;
 
+      // ==========================================
+      // WD-83: AI로 가져오기 구현부
+      // ==========================================
+      let aiConfigState = null;
+      let aiImageDataUrl = null;
+      let aiTodayDateStr = '';
+      let aiTomorrowDateStr = '';
+      let aiParsedData = null;
+      let aiPreviewRevs = {};
+
+      // DOM 엘리먼트 참조
+      const aiSettingsToggle = document.getElementById('ai-settings-toggle');
+      const aiSettingsBody = document.getElementById('ai-settings-body');
+      const aiSettingsBadge = document.getElementById('ai-settings-badge');
+      const btnToggleAiSettings = document.getElementById('btn-toggle-ai-settings');
+      const aiSelectProvider = document.getElementById('ai-select-provider');
+      const aiInputBaseUrl = document.getElementById('ai-input-base-url');
+      const aiInputModel = document.getElementById('ai-input-model');
+      const aiInputApiKey = document.getElementById('ai-input-api-key');
+      const aiKeyHintDisplay = document.getElementById('ai-key-hint-display');
+      const btnAiDeleteKey = document.getElementById('btn-ai-delete-key');
+      const aiChkVision = document.getElementById('ai-chk-vision');
+      const btnAiSaveCfg = document.getElementById('btn-ai-save-cfg');
+      const btnAiTestConn = document.getElementById('btn-ai-test-conn');
+      const aiTestResultMsg = document.getElementById('ai-test-result-msg');
+      const aiCfgMsgBanner = document.getElementById('ai-cfg-msg-banner');
+
+      const aiTextInput = document.getElementById('ai-text-input');
+      const aiCharCounter = document.getElementById('ai-char-counter');
+      const aiVisionWarn = document.getElementById('ai-vision-warn');
+      const aiImgDropzone = document.getElementById('ai-img-dropzone');
+      const aiImgFileInput = document.getElementById('ai-img-file-input');
+      const aiImgPlaceholder = document.getElementById('ai-img-placeholder');
+      const aiImgPreviewBox = document.getElementById('ai-img-preview-box');
+      const aiImgThumb = document.getElementById('ai-img-thumb');
+      const aiImgInfo = document.getElementById('ai-img-info');
+      const btnAiRemoveImg = document.getElementById('btn-ai-remove-img');
+      const btnRunAiParse = document.getElementById('btn-run-ai-parse');
+      const aiParseSpinner = document.getElementById('ai-parse-spinner');
+      const aiParseMsgBanner = document.getElementById('ai-parse-msg-banner');
+
+      const aiPreviewArea = document.getElementById('ai-preview-area');
+      const aiResultMeta = document.getElementById('ai-result-meta');
+      const aiWarningsBox = document.getElementById('ai-warnings-box');
+      const aiWarningsList = document.getElementById('ai-warnings-list');
+      const aiDateConflictBox = document.getElementById('ai-date-conflict-box');
+      const aiCardToday = document.getElementById('ai-card-today');
+      const aiCardTomorrow = document.getElementById('ai-card-tomorrow');
+      const aiTargetDateToday = document.getElementById('ai-target-date-today');
+      const aiTargetDateTomorrow = document.getElementById('ai-target-date-tomorrow');
+      const aiTodayExistingStatus = document.getElementById('ai-today-existing-status');
+      const aiTomorrowExistingStatus = document.getElementById('ai-tomorrow-existing-status');
+      const aiTodaySectionsContainer = document.getElementById('ai-today-sections-container');
+      const aiTomorrowSectionsContainer = document.getElementById('ai-tomorrow-sections-container');
+      const btnApplyAiData = document.getElementById('btn-apply-ai-data');
+      const aiApplyMsgBanner = document.getElementById('ai-apply-msg-banner');
+
+      // 1. 설정 접기/펼치기 토글
+      function setAiSettingsOpen(open) {
+        if (open) {
+          aiSettingsBody.style.display = 'block';
+          btnToggleAiSettings.textContent = '설정 접기 ▲';
+          localStorage.setItem(siteKey('ai_cfg_open'), '1');
+        } else {
+          aiSettingsBody.style.display = 'none';
+          btnToggleAiSettings.textContent = '설정 펼치기 ▼';
+          localStorage.setItem(siteKey('ai_cfg_open'), '0');
+        }
+      }
+      aiSettingsToggle.onclick = () => {
+        const isOpen = aiSettingsBody.style.display !== 'none';
+        setAiSettingsOpen(!isOpen);
+      };
+      btnToggleAiSettings.onclick = (e) => {
+        e.stopPropagation();
+        const isOpen = aiSettingsBody.style.display !== 'none';
+        setAiSettingsOpen(!isOpen);
+      };
+
+      // 2. 날짜 초기화
+      async function initAiDates() {
+        try {
+          const state = await api('/api/state');
+          aiTodayDateStr = (state && state.today) || new Date().toISOString().slice(0, 10);
+          aiTomorrowDateStr = (state && state.tomorrow) || '';
+          if (!aiTomorrowDateStr) {
+            const d = new Date(aiTodayDateStr);
+            d.setDate(d.getDate() + 1);
+            aiTomorrowDateStr = d.toISOString().slice(0, 10);
+          }
+        } catch (_) {
+          aiTodayDateStr = new Date().toISOString().slice(0, 10);
+          const d = new Date();
+          d.setDate(d.getDate() + 1);
+          aiTomorrowDateStr = d.toISOString().slice(0, 10);
+        }
+      }
+
+      // 3. AI 설정 로드 및 바인딩
+      async function loadAiSettings() {
+        try {
+          const res = await api('/api/ai-config');
+          aiConfigState = res;
+          aiSelectProvider.value = res.provider || 'gemini';
+          aiInputBaseUrl.value = res.baseUrl || '';
+          aiInputModel.value = res.model || '';
+          aiChkVision.checked = res.vision === true;
+          aiInputApiKey.value = '';
+
+          if (res.hasKey) {
+            aiKeyHintDisplay.textContent = `저장됨 ${res.keyHint}`;
+            aiKeyHintDisplay.style.display = 'inline-block';
+            btnAiDeleteKey.style.display = 'inline-block';
+            aiInputApiKey.placeholder = '저장된 키 유지 (변경 시에만 입력)';
+            aiSettingsBadge.textContent = `${res.provider} · 키 등록됨`;
+            aiSettingsBadge.className = 'badge-pill ok';
+          } else if (res.provider === 'lmstudio') {
+            aiKeyHintDisplay.style.display = 'none';
+            btnAiDeleteKey.style.display = 'none';
+            aiInputApiKey.placeholder = '로컬 모델 (키 불필요 가능)';
+            aiSettingsBadge.textContent = 'LM Studio (로컬)';
+            aiSettingsBadge.className = 'badge-pill ok';
+          } else {
+            aiKeyHintDisplay.style.display = 'none';
+            btnAiDeleteKey.style.display = 'none';
+            aiInputApiKey.placeholder = 'API 키 입력';
+            aiSettingsBadge.textContent = '설정 필요 (미완료)';
+            aiSettingsBadge.className = 'badge-pill warn';
+          }
+
+          // 비전 지원 여부 시각적 피드백
+          if (!res.vision) {
+            aiVisionWarn.style.display = 'inline-block';
+          } else {
+            aiVisionWarn.style.display = 'none';
+          }
+
+          // 기본 열림 상태 제어
+          const savedOpen = localStorage.getItem(siteKey('ai_cfg_open'));
+          if (savedOpen === '1' || (savedOpen === null && (!res.hasKey && res.provider !== 'lmstudio'))) {
+            setAiSettingsOpen(true);
+          } else if (savedOpen === '0') {
+            setAiSettingsOpen(false);
+          } else {
+            setAiSettingsOpen(false);
+          }
+        } catch (err) {
+          aiSettingsBadge.textContent = '설정 로드 실패';
+          aiSettingsBadge.className = 'badge-pill warn';
+        }
+      }
+
+      // 프리셋 변경 바인딩
+      aiSelectProvider.onchange = () => {
+        const prov = aiSelectProvider.value;
+        const presets = aiConfigState && aiConfigState.presets;
+        const p = presets && presets[prov];
+        if (p) {
+          aiInputBaseUrl.value = p.baseUrl || '';
+          aiInputModel.value = p.model || '';
+          aiChkVision.checked = p.vision === true;
+          if (!p.vision) {
+            aiVisionWarn.style.display = 'inline-block';
+          } else {
+            aiVisionWarn.style.display = 'none';
+          }
+        }
+      };
+
+      aiChkVision.onchange = () => {
+        if (!aiChkVision.checked) {
+          aiVisionWarn.style.display = 'inline-block';
+        } else {
+          aiVisionWarn.style.display = 'none';
+        }
+      };
+
+      // 설정 저장 버튼
+      btnAiSaveCfg.onclick = async () => {
+        aiCfgMsgBanner.style.display = 'none';
+        btnAiSaveCfg.disabled = true;
+        try {
+          const body = {
+            provider: aiSelectProvider.value,
+            baseUrl: aiInputBaseUrl.value.trim(),
+            model: aiInputModel.value.trim(),
+            vision: aiChkVision.checked,
+          };
+          const rawKey = aiInputApiKey.value.trim();
+          if (rawKey) {
+            body.apiKey = rawKey;
+          }
+          const res = await api('/api/ai-config', { method: 'PUT', body });
+          aiConfigState = res;
+          aiCfgMsgBanner.className = 'msg-banner ok';
+          aiCfgMsgBanner.textContent = '✓ AI 설정이 성공적으로 저장되었습니다.';
+          aiCfgMsgBanner.style.display = 'block';
+          await loadAiSettings();
+          setTimeout(() => { aiCfgMsgBanner.style.display = 'none'; }, 4000);
+        } catch (err) {
+          aiCfgMsgBanner.className = 'msg-banner err';
+          aiCfgMsgBanner.textContent = '⚠ 설정 저장 실패: ' + (err.message || '오류 발생');
+          aiCfgMsgBanner.style.display = 'block';
+        } finally {
+          btnAiSaveCfg.disabled = false;
+        }
+      };
+
+      // 키 삭제 버튼
+      btnAiDeleteKey.onclick = async () => {
+        if (!confirm('저장된 API 키를 삭제하시겠습니까?')) return;
+        btnAiDeleteKey.disabled = true;
+        try {
+          await api('/api/ai-config', {
+            method: 'PUT',
+            body: {
+              provider: aiSelectProvider.value,
+              baseUrl: aiInputBaseUrl.value.trim(),
+              model: aiInputModel.value.trim(),
+              vision: aiChkVision.checked,
+              apiKey: null,
+            },
+          });
+          await loadAiSettings();
+        } catch (err) {
+          alert('키 삭제 실패: ' + err.message);
+        } finally {
+          btnAiDeleteKey.disabled = false;
+        }
+      };
+
+      // 연결 테스트 버튼
+      btnAiTestConn.onclick = async () => {
+        btnAiTestConn.disabled = true;
+        aiTestResultMsg.textContent = '테스트 중…';
+        aiTestResultMsg.style.color = 'var(--sub)';
+        try {
+          const res = await api('/api/ai/test', { method: 'POST' });
+          aiTestResultMsg.textContent = `✓ 연결 성공 (${res.latencyMs || 0}ms)`;
+          aiTestResultMsg.style.color = 'var(--ok)';
+        } catch (err) {
+          const code = err.data && err.data.error;
+          let msg = err.data && err.data.message ? err.data.message : err.message;
+          if (code === 'ai_not_configured') msg = 'AI 설정을 먼저 저장하세요.';
+          else if (code === 'ai_auth') msg = 'API 키가 올바르지 않습니다.';
+          else if (code === 'ai_timeout' || code === 'ai_unreachable') msg = 'AI 서비스에 연결할 수 없습니다.';
+          aiTestResultMsg.textContent = '⚠ ' + msg;
+          aiTestResultMsg.style.color = 'var(--danger)';
+        } finally {
+          btnAiTestConn.disabled = false;
+        }
+      };
+
+      // 4. 입력 글자 수 카운터
+      aiTextInput.oninput = () => {
+        const len = aiTextInput.value.length;
+        aiCharCounter.textContent = `${len.toLocaleString()} / 30,000자`;
+        if (len > 30000) {
+          aiCharCounter.style.color = 'var(--danger)';
+        } else {
+          aiCharCounter.style.color = 'var(--sub)';
+        }
+      };
+
+      // 5. 이미지 축소 유틸리티
+      function resizeImageFileToDataUrl(file, maxDimension = 1600, quality = 0.85) {
+        return new Promise((resolve, reject) => {
+          if (!file || !file.type.startsWith('image/')) {
+            return reject(new Error('이미지 파일이 아닙니다.'));
+          }
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+              let w = img.width;
+              let h = img.height;
+              if (w > maxDimension || h > maxDimension) {
+                if (w > h) {
+                  h = Math.round((h * maxDimension) / w);
+                  w = maxDimension;
+                } else {
+                  w = Math.round((w * maxDimension) / h);
+                  h = maxDimension;
+                }
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, w, h);
+              try {
+                const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                resolve({ dataUrl, width: w, height: h });
+              } catch (err) {
+                reject(err);
+              }
+            };
+            img.onerror = () => reject(new Error('이미지를 디코딩할 수 없습니다.'));
+            img.src = e.target.result;
+          };
+          reader.onerror = () => reject(new Error('파일을 읽을 수 없습니다.'));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function handleImageFile(file) {
+        if (!file) return;
+        aiParseMsgBanner.style.display = 'none';
+        try {
+          const res = await resizeImageFileToDataUrl(file);
+          aiImageDataUrl = res.dataUrl;
+          aiImgThumb.src = aiImageDataUrl;
+          aiImgInfo.textContent = `${file.name || '이미지'} (${res.width}×${res.height})`;
+          aiImgPlaceholder.style.display = 'none';
+          aiImgPreviewBox.style.display = 'flex';
+        } catch (err) {
+          aiParseMsgBanner.className = 'msg-banner err';
+          aiParseMsgBanner.textContent = '⚠ 이미지 처리 오류: ' + (err.message || '지원되지 않는 형식입니다.');
+          aiParseMsgBanner.style.display = 'block';
+        }
+      }
+
+      function clearAttachedImage() {
+        aiImageDataUrl = null;
+        aiImgThumb.removeAttribute('src');
+        aiImgInfo.textContent = '';
+        aiImgPlaceholder.style.display = 'block';
+        aiImgPreviewBox.style.display = 'none';
+        aiImgFileInput.value = '';
+      }
+      btnAiRemoveImg.onclick = clearAttachedImage;
+
+      aiImgDropzone.onclick = (e) => {
+        if (e.target !== btnAiRemoveImg && !aiImageDataUrl) {
+          aiImgFileInput.click();
+        }
+      };
+      aiImgFileInput.onchange = () => {
+        if (aiImgFileInput.files && aiImgFileInput.files[0]) {
+          handleImageFile(aiImgFileInput.files[0]);
+        }
+      };
+
+      aiImgDropzone.ondragover = (e) => {
+        e.preventDefault();
+        aiImgDropzone.classList.add('dragover');
+      };
+      aiImgDropzone.ondragleave = () => {
+        aiImgDropzone.classList.remove('dragover');
+      };
+      aiImgDropzone.ondrop = (e) => {
+        e.preventDefault();
+        aiImgDropzone.classList.remove('dragover');
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+          const file = e.dataTransfer.files[0];
+          if (!file.type.startsWith('image/')) {
+            aiParseMsgBanner.className = 'msg-banner warn';
+            aiParseMsgBanner.textContent = '⚠ 이미지 파일(PNG, JPEG, WebP)만 첨부할 수 있습니다.';
+            aiParseMsgBanner.style.display = 'block';
+            return;
+          }
+          handleImageFile(file);
+        }
+      };
+
+      // 클립보드 붙여넣기 (Ctrl+V) 리스너
+      window.addEventListener('paste', (e) => {
+        if (viewAi.style.display === 'none') return;
+        const items = e.clipboardData && e.clipboardData.items;
+        if (!items) return;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf('image') !== -1) {
+            const blob = items[i].getAsFile();
+            if (blob) {
+              handleImageFile(blob);
+              break;
+            }
+          }
+        }
+      });
+
+      // 6. AI 분석 실행
+      btnRunAiParse.onclick = async () => {
+        aiParseMsgBanner.style.display = 'none';
+        const text = aiTextInput.value.trim();
+        const image = aiImageDataUrl;
+
+        if (!text && !image) {
+          aiParseMsgBanner.className = 'msg-banner err';
+          aiParseMsgBanner.textContent = '⚠ 분석할 작업일보 텍스트를 입력하거나 사진 이미지를 첨부해 주세요.';
+          aiParseMsgBanner.style.display = 'block';
+          return;
+        }
+
+        if (image && aiConfigState && !aiConfigState.vision) {
+          aiParseMsgBanner.className = 'msg-banner err';
+          aiParseMsgBanner.textContent = '⚠ 현재 서비스 설정은 이미지를 지원하지 않습니다. (설정에서 이미지 지원을 켜거나 Gemini를 사용하세요)';
+          aiParseMsgBanner.style.display = 'block';
+          return;
+        }
+
+        // 외부 서비스 1회 확인 동의창
+        const isLocal = aiConfigState && (aiConfigState.provider === 'lmstudio' || (aiConfigState.baseUrl && /localhost|127\.0\.0\.1/i.test(aiConfigState.baseUrl)));
+        if (!isLocal && !localStorage.getItem(siteKey('ai_external_agreed'))) {
+          if (!confirm('외부 AI 서비스로 작업일보 내용이 전송됩니다. 계속 진행하시겠습니까? (이 안내는 최초 1회만 표시됩니다)')) {
+            return;
+          }
+          localStorage.setItem(siteKey('ai_external_agreed'), '1');
+        }
+
+        // 기존 분석 결과 덮어쓰기 확인
+        if (aiParsedData && !confirm('기존 분석 결과가 있습니다. 새로 분석하여 덮어쓰시겠습니까?')) {
+          return;
+        }
+
+        btnRunAiParse.disabled = true;
+        aiParseSpinner.style.display = 'inline-block';
+        try {
+          if (!aiTodayDateStr) await initAiDates();
+          const res = await api('/api/ai/parse', {
+            method: 'POST',
+            body: { text, image, todayDate: aiTodayDateStr },
+          });
+          renderAiParsedResults(res);
+        } catch (err) {
+          const code = err.data && err.data.error;
+          let msg = err.data && err.data.message ? err.data.message : err.message;
+          if (code === 'ai_not_configured') msg = 'AI 설정을 먼저 저장하세요.';
+          else if (code === 'ai_auth') msg = 'API 키가 올바르지 않습니다.';
+          else if (code === 'ai_rate_limited') msg = '요청 한도 초과, 잠시 후 다시 시도하세요.';
+          else if (code === 'ai_timeout' || code === 'ai_unreachable') msg = 'AI 서비스에 연결할 수 없습니다(LM Studio라면 실행 여부·주소 확인).';
+          else if (code === 'ai_bad_output') msg = 'AI 응답을 해석하지 못했습니다. 다시 시도하거나 다른 모델을 사용하세요.';
+          else if (code === 'rate_limited') msg = '요청 한도 초과, 잠시 후 다시 시도하세요 (분당 최대 6회).';
+          else if (code === 'vision_unsupported') msg = '현재 설정된 AI 모델은 이미지 분석을 지원하지 않습니다.';
+          aiParseMsgBanner.className = 'msg-banner err';
+          aiParseMsgBanner.textContent = '⚠ 분석 오류: ' + msg;
+          aiParseMsgBanner.style.display = 'block';
+        } finally {
+          btnRunAiParse.disabled = false;
+          aiParseSpinner.style.display = 'none';
+        }
+      };
+
+      // 7. 분석 결과 렌더링
+      function renderAiParsedResults(rawResponse) {
+        const data = (rawResponse && rawResponse.data) ? rawResponse.data : (rawResponse || {});
+        aiParsedData = data;
+        window.aiParsedResult = data;
+        aiPreviewArea.style.display = 'block';
+        aiApplyMsgBanner.style.display = 'none';
+
+        // 메타 정보
+        aiResultMeta.textContent = `모델: ${rawResponse.model || data.model || 'AI'} · 분석 완료`;
+
+        // warnings 렌더링
+        aiWarningsList.replaceChildren();
+        if (Array.isArray(data.warnings) && data.warnings.length > 0) {
+          data.warnings.forEach((w) => {
+            aiWarningsList.appendChild(el('li', { text: String(w) }));
+          });
+          aiWarningsBox.style.display = 'block';
+        } else {
+          aiWarningsBox.style.display = 'none';
+        }
+
+        // 날짜 옵션 채우기
+        function fillDateSelect(sel, defaultVal) {
+          sel.replaceChildren();
+          sel.appendChild(el('option', { value: aiTodayDateStr, text: `오늘 (${aiTodayDateStr})` }));
+          sel.appendChild(el('option', { value: aiTomorrowDateStr, text: `내일 (${aiTomorrowDateStr})` }));
+          sel.appendChild(el('option', { value: 'none', text: '적용 안 함' }));
+          sel.value = defaultVal;
+          sel.onchange = () => {
+            validateDateConflict();
+            updateExistingStatus();
+          };
+        }
+
+        fillDateSelect(aiTargetDateToday, data.today ? aiTodayDateStr : 'none');
+        fillDateSelect(aiTargetDateTomorrow, data.tomorrow ? aiTomorrowDateStr : 'none');
+
+        // 카드 렌더링
+        renderDayCard('today', data.today, aiTodaySectionsContainer, aiCardToday);
+        renderDayCard('tomorrow', data.tomorrow, aiTomorrowSectionsContainer, aiCardTomorrow);
+
+        validateDateConflict();
+        updateExistingStatus();
+
+        // 뷰 스크롤 이동
+        aiPreviewArea.scrollIntoView({ behavior: 'smooth' });
+      }
+
+      const AI_SECTIONS = ['work', 'crew', 'equip', 'material', 'notes'];
+      let aiCachedState = null;
+
+      function getExistingSectionCount(targetDate, secKey) {
+        if (!aiCachedState || targetDate === 'none') return 0;
+        let day = null;
+        if (targetDate === aiCachedState.today) day = aiCachedState.todayData;
+        else if (targetDate === aiCachedState.tomorrow) day = aiCachedState.tomorrowData;
+        else if (aiCachedState.days) day = aiCachedState.days[targetDate];
+        if (!day || !Array.isArray(day[secKey])) return 0;
+        return day[secKey].length;
+      }
+
+      function countCheckedItemsInSection(cardKey, secKey) {
+        const card = document.getElementById(`ai-card-${cardKey}`);
+        if (!card) return 0;
+        const secBox = card.querySelector(`[data-section="${secKey}"]`);
+        if (!secBox) return 0;
+        if (secKey === 'work') {
+          return secBox.querySelectorAll('.chk-work-node:checked').length;
+        }
+        return secBox.querySelectorAll('tbody input[type="checkbox"]:checked, .ai-item-row input[type="checkbox"]:checked').length;
+      }
+
+      function updateSectionCalcHint(cardKey, secKey) {
+        const card = document.getElementById(`ai-card-${cardKey}`);
+        if (!card) return;
+        const secBox = card.querySelector(`[data-section="${secKey}"]`);
+        if (!secBox) return;
+        const hintEl = secBox.querySelector('.ai-calc-hint');
+        if (!hintEl) return;
+
+        const targetDateSelect = cardKey === 'today' ? aiTargetDateToday : aiTargetDateTomorrow;
+        const targetDate = targetDateSelect ? targetDateSelect.value : 'none';
+
+        if (targetDate === 'none') {
+          hintEl.textContent = '적용 안 함';
+          hintEl.style.color = 'var(--sub)';
+          hintEl.style.fontWeight = 'normal';
+          return;
+        }
+
+        const N = getExistingSectionCount(targetDate, secKey);
+        const M = countCheckedItemsInSection(cardKey, secKey);
+        const mode = getSectionMode(cardKey, secKey);
+
+        if (mode === 'append') {
+          hintEl.textContent = `기존 ${N}건 + 신규 ${M}건 = 총 ${N + M}건`;
+          hintEl.style.color = 'var(--sub)';
+          hintEl.style.fontWeight = 'normal';
+        } else {
+          if (M > 0) {
+            hintEl.textContent = `기존 ${N}건 삭제 → 신규 ${M}건만 남음`;
+            hintEl.style.color = 'var(--danger, #ef4444)';
+            hintEl.style.fontWeight = '700';
+          } else {
+            hintEl.textContent = `체크 0건 (기존 ${N}건 보존·삭제 안 함)`;
+            hintEl.style.color = 'var(--sub)';
+            hintEl.style.fontWeight = 'normal';
+          }
+        }
+      }
+
+      function updateCardBatchModeUI(cardKey) {
+        const bar = document.getElementById(`ai-${cardKey}-batch-bar`);
+        if (!bar) return;
+        const targetDateSelect = cardKey === 'today' ? aiTargetDateToday : aiTargetDateTomorrow;
+        const targetDate = targetDateSelect ? targetDateSelect.value : 'none';
+
+        const btnAppend = bar.querySelector('.btn-batch-append');
+        const btnReplace = bar.querySelector('.btn-batch-replace');
+        const statusLabel = bar.querySelector('.ai-batch-status-label');
+
+        if (targetDate === 'none') {
+          bar.classList.add('is-disabled');
+          if (btnAppend) btnAppend.disabled = true;
+          if (btnReplace) btnReplace.disabled = true;
+          if (statusLabel) statusLabel.textContent = '(적용 안 함)';
+          return;
+        }
+
+        bar.classList.remove('is-disabled');
+        if (btnAppend) btnAppend.disabled = false;
+        if (btnReplace) btnReplace.disabled = false;
+
+        const renderedSecs = AI_SECTIONS.filter((s) => {
+          return !!document.querySelector(`#ai-card-${cardKey} [data-section="${s}"]`);
+        });
+        if (renderedSecs.length === 0) return;
+
+        const modes = renderedSecs.map((s) => getSectionMode(cardKey, s));
+        const allAppend = modes.every((m) => m === 'append');
+        const allReplace = modes.every((m) => m === 'replace');
+
+        if (btnAppend) {
+          btnAppend.classList.toggle('active-append', allAppend);
+          btnAppend.classList.toggle('faint', !allAppend);
+        }
+        if (btnReplace) {
+          btnReplace.classList.toggle('active-replace', allReplace);
+          btnReplace.classList.toggle('faint', !allReplace);
+        }
+        if (statusLabel) {
+          if (allAppend) statusLabel.textContent = '';
+          else if (allReplace) statusLabel.textContent = '';
+          else statusLabel.textContent = '(구역별 개별 설정 / 혼합)';
+        }
+      }
+
+      function setCardBatchMode(cardKey, targetMode) {
+        AI_SECTIONS.forEach((secKey) => {
+          const rad = document.querySelector(`input[name="ai-mode-${cardKey}-${secKey}"][value="${targetMode}"]`);
+          if (rad) {
+            rad.checked = true;
+            updateSectionCalcHint(cardKey, secKey);
+          }
+        });
+        updateCardBatchModeUI(cardKey);
+      }
+
+      function renderBatchModeBar(cardKey) {
+        const bar = document.getElementById(`ai-${cardKey}-batch-bar`);
+        if (!bar) return;
+        bar.replaceChildren();
+
+        const title = el('span', {
+          style: 'font-size:0.8rem; font-weight:700; color:var(--ink); margin-right:0.2rem;',
+          text: '⚡ 일괄 설정:'
+        });
+
+        const btnAppend = el('button', {
+          type: 'button',
+          class: 'ai-batch-btn btn-batch-append active-append',
+          'data-card': cardKey,
+          'data-mode': 'append',
+          text: '➕ 기존 내용에 추가'
+        });
+
+        const btnReplace = el('button', {
+          type: 'button',
+          class: 'ai-batch-btn btn-batch-replace faint',
+          'data-card': cardKey,
+          'data-mode': 'replace',
+          text: '♻ 기존 삭제 후 덮어쓰기'
+        });
+
+        const statusLabel = el('span', {
+          class: 'ai-batch-status-label',
+          style: 'font-size:0.75rem; color:var(--sub); margin-left:auto;'
+        });
+
+        btnAppend.onclick = () => setCardBatchMode(cardKey, 'append');
+        btnReplace.onclick = () => setCardBatchMode(cardKey, 'replace');
+
+        bar.append(title, btnAppend, btnReplace, statusLabel);
+      }
+
+      function updateAllCardCalcHints() {
+        ['today', 'tomorrow'].forEach((ck) => {
+          AI_SECTIONS.forEach((sk) => {
+            updateSectionCalcHint(ck, sk);
+          });
+          updateCardBatchModeUI(ck);
+        });
+      }
+
+      async function updateExistingStatus() {
+        // 기존 상태 안내 갱신
+        const tVal = aiTargetDateToday.value;
+        const tmVal = aiTargetDateTomorrow.value;
+        try {
+          const st = await api('/api/state');
+          aiCachedState = st;
+          if (st.today) aiPreviewRevs[st.today] = st.todayRev || '';
+          if (st.tomorrow) aiPreviewRevs[st.tomorrow] = st.tomorrowRev || '';
+
+          function renderCount(dt, targetEl) {
+            if (dt === 'none') {
+              targetEl.textContent = '적용 안 함';
+              return;
+            }
+            let day = null;
+            if (dt === st.today) day = st.todayData;
+            else if (dt === st.tomorrow) day = st.tomorrowData;
+            else day = (st.days && st.days[dt]) || null;
+
+            if (day) {
+              const wLen = (day.work || []).length;
+              const cLen = (day.crew || []).length;
+              const eLen = (day.equip || []).length;
+              const mLen = (day.material || []).length;
+              const nLen = (day.notes || []).length;
+              const total = wLen + cLen + eLen + mLen + nLen;
+              targetEl.textContent = `대상 날짜: ${dt} (기존 등록: ${total}건 - 작업 ${wLen}, 인원 ${cLen}, 장비 ${eLen})`;
+            } else {
+              targetEl.textContent = `대상 날짜: ${dt} (기존 등록: 0건)`;
+            }
+          }
+          renderCount(tVal, aiTodayExistingStatus);
+          renderCount(tmVal, aiTomorrowExistingStatus);
+        } catch {
+          aiTodayExistingStatus.textContent = tVal !== 'none' ? `대상 날짜: ${tVal}` : '적용 안 함';
+          aiTomorrowExistingStatus.textContent = tmVal !== 'none' ? `대상 날짜: ${tmVal}` : '적용 안 함';
+        }
+        updateAllCardCalcHints();
+      }
+
+      function validateDateConflict() {
+        const d1 = aiTargetDateToday.value;
+        const d2 = aiTargetDateTomorrow.value;
+        if (d1 !== 'none' && d2 !== 'none' && d1 === d2) {
+          aiDateConflictBox.style.display = 'block';
+          btnApplyAiData.disabled = true;
+        } else {
+          aiDateConflictBox.style.display = 'none';
+          btnApplyAiData.disabled = false;
+        }
+      }
+
+      // 카드 내부 구역별(인원, 장비 등) 렌더링
+      function renderDayCard(cardKey, dayData, container, cardElement) {
+        container.replaceChildren();
+        if (!dayData) {
+          cardElement.classList.add('empty');
+          container.appendChild(el('div', {
+            style: 'padding:1.5rem 0; text-align:center; color:var(--sub); font-size:0.85rem;',
+            text: '인식된 작업일보 내용이 없습니다.',
+          }));
+          const batchBar = document.getElementById(`ai-${cardKey}-batch-bar`);
+          if (batchBar) batchBar.style.display = 'none';
+          return;
+        }
+        cardElement.classList.remove('empty');
+        const batchBar = document.getElementById(`ai-${cardKey}-batch-bar`);
+        if (batchBar) {
+          batchBar.style.display = 'flex';
+          renderBatchModeBar(cardKey);
+        }
+
+        // 구역 1: 작업 현황 (work)
+        renderWorkSection(cardKey, dayData.work || [], container);
+
+        // 구역 2: 인원 투입 현황 (crew)
+        renderTableSection(cardKey, 'crew', '👷 인원 투입', dayData.crew || [], container, [
+          { key: 'job', label: '직종', width: '35%' },
+          { key: 'count', label: '인원', width: '20%' },
+          { key: 'loc', label: '위치/내용', width: '45%' },
+        ]);
+
+        // 구역 3: 장비 투입 현황 (equip)
+        renderTableSection(cardKey, 'equip', '🚜 장비 투입', dayData.equip || [], container, [
+          { key: 'name', label: '장비명', width: '35%' },
+          { key: 'qty', label: '대수', width: '20%' },
+          { key: 'spec', label: '규격/위치', width: '45%' },
+        ]);
+
+        // 구역 4: 자재 투입 현황 (material)
+        renderTableSection(cardKey, 'material', '🧱 자재 투입', dayData.material || [], container, [
+          { key: 'kind', label: '품명', width: '30%' },
+          { key: 'qty', label: '수량', width: '25%' },
+          { key: 'spec', label: '규격/용도', width: '45%' },
+        ]);
+
+        // 구역 5: 특이사항 (notes)
+        renderNotesSection(cardKey, dayData.notes || [], container);
+
+        updateCardBatchModeUI(cardKey);
+      }
+
+      // 표 형태 섹션 (crew, equip, material)
+      function renderTableSection(cardKey, secKey, title, items, container, cols) {
+        if (!items || items.length === 0) return;
+        const secBox = el('div', { class: 'ai-sec-card', 'data-section': secKey, style: 'background:var(--card-sub); border:1px solid var(--line); border-radius:0.4rem; padding:0.6rem; margin-bottom:0.6rem;' });
+
+        // 헤더
+        const header = el('div', { style: 'display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; flex-wrap:wrap; gap:0.4rem;' });
+        header.appendChild(el('div', { style: 'font-weight:700; font-size:0.85rem; color:var(--ink);', text: `${title} (${items.length}건)` }));
+
+        const ctrl = el('div', { style: 'display:flex; align-items:center; gap:0.6rem; font-size:0.75rem; flex-wrap:wrap;' });
+        const rName = `ai-mode-${cardKey}-${secKey}`;
+        const lblAppend = el('label', { style: 'cursor:pointer; display:flex; align-items:center; gap:0.2rem;' });
+        const radioAppend = el('input', { type: 'radio', name: rName, value: 'append', checked: 'true' });
+        lblAppend.append(radioAppend, ' 추가');
+
+        const lblReplace = el('label', { style: 'cursor:pointer; display:flex; align-items:center; gap:0.2rem;' });
+        const radioReplace = el('input', { type: 'radio', name: rName, value: 'replace' });
+        lblReplace.append(radioReplace, ' 덮어쓰기(기존 삭제)');
+
+        const calcHint = el('div', { class: 'ai-calc-hint', 'data-sec': secKey });
+
+        radioAppend.onchange = () => {
+          updateSectionCalcHint(cardKey, secKey);
+          updateCardBatchModeUI(cardKey);
+        };
+        radioReplace.onchange = () => {
+          updateSectionCalcHint(cardKey, secKey);
+          updateCardBatchModeUI(cardKey);
+        };
+
+        const btnToggleAll = el('button', { type: 'button', class: 'btn faint', style: 'padding:0.15rem 0.4rem; font-size:0.7rem;', text: '전체 해제' });
+
+        ctrl.append(lblAppend, lblReplace, calcHint, btnToggleAll);
+        header.appendChild(ctrl);
+        secBox.appendChild(header);
+
+        // 테이블
+        const table = el('table', { class: 'import-preview-table', style: 'background:var(--card);' });
+        const tbody = el('tbody');
+
+        items.forEach((item, idx) => {
+          const tr = el('tr', { class: 'ai-item-row', 'data-item-index': String(idx) });
+          const tdChk = el('td', { style: 'width:28px; text-align:center;' });
+          const chk = el('input', { type: 'checkbox', class: `chk-${cardKey}-${secKey}`, checked: 'true' });
+          item.__chk = chk;
+          chk.onchange = () => {
+            updateSectionCalcHint(cardKey, secKey);
+          };
+          tdChk.appendChild(chk);
+          tr.appendChild(tdChk);
+
+          cols.forEach((col) => {
+            const td = el('td', { style: `width:${col.width};` });
+            const inp = el('input', {
+              type: 'text',
+              value: String(item[col.key] || ''),
+              style: 'width:100%; box-sizing:border-box;',
+              oninput: (e) => { item[col.key] = e.target.value; },
+            });
+            td.appendChild(inp);
+            tr.appendChild(td);
+          });
+
+          // 행 삭제 버튼
+          const tdDel = el('td', { style: 'width:24px; text-align:center;' });
+          const btnDel = el('button', {
+            type: 'button',
+            class: 'btn faint btn-delete-row',
+            style: 'padding:0.1rem 0.3rem; font-size:0.7rem; color:var(--danger); border:none; background:transparent;',
+            text: '✕',
+            onclick: () => {
+              tr.remove();
+              item.__deleted = true;
+              updateSectionCalcHint(cardKey, secKey);
+            },
+          });
+          tdDel.appendChild(btnDel);
+          tr.appendChild(tdDel);
+
+          tbody.appendChild(tr);
+        });
+
+        btnToggleAll.onclick = () => {
+          const chks = tbody.querySelectorAll(`input.chk-${cardKey}-${secKey}`);
+          const anyChecked = Array.from(chks).some((c) => c.checked);
+          chks.forEach((c) => { c.checked = !anyChecked; });
+          btnToggleAll.textContent = anyChecked ? '전체 선택' : '전체 해제';
+          updateSectionCalcHint(cardKey, secKey);
+        };
+
+        table.appendChild(tbody);
+        secBox.appendChild(table);
+        container.appendChild(secBox);
+      }
+
+      // 작업 현황 계층 트리 렌더링
+      function renderWorkSection(cardKey, workItems, container) {
+        if (!workItems || workItems.length === 0) return;
+        const secBox = el('div', { class: 'ai-sec-card', 'data-section': 'work', style: 'background:var(--card-sub); border:1px solid var(--line); border-radius:0.4rem; padding:0.6rem; margin-bottom:0.6rem;' });
+
+        const header = el('div', { style: 'display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; flex-wrap:wrap; gap:0.4rem;' });
+        header.appendChild(el('div', { style: 'font-weight:700; font-size:0.85rem; color:var(--ink);', text: `📋 작업 현황 (${workItems.length}건)` }));
+
+        const ctrl = el('div', { style: 'display:flex; align-items:center; gap:0.6rem; font-size:0.75rem; flex-wrap:wrap;' });
+        const rName = `ai-mode-${cardKey}-work`;
+        const lblAppend = el('label', { style: 'cursor:pointer; display:flex; align-items:center; gap:0.2rem;' });
+        const radioAppend = el('input', { type: 'radio', name: rName, value: 'append', checked: 'true' });
+        lblAppend.append(radioAppend, ' 추가');
+
+        const lblReplace = el('label', { style: 'cursor:pointer; display:flex; align-items:center; gap:0.2rem;' });
+        const radioReplace = el('input', { type: 'radio', name: rName, value: 'replace' });
+        lblReplace.append(radioReplace, ' 덮어쓰기(기존 삭제)');
+
+        const calcHint = el('div', { class: 'ai-calc-hint', 'data-sec': 'work' });
+
+        radioAppend.onchange = () => {
+          updateSectionCalcHint(cardKey, 'work');
+          updateCardBatchModeUI(cardKey);
+        };
+        radioReplace.onchange = () => {
+          updateSectionCalcHint(cardKey, 'work');
+          updateCardBatchModeUI(cardKey);
+        };
+
+        ctrl.append(lblAppend, lblReplace, calcHint);
+        header.appendChild(ctrl);
+        secBox.appendChild(header);
+
+        const treeBox = el('div', { style: 'background:var(--card); border:1px solid var(--line); border-radius:0.3rem; padding:0.4rem;' });
+
+        function buildWorkNode(w) {
+          const row = el('div', { class: 'ai-item-row', style: 'margin:0.25rem 0;' });
+          const line = el('div', { style: 'display:flex; align-items:center; gap:0.4rem;' });
+          const chk = el('input', { type: 'checkbox', class: 'chk-work-node', checked: 'true' });
+          w.__chk = chk;
+          chk.onchange = () => {
+            updateSectionCalcHint(cardKey, 'work');
+          };
+
+          const txtInput = el('input', {
+            type: 'text',
+            class: 'input-work-t',
+            value: w.t || '',
+            style: 'flex:1;',
+            oninput: (e) => { w.t = e.target.value; },
+          });
+
+          const btnDel = el('button', {
+            type: 'button',
+            class: 'btn faint btn-delete-row',
+            style: 'padding:0.1rem 0.3rem; font-size:0.7rem; color:var(--danger); border:none; background:transparent;',
+            text: '✕',
+            onclick: () => {
+              row.remove();
+              w.__deleted = true;
+              updateSectionCalcHint(cardKey, 'work');
+            },
+          });
+
+          line.append(chk, txtInput, btnDel);
+          row.appendChild(line);
+
+          if (Array.isArray(w.c) && w.c.length > 0) {
+            const childContainer = el('div', { class: 'ai-item-tree' });
+            w.c.forEach((cw) => {
+              childContainer.appendChild(buildWorkNode(cw));
+            });
+            row.appendChild(childContainer);
+
+            // 부모 체크 해제 시 자식 일괄 해제
+            chk.onchange = () => {
+              const childChks = childContainer.querySelectorAll('input[type="checkbox"]');
+              childChks.forEach((cc) => { cc.checked = chk.checked; });
+              updateSectionCalcHint(cardKey, 'work');
+            };
+          }
+          return row;
+        }
+
+        workItems.forEach((w) => {
+          treeBox.appendChild(buildWorkNode(w));
+        });
+
+        secBox.appendChild(treeBox);
+        container.appendChild(secBox);
+      }
+
+      // 특이사항 렌더링
+      function renderNotesSection(cardKey, notes, container) {
+        if (!notes || notes.length === 0) return;
+        const secBox = el('div', { class: 'ai-sec-card', 'data-section': 'notes', style: 'background:var(--card-sub); border:1px solid var(--line); border-radius:0.4rem; padding:0.6rem; margin-bottom:0.6rem;' });
+
+        const header = el('div', { style: 'display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; flex-wrap:wrap; gap:0.4rem;' });
+        header.appendChild(el('div', { style: 'font-weight:700; font-size:0.85rem; color:var(--ink);', text: `📝 특이사항 (${notes.length}건)` }));
+
+        const ctrl = el('div', { style: 'display:flex; align-items:center; gap:0.6rem; font-size:0.75rem; flex-wrap:wrap;' });
+        const rName = `ai-mode-${cardKey}-notes`;
+        const lblAppend = el('label', { style: 'cursor:pointer; display:flex; align-items:center; gap:0.2rem;' });
+        const radioAppend = el('input', { type: 'radio', name: rName, value: 'append', checked: 'true' });
+        lblAppend.append(radioAppend, ' 추가');
+
+        const lblReplace = el('label', { style: 'cursor:pointer; display:flex; align-items:center; gap:0.2rem;' });
+        const radioReplace = el('input', { type: 'radio', name: rName, value: 'replace' });
+        lblReplace.append(radioReplace, ' 덮어쓰기(기존 삭제)');
+
+        const calcHint = el('div', { class: 'ai-calc-hint', 'data-sec': 'notes' });
+
+        radioAppend.onchange = () => {
+          updateSectionCalcHint(cardKey, 'notes');
+          updateCardBatchModeUI(cardKey);
+        };
+        radioReplace.onchange = () => {
+          updateSectionCalcHint(cardKey, 'notes');
+          updateCardBatchModeUI(cardKey);
+        };
+
+        ctrl.append(lblAppend, lblReplace, calcHint);
+        header.appendChild(ctrl);
+        secBox.appendChild(header);
+
+        const list = el('div', { style: 'background:var(--card); border:1px solid var(--line); border-radius:0.3rem; padding:0.3rem;' });
+        notes.forEach((n) => {
+          const row = el('div', { class: 'ai-item-row' });
+          const chk = el('input', { type: 'checkbox', checked: 'true' });
+          n.__chk = chk;
+          chk.onchange = () => {
+            updateSectionCalcHint(cardKey, 'notes');
+          };
+
+          const txt = el('input', {
+            type: 'text',
+            value: n.t || '',
+            style: 'flex:1;',
+            oninput: (e) => { n.t = e.target.value; },
+          });
+
+          const btnDel = el('button', {
+            type: 'button',
+            class: 'btn faint',
+            style: 'padding:0.1rem 0.3rem; font-size:0.7rem; color:var(--danger); border:none; background:transparent;',
+            text: '✕',
+            onclick: () => {
+              row.remove();
+              n.__deleted = true;
+              updateSectionCalcHint(cardKey, 'notes');
+            },
+          });
+
+          row.append(chk, txt, btnDel);
+          list.appendChild(row);
+        });
+
+        secBox.appendChild(list);
+        container.appendChild(secBox);
+      }
+
+      // 8. 데이터 추출 및 대시보드 적용
+      function extractCheckedItems(cardKey, dayData) {
+        if (!dayData) return null;
+        const res = { work: [], crew: [], equip: [], material: [], notes: [] };
+
+        function cleanObj(obj) {
+          const c = { ...obj };
+          delete c.__chk;
+          delete c.__deleted;
+          return c;
+        }
+
+        // crew
+        if (Array.isArray(dayData.crew)) {
+          const trs = aiPreviewArea.querySelectorAll(`#ai-card-${cardKey} [data-section="crew"] tr[data-item-index]`);
+          trs.forEach((tr) => {
+            const idx = parseInt(tr.getAttribute('data-item-index'), 10);
+            const chk = tr.querySelector(`input.chk-${cardKey}-crew`);
+            if (chk && chk.checked && dayData.crew[idx] && !dayData.crew[idx].__deleted) {
+              res.crew.push(cleanObj(dayData.crew[idx]));
+            }
+          });
+        }
+        // equip
+        if (Array.isArray(dayData.equip)) {
+          const trs = aiPreviewArea.querySelectorAll(`#ai-card-${cardKey} [data-section="equip"] tr[data-item-index]`);
+          trs.forEach((tr) => {
+            const idx = parseInt(tr.getAttribute('data-item-index'), 10);
+            const chk = tr.querySelector(`input.chk-${cardKey}-equip`);
+            if (chk && chk.checked && dayData.equip[idx] && !dayData.equip[idx].__deleted) {
+              res.equip.push(cleanObj(dayData.equip[idx]));
+            }
+          });
+        }
+        // material
+        if (Array.isArray(dayData.material)) {
+          const trs = aiPreviewArea.querySelectorAll(`#ai-card-${cardKey} [data-section="material"] tr[data-item-index]`);
+          trs.forEach((tr) => {
+            const idx = parseInt(tr.getAttribute('data-item-index'), 10);
+            const chk = tr.querySelector(`input.chk-${cardKey}-material`);
+            if (chk && chk.checked && dayData.material[idx] && !dayData.material[idx].__deleted) {
+              res.material.push(cleanObj(dayData.material[idx]));
+            }
+          });
+        }
+        // notes
+        if (Array.isArray(dayData.notes)) {
+          dayData.notes.forEach((n) => {
+            if (n.__chk && n.__chk.checked && !n.__deleted && n.t) {
+              res.notes.push({ t: n.t });
+            }
+          });
+        }
+        // work
+        function collectWork(wList) {
+          if (!Array.isArray(wList)) return [];
+          const out = [];
+          wList.forEach((w) => {
+            if (w.__chk && w.__chk.checked && !w.__deleted && w.t) {
+              const node = { t: w.t };
+              if (Array.isArray(w.c) && w.c.length > 0) {
+                const childs = collectWork(w.c);
+                if (childs.length > 0) node.c = childs;
+              }
+              out.push(node);
+            }
+          });
+          return out;
+        }
+        res.work = collectWork(dayData.work);
+        return res;
+      }
+
+      function getSectionMode(cardKey, secKey) {
+        const rad = aiPreviewArea.querySelector(`input[name="ai-mode-${cardKey}-${secKey}"]:checked`);
+        return rad ? rad.value : 'append';
+      }
+
+      btnApplyAiData.onclick = async () => {
+        aiApplyMsgBanner.style.display = 'none';
+
+        const tDate = aiTargetDateToday.value;
+        const tmDate = aiTargetDateTomorrow.value;
+
+        if (tDate === 'none' && tmDate === 'none') {
+          alert('적용할 대상 날짜를 선택해 주세요.');
+          return;
+        }
+
+        if (tDate !== 'none' && tmDate !== 'none' && tDate === tmDate) {
+          alert('오늘과 내일 데이터의 적용 대상 날짜가 동일합니다. 날짜를 다르게 선택해 주세요.');
+          return;
+        }
+
+        const tItems = tDate !== 'none' ? extractCheckedItems('today', aiParsedData && aiParsedData.today) : null;
+        const tmItems = tmDate !== 'none' ? extractCheckedItems('tomorrow', aiParsedData && aiParsedData.tomorrow) : null;
+
+        const countItems = (it) => (it ? (it.work.length + it.crew.length + it.equip.length + it.material.length + it.notes.length) : 0);
+        const totalCount = countItems(tItems) + countItems(tmItems);
+
+        if (totalCount === 0) {
+          alert('선택(체크)된 항목이 없습니다.');
+          return;
+        }
+
+        // 덮어쓰기 모드 및 삭제 위험 안내 (WD-85)
+        const replaceDetails = [];
+        const checkCardReplace = (cardKey, targetDate) => {
+          if (targetDate === 'none') return;
+          const secLabels = { work: '작업', crew: '인원', equip: '장비', material: '자재', notes: '특이사항' };
+          AI_SECTIONS.forEach((secKey) => {
+            if (getSectionMode(cardKey, secKey) === 'replace') {
+              const M = countCheckedItemsInSection(cardKey, secKey);
+              if (M > 0) {
+                const N = getExistingSectionCount(targetDate, secKey);
+                replaceDetails.push({
+                  date: targetDate,
+                  secName: secLabels[secKey] || secKey,
+                  nCount: N,
+                  mCount: M,
+                });
+              }
+            }
+          });
+        };
+
+        if (tDate !== 'none') checkCardReplace('today', tDate);
+        if (tmDate !== 'none') checkCardReplace('tomorrow', tmDate);
+
+        if (replaceDetails.length > 0) {
+          let warnMsg = '[주의] 기존 데이터가 삭제되고 새 데이터로 덮어쓰기됩니다:\n\n';
+          const byDate = {};
+          replaceDetails.forEach((d) => {
+            if (!byDate[d.date]) byDate[d.date] = [];
+            byDate[d.date].push(`${d.secName}(기존 ${d.nCount}건 삭제 → 신규 ${d.mCount}건)`);
+          });
+          for (const [dt, secs] of Object.entries(byDate)) {
+            warnMsg += `• ${dt}: ${secs.join(', ')}\n`;
+          }
+          warnMsg += '\n정말 기존 데이터를 삭제하고 덮어쓰시겠습니까?';
+          if (!confirm(warnMsg)) {
+            return;
+          }
+        }
+
+        btnApplyAiData.disabled = true;
+        btnApplyAiData.textContent = '적용 중…';
+
+        try {
+          // 1. 자동 백업
+          try {
+            await api('/api/backup/now', { method: 'POST' });
+          } catch (_) { /* 백업 실패해도 진행 */ }
+
+          // 2. 날짜별 단일 원자적 PUT
+          const appliedSummaries = [];
+
+          const applyDay = async (targetDate, items, cardKey) => {
+            if (!items || countItems(items) === 0) return;
+
+            // 최신 상태 조회하여 Base Rev 및 기존 데이터 획득
+            const st = await api('/api/state');
+            let currentDay = {};
+            if (targetDate === st.today) {
+              currentDay = st.todayData || {};
+            } else if (targetDate === st.tomorrow) {
+              currentDay = st.tomorrowData || {};
+            } else if (st.days && st.days[targetDate]) {
+              currentDay = st.days[targetDate];
+            }
+            let baseRev = aiPreviewRevs[targetDate];
+            if (baseRev === undefined) {
+              baseRev = targetDate === st.today ? (st.todayRev || '') : (st.tomorrowRev || '');
+            }
+
+            // WD-85: 체크 0건 구역은 덮어쓰기 모드여도 기존 데이터 보존
+            const buildMergedSection = (secKey) => {
+              const isReplace = getSectionMode(cardKey, secKey) === 'replace';
+              const checkedList = items[secKey] || [];
+              const existingList = currentDay[secKey] || [];
+              if (isReplace && checkedList.length > 0) {
+                return checkedList;
+              }
+              return [...existingList, ...checkedList];
+            };
+
+            const merged = {
+              work: buildMergedSection('work'),
+              crew: buildMergedSection('crew'),
+              equip: buildMergedSection('equip'),
+              material: buildMergedSection('material'),
+              notes: buildMergedSection('notes'),
+            };
+            if (currentDay.mealAdj !== undefined) {
+              merged.mealAdj = currentDay.mealAdj;
+            }
+
+            const putHeaders = baseRev ? { 'X-Base-Rev': String(baseRev) } : {};
+            const putRes = await api('/api/day/' + targetDate, {
+              method: 'PUT',
+              headers: putHeaders,
+              body: merged,
+            });
+            if (putRes && putRes.rev !== undefined) {
+              aiPreviewRevs[targetDate] = putRes.rev;
+            }
+
+            appliedSummaries.push(`${targetDate}: 작업 ${items.work.length}건, 인원 ${items.crew.length}건, 장비 ${items.equip.length}건, 자재 ${items.material.length}건, 특이사항 ${items.notes.length}건`);
+          };
+
+          if (tDate !== 'none') await applyDay(tDate, tItems, 'today');
+          if (tmDate !== 'none') await applyDay(tmDate, tmItems, 'tomorrow');
+
+          aiApplyMsgBanner.className = 'msg-banner ok';
+          aiApplyMsgBanner.replaceChildren();
+          aiApplyMsgBanner.appendChild(el('div', {
+            style: 'font-weight:700; margin-bottom:0.3rem;',
+            text: '✓ 대시보드 적용 완료!',
+          }));
+          appliedSummaries.forEach((s) => {
+            aiApplyMsgBanner.appendChild(el('div', { style: 'font-size:0.82rem;', text: '• ' + s }));
+          });
+          const homeLink = el('a', {
+            href: withSitePrefix('/'),
+            class: 'btn primary',
+            style: 'margin-top:0.6rem; display:inline-block; font-size:0.85rem;',
+            text: '메인 대시보드로 이동 →',
+          });
+          aiApplyMsgBanner.appendChild(homeLink);
+          aiApplyMsgBanner.style.display = 'block';
+        } catch (err) {
+          aiApplyMsgBanner.className = 'msg-banner err';
+          if (err.status === 409) {
+            aiApplyMsgBanner.textContent = '⚠ 다른 사용자가 그 사이 데이터를 변경했습니다 (409 충돌). 안전을 위해 자동 덮어쓰기가 차단되었습니다. 새로고침 후 다시 시도하세요.';
+          } else {
+            aiApplyMsgBanner.textContent = '⚠ 적용 실패: ' + (err.message || '오류 발생');
+          }
+          aiApplyMsgBanner.style.display = 'block';
+        } finally {
+          btnApplyAiData.disabled = false;
+          btnApplyAiData.textContent = '🚀 선택한 데이터 대시보드에 적용하기';
+        }
+      };
+
+      // 전역 디버그/테스트 바인딩 확장
+      window.loadAiSettings = loadAiSettings;
+      window.runAiParse = () => btnRunAiParse.click();
+      window.handleImageFile = handleImageFile;
+      window.resizeImageFileToDataUrl = resizeImageFileToDataUrl;
+      window.clearAttachedImage = clearAttachedImage;
+      window.renderAiParsedResults = renderAiParsedResults;
+      window.applyAiParsedData = () => btnApplyAiData.click();
+      window.setAiConfigState = (st) => { aiConfigState = st; };
+      window.getAiConfigState = () => aiConfigState;
+
       // 10. 초기화
       tabBar.style.display = 'flex';
       initTargetDate();
@@ -3298,7 +4982,9 @@
           const res = await api('/api/import-templates');
           S.templates = (res && res.templates) || [];
           const savedTab = sessionStorage.getItem(siteKey('import-active-tab'));
-          if (savedTab === 'templates') {
+          if (savedTab === 'ai') {
+            switchTab('ai');
+          } else if (savedTab === 'templates') {
             switchTab('templates');
           } else if (savedTab === 'import' && S.templates.length > 0) {
             switchTab('import');

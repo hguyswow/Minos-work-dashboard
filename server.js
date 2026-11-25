@@ -33,6 +33,47 @@ const BACKUP_DIR = path.join(BASE_DATA_DIR, 'backup');
 const FILES_DIR = path.join(BASE_DATA_DIR, 'files');
 const FILES_INDEX_FILE = path.join(FILES_DIR, 'index.json');
 const IMPORT_TEMPLATES_FILE = path.join(BASE_DATA_DIR, 'import-templates.json');
+const AI_CONFIG_FILE = path.join(BASE_DATA_DIR, 'ai-config.json');
+const AI_PROVIDERS = new Set(['gemini', 'deepseek', 'lmstudio', 'opencode', 'custom']);
+
+// 모델명·주소는 사용자가 바꿀 수 있는 제안값임 (WD-82)
+const AI_PRESETS = {
+  gemini: {
+    name: 'Google Gemini',
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
+    model: 'gemini-2.5-flash',
+    vision: true,
+    hint: '무료 티어 지원 (Google AI Studio에서 API 키 발급)',
+  },
+  deepseek: {
+    name: 'DeepSeek',
+    baseUrl: 'https://api.deepseek.com',
+    model: 'deepseek-chat',
+    vision: false,
+    hint: '가성비 우수 (텍스트 전용)',
+  },
+  lmstudio: {
+    name: 'LM Studio (로컬)',
+    baseUrl: 'http://localhost:1234/v1',
+    model: '',
+    vision: false,
+    hint: '로컬 PC 실행 (API 키 불필요 가능, 주소/모델 직접 입력)',
+  },
+  opencode: {
+    name: 'OpenCode Go',
+    baseUrl: 'https://opencode.ai/zen/go/v1',
+    model: '',
+    vision: false,
+    hint: 'OpenCode Go 엔드포인트 (주소·모델 변경 가능)',
+  },
+  custom: {
+    name: '사용자 정의 (Custom)',
+    baseUrl: '',
+    model: '',
+    vision: false,
+    hint: '기타 OpenAI 호환 엔드포인트',
+  },
+};
 const FILE_WARN_BYTES = 5 * 1024 * 1024 * 1024; // 5GB 경고 기준
 const FILE_MAX_BYTES = 100 * 1024 * 1024; // 100MB 단일 파일 제한 (104,857,600B)
 const CATS = ['work', 'equip', 'crew', 'material', 'notes'];
@@ -500,6 +541,220 @@ function cleanDay(d) {
 function calcDayRev(d) {
   const cd = cleanDay(d);
   return crypto.createHash('sha1').update(JSON.stringify(cd)).digest('hex').slice(0, 12);
+}
+
+// ---------- WD-82: AI 작업일보 분석 설정 및 OpenAI 호환 중계 ----------
+function loadAiConfig() {
+  const def = {
+    provider: 'gemini',
+    baseUrl: AI_PRESETS.gemini.baseUrl,
+    model: AI_PRESETS.gemini.model,
+    apiKey: '',
+    vision: AI_PRESETS.gemini.vision,
+  };
+  try {
+    if (!fs.existsSync(AI_CONFIG_FILE)) return def;
+    const raw = fs.readFileSync(AI_CONFIG_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return def;
+    return {
+      provider: AI_PROVIDERS.has(parsed.provider) ? parsed.provider : def.provider,
+      baseUrl: typeof parsed.baseUrl === 'string' ? parsed.baseUrl : def.baseUrl,
+      model: typeof parsed.model === 'string' ? parsed.model : def.model,
+      apiKey: typeof parsed.apiKey === 'string' ? parsed.apiKey : '',
+      vision: typeof parsed.vision === 'boolean' ? parsed.vision : def.vision,
+    };
+  } catch {
+    return def;
+  }
+}
+
+function saveAiConfig(cfg) {
+  fs.mkdirSync(BASE_DATA_DIR, { recursive: true });
+  const tmpPath = `${AI_CONFIG_FILE}.${process.pid}.${Date.now()}.tmp`;
+  fs.writeFileSync(tmpPath, JSON.stringify(cfg, null, 2), 'utf8');
+  fs.renameSync(tmpPath, AI_CONFIG_FILE);
+}
+
+function getSafeAiConfig(cfg) {
+  const hasKey = !!(cfg.apiKey && cfg.apiKey.trim().length > 0);
+  const trimmed = hasKey ? cfg.apiKey.trim() : '';
+  const keyHint = hasKey
+    ? (trimmed.length >= 4 ? `...${trimmed.slice(-4)}` : '...****')
+    : '';
+  return {
+    provider: cfg.provider,
+    baseUrl: cfg.baseUrl,
+    model: cfg.model,
+    vision: !!cfg.vision,
+    hasKey,
+    keyHint,
+    presets: AI_PRESETS,
+  };
+}
+
+function isLocalAiHost(hostname) {
+  if (!hostname) return false;
+  const h = hostname.toLowerCase().trim();
+  return h === 'localhost' || h === '127.0.0.1' || h === '::1';
+}
+
+function isBlockedAiHost(hostname) {
+  if (!hostname) return true;
+  const h = hostname.toLowerCase().trim();
+  if (h.startsWith('169.254.') || h === 'metadata.google.internal' || h === 'metadata') {
+    return true;
+  }
+  return false;
+}
+
+function maskApiKey(rawStr, apiKey) {
+  if (!rawStr) return '';
+  let s = String(rawStr);
+  if (apiKey && apiKey.length >= 4) {
+    s = s.split(apiKey).join('***');
+  }
+  return s.slice(0, 200);
+}
+
+let aiParseInProgress = false; // 동시 진행 1건 제한
+const aiRateLimitMap = new Map(); // key -> timestamps[]
+
+function checkAiRateLimit(key) {
+  const now = Date.now();
+  let list = aiRateLimitMap.get(key) || [];
+  list = list.filter((ts) => now - ts < 60 * 1000);
+  if (list.length >= 6) {
+    aiRateLimitMap.set(key, list);
+    return false; // 분당 6회 초과
+  }
+  list.push(now);
+  aiRateLimitMap.set(key, list);
+  return true;
+}
+
+async function callAiChatCompletions(cfg, messages, options = {}) {
+  let endpoint = (cfg.baseUrl || '').trim().replace(/\/+$/, '');
+  if (!endpoint.endsWith('/chat/completions')) {
+    endpoint += '/chat/completions';
+  }
+
+  let u;
+  try {
+    u = new URL(endpoint);
+  } catch {
+    return { ok: false, status: 400, error: 'invalid_base_url', message: '올바른 API 주소 형식이 아닙니다.' };
+  }
+
+  if (isBlockedAiHost(u.hostname)) {
+    return { ok: false, status: 400, error: 'invalid_base_url', message: '허용되지 않는 API 주소입니다.' };
+  }
+
+  const isLocal = isLocalAiHost(u.hostname);
+  if (!cfg.model || !cfg.baseUrl) {
+    return { ok: false, status: 400, error: 'ai_not_configured', message: 'AI 모델 또는 API 주소가 설정되지 않았습니다.' };
+  }
+  if (!isLocal && (!cfg.apiKey || !cfg.apiKey.trim())) {
+    return { ok: false, status: 400, error: 'ai_not_configured', message: 'API 키가 설정되지 않았습니다.' };
+  }
+
+  const makePayload = (withResponseFormat) => {
+    const p = {
+      model: cfg.model,
+      temperature: 0,
+      messages,
+    };
+    if (withResponseFormat && options.jsonMode !== false) {
+      p.response_format = { type: 'json_object' };
+    }
+    return p;
+  };
+
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  if (cfg.apiKey && cfg.apiKey.trim()) {
+    headers.Authorization = `Bearer ${cfg.apiKey.trim()}`;
+  }
+
+  const execute = async (payload) => {
+    const controller = new AbortController();
+    const timeoutMs = Number(process.env.WD_AI_TIMEOUT_MS) || 90000;
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const resp = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+        redirect: 'error',
+      });
+      clearTimeout(timer);
+
+      let bodyText = '';
+      if (resp.body && typeof resp.body.getReader === 'function') {
+        const reader = resp.body.getReader();
+        let received = 0;
+        const chunks = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          received += value.length;
+          if (received > 2 * 1024 * 1024) {
+            try { await reader.cancel(); } catch {}
+            return { ok: false, status: 502, error: 'ai_bad_output', message: 'AI 응답 크기가 너무 큽니다 (2MB 초과).' };
+          }
+          chunks.push(value);
+        }
+        bodyText = Buffer.concat(chunks).toString('utf8');
+      } else {
+        bodyText = await resp.text();
+        if (Buffer.byteLength(bodyText, 'utf8') > 2 * 1024 * 1024) {
+          return { ok: false, status: 502, error: 'ai_bad_output', message: 'AI 응답 크기가 너무 큽니다 (2MB 초과).' };
+        }
+      }
+
+      if (!resp.ok) {
+        let errJson = null;
+        try { errJson = JSON.parse(bodyText); } catch {}
+        const upstreamMsg = (errJson && errJson.error && errJson.error.message) || bodyText || resp.statusText;
+        const safeMsg = maskApiKey(upstreamMsg, cfg.apiKey);
+
+        if (resp.status === 401 || resp.status === 403) {
+          return { ok: false, status: 502, error: 'ai_auth', message: 'AI 서비스 인증에 실패했습니다. API 키를 확인하세요.' };
+        }
+        if (resp.status === 429) {
+          return { ok: false, status: 429, error: 'ai_rate_limited', message: 'AI 서비스 요청 한도를 초과했습니다. 잠시 후 다시 시도하세요.' };
+        }
+        if (resp.status >= 500) {
+          return { ok: false, status: 502, error: 'ai_unreachable', message: 'AI 서비스에 연결할 수 없습니다 (원격 서버 오류).' };
+        }
+        return { ok: false, status: 502, error: 'ai_request_failed', message: safeMsg, is400: resp.status === 400 };
+      }
+
+      let parsedJson;
+      try {
+        parsedJson = JSON.parse(bodyText);
+      } catch {
+        return { ok: false, status: 502, error: 'ai_bad_output', message: 'AI 서비스 응답이 올바른 JSON이 아닙니다.' };
+      }
+
+      return { ok: true, data: parsedJson };
+    } catch (err) {
+      clearTimeout(timer);
+      if (err.name === 'AbortError') {
+        return { ok: false, status: 504, error: 'ai_timeout', message: 'AI 서비스 응답 시간이 초과되었습니다 (90초).' };
+      }
+      return { ok: false, status: 502, error: 'ai_unreachable', message: 'AI 서비스에 연결할 수 없습니다.' };
+    }
+  };
+
+  let res = await execute(makePayload(true));
+  if (!res.ok && res.is400 && options.jsonMode !== false) {
+    // response_format 미지원 400일 경우 1회 제거 후 재시도
+    res = await execute(makePayload(false));
+  }
+  return res;
 }
 
 // WD-72: 작업일보 PDF 양식(템플릿) 검증 및 저장 유틸
@@ -1815,10 +2070,10 @@ const json = (res, code, obj) => {
   res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
   res.end(JSON.stringify(obj));
 };
-function readBody(req) {
+function readBody(req, limit = 1e6) {
   return new Promise((resolve, reject) => {
     let size = 0; const chunks = [];
-    req.on('data', (c) => { size += c.length; if (size > 1e6) { reject(new Error('too large')); req.destroy(); } else chunks.push(c); });
+    req.on('data', (c) => { size += c.length; if (size > limit) { reject(new Error('too large')); req.destroy(); } else chunks.push(c); });
     req.on('end', () => { try { resolve(JSON.parse(Buffer.concat(chunks).toString() || '{}')); } catch (e) { reject(e); } });
     req.on('error', reject);
   });
@@ -2513,7 +2768,255 @@ async function handle(req, res) {
 
   // --- 인증 필수 API ---
   if (p.startsWith('/api/')) {
-    if (!authed(req)) return json(res, 401, { error: 'unauthorized' });
+    // WD-82: 관리자 전용 AI 엔드포인트는 비관리자(사무실 세션 등) 접근 시 403 차단
+    if (p === '/api/ai-config' || p.startsWith('/api/ai/')) {
+      if (!authed(req)) {
+        return json(res, isOfficeAuthed(req) ? 403 : 401, { error: isOfficeAuthed(req) ? 'forbidden' : 'unauthorized' });
+      }
+    } else {
+      if (!authed(req)) return json(res, 401, { error: 'unauthorized' });
+    }
+    if (p === '/api/me') return json(res, 200, { ok: true });
+
+    // WD-82: AI 설정 조회
+    if (p === '/api/ai-config' && req.method === 'GET') {
+      const cfg = loadAiConfig();
+      return json(res, 200, getSafeAiConfig(cfg));
+    }
+
+    // WD-82: AI 설정 저장
+    if (p === '/api/ai-config' && req.method === 'PUT') {
+      let body;
+      try {
+        body = await readBody(req);
+      } catch {
+        return json(res, 400, { error: '올바른 JSON 요청이 아닙니다.' });
+      }
+      const provider = body && body.provider;
+      if (!AI_PROVIDERS.has(provider)) {
+        return json(res, 400, { error: '올바르지 않은 provider입니다.' });
+      }
+      let baseUrl = typeof body.baseUrl === 'string' ? body.baseUrl.trim() : '';
+      if (!baseUrl || (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://'))) {
+        return json(res, 400, { error: 'baseUrl은 http:// 또는 https:// 로 시작해야 합니다.' });
+      }
+      if (baseUrl.length > 200) {
+        return json(res, 400, { error: 'baseUrl은 200자 이하여야 합니다.' });
+      }
+      if (/[\s\x00-\x1f\x7f]/.test(baseUrl)) {
+        return json(res, 400, { error: 'baseUrl에 공백이나 제어 문자가 포함될 수 없습니다.' });
+      }
+      baseUrl = baseUrl.replace(/\/+$/, '');
+
+      const model = typeof body.model === 'string' ? body.model.trim().slice(0, 100) : '';
+      const vision = body.vision === true;
+
+      const current = loadAiConfig();
+      let apiKey = current.apiKey;
+      if (body.apiKey === null) {
+        apiKey = '';
+      } else if (typeof body.apiKey === 'string') {
+        const trimmed = body.apiKey.trim();
+        if (trimmed !== '') {
+          if (trimmed.length > 300) {
+            return json(res, 400, { error: 'apiKey는 300자 이하여야 합니다.' });
+          }
+          apiKey = trimmed;
+        }
+      }
+
+      const nextCfg = { provider, baseUrl, model, apiKey, vision };
+      saveAiConfig(nextCfg);
+      return json(res, 200, getSafeAiConfig(nextCfg));
+    }
+
+    // WD-82: AI 연결 테스트
+    if (p === '/api/ai/test' && req.method === 'POST') {
+      const cfg = loadAiConfig();
+      const startMs = Date.now();
+      const result = await callAiChatCompletions(cfg, [
+        { role: 'user', content: 'Reply with OK only.' },
+      ], { jsonMode: false });
+      if (!result.ok) {
+        return json(res, result.status, { error: result.error, message: result.message });
+      }
+      const latencyMs = Date.now() - startMs;
+      return json(res, 200, { ok: true, latencyMs });
+    }
+
+    // WD-82: AI 작업일보 분석
+    if (p === '/api/ai/parse' && req.method === 'POST') {
+      if (aiParseInProgress) {
+        return json(res, 429, { error: 'rate_limited', message: '이미 분석이 진행 중입니다. 잠시 후 다시 시도하세요.' });
+      }
+
+      let body;
+      try {
+        body = await readBody(req, 8 * 1024 * 1024);
+      } catch (err) {
+        if (err.message === 'too large') {
+          return json(res, 400, { error: '본문 크기가 너무 큽니다 (최대 8MB).' });
+        }
+        return json(res, 400, { error: '올바른 JSON 요청이 아닙니다.' });
+      }
+
+      const text = typeof body.text === 'string' ? body.text.trim() : '';
+      const image = typeof body.image === 'string' ? body.image.trim() : '';
+      const todayDate = (typeof body.todayDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.todayDate))
+        ? body.todayDate
+        : ymd(new Date());
+
+      if (!text && !image) {
+        return json(res, 400, { error: '분석할 텍스트 또는 이미지를 입력하세요.' });
+      }
+      if (text.length > 30000) {
+        return json(res, 400, { error: '텍스트는 30,000자 이하여야 합니다.' });
+      }
+
+      if (image) {
+        const match = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=\r\n]+)$/.exec(image);
+        if (!match) {
+          return json(res, 400, { error: '올바른 이미지 데이터(data:image/(png|jpeg|webp);base64,...)가 아닙니다.' });
+        }
+        const b64Data = match[2].replace(/[\r\n\s]/g, '');
+        const approxBytes = Math.ceil(b64Data.length * 3 / 4);
+        if (approxBytes > 5 * 1024 * 1024 + 1024) {
+          return json(res, 400, { error: '이미지 크기는 5MB 이하여야 합니다.' });
+        }
+        let buf;
+        try {
+          buf = Buffer.from(b64Data, 'base64');
+        } catch {
+          return json(res, 400, { error: '이미지 디코드에 실패했습니다.' });
+        }
+        if (buf.length > 5 * 1024 * 1024) {
+          return json(res, 400, { error: '이미지 크기는 5MB 이하여야 합니다.' });
+        }
+        if (buf.length === 0) {
+          return json(res, 400, { error: '이미지 데이터가 비어있습니다.' });
+        }
+      }
+
+      const cfg = loadAiConfig();
+      if (image && !cfg.vision) {
+        return json(res, 400, { error: 'vision_unsupported', message: '현재 설정된 AI 모델은 이미지 분석을 지원하지 않습니다.' });
+      }
+
+      // 유효성 검사 통과 후 분당 6회 제한 검사
+      const clientKey = req.headers.authorization || req.socket.remoteAddress || 'unknown';
+      if (!checkAiRateLimit(clientKey)) {
+        return json(res, 429, { error: 'rate_limited', message: '분석 요청이 너무 빈번합니다 (분당 최대 6회). 잠시 후 다시 시도하세요.' });
+      }
+
+      const systemPrompt = `당신은 건설현장 작업일보 분석 전문가입니다. 주어진 작업일보 텍스트 및/또는 이미지에서 정보를 추출하여 대시보드 입력용 JSON 데이터를 생성하세요.
+
+출력 규칙:
+1. 반드시 유효한 JSON 객체 하나만 출력하세요. 마크다운 코드 블록(\`\`\` 등)이나 설명문은 절대 포함하지 마세요.
+2. 출력 JSON 스키마:
+{
+  "today": {
+    "work": [
+      { "t": "작업 내용 (200자 이내)", "c": [ { "t": "세부/하위 내용", "c": [] } ] }
+    ],
+    "crew": [
+      { "job": "직종명", "count": "인원수(숫자문자열)", "loc": "위치/구간", "direct": false }
+    ],
+    "equip": [
+      { "name": "장비명", "qty": "대수(숫자문자열)", "spec": "규격", "loc": "위치/구간", "direct": false }
+    ],
+    "material": [
+      { "kind": "품명", "spec": "규격", "qty": "수량(숫자문자열)", "unit": "단위", "use": "사용처/용도" }
+    ],
+    "notes": [
+      { "t": "특이사항/안전사항 (200자 이내)" }
+    ]
+  } | null,
+  "tomorrow": {
+    "work": [ ... ],
+    "crew": [ ... ],
+    "equip": [ ... ],
+    "material": [ ... ],
+    "notes": [ ... ]
+  } | null,
+  "warnings": [
+    "모호하거나 불확실한 항목에 대한 설명", ...
+  ]
+}
+3. 금일/오늘/당일 내용은 today, 명일/내일/익일 내용은 tomorrow로 분류하세요. 구분이 없으면 전부 today로 분류하세요.
+4. 원문에 없는 내용은 절대 지어내지 마세요. 모르는 정보는 비워두거나 warnings에 기록하세요.
+5. 인원(count), 장비(qty), 자재(qty) 수량은 숫자로 된 문자열(예: "5", "1.5")이어야 합니다.
+6. 작업 내용(work)의 계층 구조는 c 배열을 사용하여 표현하세요(최대 5단계). 항목당 200자 이내입니다.
+7. 사람 이름, 전화번호, 서명 등 개인정보는 절대 추출하지 마세요(직종과 인원수만 추출).
+8. 기준 일자(힌트): ${todayDate}`;
+
+      const userContent = [];
+      if (text) {
+        userContent.push({ type: 'text', text });
+      }
+      if (image) {
+        userContent.push({ type: 'image_url', image_url: { url: image } });
+      }
+
+      aiParseInProgress = true;
+      try {
+        const result = await callAiChatCompletions(cfg, [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userContent },
+        ], { jsonMode: true });
+
+        if (!result.ok) {
+          return json(res, result.status, { error: result.error, message: result.message });
+        }
+
+        const choice = result.data.choices && result.data.choices[0];
+        const rawContent = choice && choice.message && choice.message.content;
+        if (!rawContent || typeof rawContent !== 'string') {
+          return json(res, 502, { error: 'ai_bad_output', message: 'AI 응답 본문이 비어있거나 올바르지 않습니다.' });
+        }
+
+        let cleanJsonStr = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+        let parsedObj = null;
+        try {
+          parsedObj = JSON.parse(cleanJsonStr);
+        } catch {
+          const firstBrace = cleanJsonStr.indexOf('{');
+          const lastBrace = cleanJsonStr.lastIndexOf('}');
+          if (firstBrace >= 0 && lastBrace > firstBrace) {
+            try {
+              parsedObj = JSON.parse(cleanJsonStr.slice(firstBrace, lastBrace + 1));
+            } catch {}
+          }
+        }
+
+        if (!parsedObj || typeof parsedObj !== 'object') {
+          return json(res, 502, { error: 'ai_bad_output', message: 'AI 응답을 JSON으로 변환할 수 없습니다.' });
+        }
+
+        const today = (parsedObj.today && typeof parsedObj.today === 'object') ? cleanDay(parsedObj.today) : null;
+        const tomorrow = (parsedObj.tomorrow && typeof parsedObj.tomorrow === 'object') ? cleanDay(parsedObj.tomorrow) : null;
+        const warnings = Array.isArray(parsedObj.warnings)
+          ? parsedObj.warnings.filter((w) => typeof w === 'string').map((w) => w.slice(0, 200)).slice(0, 20)
+          : [];
+
+        const responsePayload = {
+          ok: true,
+          today,
+          tomorrow,
+          warnings,
+          model: cfg.model,
+        };
+        if (result.data.usage) {
+          responsePayload.usage = {
+            prompt_tokens: result.data.usage.prompt_tokens,
+            completion_tokens: result.data.usage.completion_tokens,
+            total_tokens: result.data.usage.total_tokens,
+          };
+        }
+        return json(res, 200, responsePayload);
+      } finally {
+        aiParseInProgress = false;
+      }
+    }
     if (p === '/api/me') return json(res, 200, { ok: true });
 
     // WD-72: 작업일보 PDF 양식(템플릿) 목록 조회
